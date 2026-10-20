@@ -4,7 +4,7 @@ import { canReadGenerus, canWriteGenerus, roleLabel } from "@/lib/auth";
 // Struktur navigasi per peran (DESIGN.md §6.3). Dibangun di server, dirender
 // oleh komponen klien yang hanya menandai item aktif.
 
-export type NavIcon = "home" | "agenda" | "generus" | "kartu" | "wilayah" | "akun" | "lainnya";
+export type NavIcon = "home" | "agenda" | "generus" | "kartu" | "kurikulum" | "wilayah" | "akun" | "lainnya";
 
 export interface NavItem {
   href: string;
@@ -36,6 +36,7 @@ export function buildNav(user: CurrentUser): ShellNav {
     main.push({ href: "/agenda", label: "Agenda", icon: "agenda" }, { href: "/generus", label: "Generus", icon: "generus" });
   }
   if (canWriteGenerus(user)) main.push({ href: "/generus/kartu", label: "Kartu QR", icon: "kartu" });
+  main.push({ href: "/kurikulum", label: "Kurikulum", icon: "kurikulum" });
 
   const admin: NavItem[] = user.isSuperadmin
     ? [

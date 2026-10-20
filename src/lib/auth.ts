@@ -110,6 +110,17 @@ export async function requireGenerusWriter(): Promise<CurrentUser> {
   return user;
 }
 
+/** Penyusun kurikulum: Tim Kurikulum & superadmin. */
+export function canEditCurriculum(user: CurrentUser): boolean {
+  return user.roles.some((r) => r.role === "kurikulum" || r.role === "superadmin");
+}
+
+export async function requireCurriculumEditor(): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+  if (!canEditCurriculum(user)) redirect("/kurikulum");
+  return user;
+}
+
 export const ROLE_LABEL: Record<AppRole, string> = {
   superadmin: "Superadmin",
   kurikulum: "Tim Kurikulum",
