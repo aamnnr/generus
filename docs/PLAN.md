@@ -1,27 +1,31 @@
 # PLAN — Rencana Implementasi
 
-> Versi 0.3 · 2026-10-20 · Lihat [PRD.md](PRD.md) dan [ARCHITECTURE.md](ARCHITECTURE.md)
+> Versi 0.4 · 2026-10-20 · Lihat [PRD.md](PRD.md) dan [ARCHITECTURE.md](ARCHITECTURE.md)
 
-Estimasi untuk 1–2 developer. Setiap fase diakhiri rilis yang bisa dipakai pengguna nyata (pilot).
+Estimasi untuk 1–2 developer.
+
+**Strategi data (diputuskan 2026-10-20):** pengumpulan data asli dan pemilihan desa pilot ditunda. Fase 1–5 dikembangkan dan diuji dengan **data seed** (`pnpm db:seed`) dan akun uji `*@generus.test`. Data asli baru dibutuhkan di **Persiapan Pilot** sebelum rollout.
 
 ## Fase 0 — Persiapan (±1 minggu)
 - [x] Semua keputusan produk sudah dijawab (PRD §8).
-- [ ] Kumpulkan data awal memakai [templates/Template_Data_Generus.xlsx](../templates/Template_Data_Generus.xlsx) (sheet Wilayah + Generus; format ini juga menjadi format import di Fase 1).
-- [ ] Pilih 1 desa (± 4–6 kelompok) sebagai **pilot**.
+- [~] ~~Kumpulkan data awal~~ dan ~~pilih desa pilot~~ → dipindah ke **Persiapan Pilot**.
 - [x] Setup repo: Next.js + TypeScript + Tailwind, Drizzle, Vitest + PGlite, CI (lint, typecheck, test, build), script data contoh.
 - [x] Project Supabase development: migrasi + seed diterapkan, RLS terverifikasi (`pnpm db:check`).
-- [ ] Project Supabase staging (menjelang pilot).
-- [ ] shadcn/ui dipasang saat mulai membuat UI (Fase 1).
+- [x] shadcn/ui (preset base-nova) terpasang.
 
 ## Fase 1 — Fondasi (±2–3 minggu)
 - [x] Skema DB: `units` (ltree), `profiles`, `user_roles`, `jenjang` + `jenjang_kategori`, `generus` + riwayat status, `audit_log`.
 - [x] Fungsi lingkup (`app.scope_paths`, `app.has_role_in`, `app.can_mutate`) + kebijakan RLS + tes (PGlite).
-- [ ] Login, manajemen akun & peran (Superadmin).
-- [ ] Kelola pohon wilayah.
-- [ ] CRUD generus + import Excel + mutasi kelompok + tandai Menikah / Pindah Sambung (QR otomatis nonaktif) + kenaikan jenjang/kategori massal.
+- [x] Login (email + password), logout, ganti password (wajib untuk password sementara).
+- [x] Manajemen akun & peran oleh Superadmin: buat akun + password sementara, multi-peran, nonaktifkan (blokir login), reset password.
+- [x] Kelola pohon wilayah (Superadmin): tambah/ubah nama/hapus desa & kelompok kosong.
+- [x] CRUD generus sesuai lingkup (filter wilayah/jenjang/status, paginasi), Kyai read-only.
+- [x] Tandai Menikah / Pindah Sambung + aktifkan kembali (QR otomatis nonaktif), mutasi kelompok (admin desa/daerah), riwayat.
+- [ ] Import Excel dari template.
+- [ ] Kenaikan jenjang/kategori massal.
 - [ ] PWA dasar: manifest, ikon, service worker, install prompt.
 
-**Selesai bila:** Admin Kelompok di desa pilot bisa login dari HP dan melihat/mengelola hanya generus kelompoknya.
+**Selesai bila:** akun uji Admin Kelompok bisa login dari HP dan melihat/mengelola hanya generus kelompoknya (data seed). Import diuji dengan file template berisi data seed.
 
 ## Fase 2 — Agenda & Presensi Manual (±2 minggu)
 - [ ] CRUD agenda (sekali & berulang mingguan), filter jenjang/kategori/gender.
@@ -30,7 +34,7 @@ Estimasi untuk 1–2 developer. Setiap fase diakhiri rilis yang bisa dipakai pen
 - [ ] Penguncian otomatis + `alpa` default (cron).
 - [ ] Rekap presensi sederhana per agenda & per generus.
 
-**Pilot 1:** semua kelompok di desa pilot memakai presensi manual selama 2–3 minggu. Kumpulkan masukan.
+**Uji internal 1:** simulasikan beberapa minggu agenda & presensi manual dengan akun uji per peran (data seed), termasuk mode offline.
 
 ## Fase 3 — Presensi QR untuk Desa/Daerah (±2 minggu)
 - [ ] Generate `qr_token` + cetak kartu QR massal (PDF A4).
@@ -40,7 +44,7 @@ Estimasi untuk 1–2 developer. Setiap fase diakhiri rilis yang bisa dipakai pen
 - [ ] Cadangan cari-nama.
 - [ ] Uji lapangan: simulasi 200+ scan dengan 3 HP, sebagian offline.
 
-**Pilot 2:** satu pengajian desa penuh memakai scan QR. Ukur waktu check-in (target PRD G2).
+**Uji internal 2:** simulasi pengajian desa: cetak ±200 kartu QR dari data seed, 3 HP memindai bersamaan (sebagian offline). Ukur waktu check-in (target PRD G2).
 
 ## Fase 4 — Kurikulum, Target & Capaian (±3 minggu)
 - [ ] CRUD materi & kitab per jenjang & kategori (peran Tim Kurikulum).
@@ -54,6 +58,13 @@ Estimasi untuk 1–2 developer. Setiap fase diakhiri rilis yang bisa dipakai pen
 - [ ] Dashboard per tingkat + drill-down Daerah → Desa → Kelompok → Generus.
 - [ ] Peringatan (alpa beruntun, capaian belum diisi).
 - [ ] Ekspor Excel/PDF laporan bulanan.
+
+## Persiapan Pilot (±1–2 minggu, setelah Fase 5)
+- [ ] Pilih 1 desa (± 4–6 kelompok) sebagai **pilot**.
+- [ ] Kumpulkan data asli desa pilot memakai [templates/Template_Data_Generus.xlsx](../templates/Template_Data_Generus.xlsx).
+- [ ] Project Supabase **staging/production** terpisah dari development (data seed tidak boleh tercampur data asli).
+- [ ] Import data pilot, buat akun asli, cetak kartu QR.
+- [ ] Pilot 2–4 minggu: presensi kelompok (manual) + minimal satu pengajian desa (scan QR). Kumpulkan masukan & perbaiki.
 
 ## Fase 6 — Rollout Daerah (±2–4 minggu, bertahap)
 - [ ] Pelatihan per desa (admin + petugas scan), panduan singkat bergambar.

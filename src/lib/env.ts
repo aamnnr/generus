@@ -23,3 +23,10 @@ export function env() {
   }
   return cached;
 }
+
+/** Kunci service role; hanya dibutuhkan fitur admin akun. */
+export function serviceRoleKey(): string {
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY belum diisi. Lihat .env.example.");
+  return key;
+}

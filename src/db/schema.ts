@@ -59,8 +59,12 @@ export const profiles = pgTable("profiles", {
     .primaryKey()
     .references(() => authUsers.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  // Salinan auth.users.email (dipelihara trigger) agar bisa dibaca lewat RLS.
+  email: text("email"),
   phone: text("phone"),
   active: boolean("active").notNull().default(true),
+  // True untuk akun yang dibuat/di-reset superadmin dengan password sementara.
+  mustChangePassword: boolean("must_change_password").notNull().default(false),
   ...timestamps,
 });
 

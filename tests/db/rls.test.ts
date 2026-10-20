@@ -77,6 +77,20 @@ describe("struktur wilayah", () => {
     expect(r.rows[0].name).toBe("kyaiKelA1");
   });
 
+  it("unit yang masih berisi kelompok/generus tidak bisa dihapus, unit kosong bisa", async () => {
+    await expect(
+      asUser(db, u.superadmin, () => db.query(`DELETE FROM units WHERE id = $1`, [unit.desaB])),
+    ).rejects.toThrow(/foreign key/);
+    const kosong = await createUnit(db, "kelompok", "Kosong", unit.desaB);
+    const r = await asUser(db, u.superadmin, () => db.query(`DELETE FROM units WHERE id = $1`, [kosong]));
+    expect(r.affectedRows).toBe(1);
+  });
+
+  it("hanya superadmin yang bisa mengubah wilayah", async () => {
+    const r = await asUser(db, u.adminDesaA, () => db.query(`UPDATE units SET name = 'X' WHERE id = $1`, [unit.kelA1]));
+    expect(r.affectedRows).toBe(0);
+  });
+
   it("peran kurikulum hanya di tingkat daerah", async () => {
     await expect(grantRole(db, u.adminDesaA, unit.desaA, "kurikulum")).rejects.toThrow(/hanya untuk unit tingkat daerah/);
   });
@@ -191,6 +205,25 @@ describe("audit & akun", () => {
     await expect(
       asUser(db, u.adminKelA1, () => db.query(`UPDATE profiles SET active = false WHERE id = $1`, [u.adminKelA1])),
     ).rejects.toThrow(/Hanya superadmin/);
+  });
+
+  it("email profil tersalin dari akun auth dan tidak bisa diubah sendiri", async () => {
+    const r = await db.query<{ email: string }>(`SELECT email FROM profiles WHERE id = $1`, [u.adminKelA1]);
+    expect(r.rows[0].email).toBe("adminkela1@generus.test");
+    await expect(
+      asUser(db, u.adminKelA1, () => db.query(`UPDATE profiles SET email = 'x@y.z' WHERE id = $1`, [u.adminKelA1])),
+    ).rejects.toThrow(/Email hanya bisa diubah superadmin/);
+    await db.query(`UPDATE auth.users SET email = 'baru@generus.test' WHERE id = $1`, [u.adminKelA1]);
+    const r2 = await db.query<{ email: string }>(`SELECT email FROM profiles WHERE id = $1`, [u.adminKelA1]);
+    expect(r2.rows[0].email).toBe("baru@generus.test");
+  });
+
+  it("user boleh menghapus tanda wajib-ganti-password miliknya", async () => {
+    await db.query(`UPDATE profiles SET must_change_password = true WHERE id = $1`, [u.adminKelB1]);
+    const r = await asUser(db, u.adminKelB1, () =>
+      db.query(`UPDATE profiles SET must_change_password = false WHERE id = $1`, [u.adminKelB1]),
+    );
+    expect(r.affectedRows).toBe(1);
   });
 
   it("akun nonaktif kehilangan akses", async () => {

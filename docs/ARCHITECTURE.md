@@ -118,6 +118,15 @@ audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb
 ### Peserta sasaran agenda
 Tidak disimpan per baris; dihitung: generus `aktif` yang `kelompok.path <@ agenda.unit.path` dan sesuai filter jenjang/kategori/gender. Saat agenda dikunci, snapshot daftar sasaran disimpan agar laporan historis tidak berubah ketika generus pindah/naik jenjang.
 
+## 4b. Autentikasi & Akses dari Aplikasi
+
+- **Login**: Supabase Auth (email + password). Akun dibuat Superadmin dengan password sementara (`profiles.must_change_password`), yang wajib diganti saat login pertama. Tidak ada pendaftaran mandiri.
+- **Sesi**: `src/proxy.ts` memperbarui cookie sesi di setiap request dan mengalihkan pengunjung tanpa sesi ke `/login`. Kode lain hanya **membaca** cookie (`createSupabaseServer()`), kecuali aksi login/logout/ganti password (`{ writeCookies: true }`). Menulis cookie di tengah Server Action biasa memicu `InvariantError` di Next 16.
+- **Data Access Layer**: `src/lib/auth.ts`. `getSession()` memverifikasi JWT (`auth.getClaims()`), `getCurrentUser()` memuat profil + peran, `requireSuperadmin()` untuk halaman/aksi admin. Setiap Server Action memeriksa ulang sesinya sendiri.
+- **Query atas nama user**: `withRls(claims, tx => …)` di `src/db/rls.ts` menjalankan transaksi dengan `SET LOCAL ROLE authenticated` + klaim JWT, sehingga kebijakan RLS berlaku sama seperti lewat PostgREST.
+- **Operasi Auth admin** (buat akun, reset password, blokir) memakai service role key, hanya setelah `requireSuperadmin()`. Menonaktifkan akun = `profiles.active = false` (RLS) **dan** ban di Supabase Auth (tidak bisa login).
+- **Cache Components**: semua bagian yang membaca sesi berada di dalam `<Suspense>`; `getSession()` memanggil `connection()` karena klien auth Supabase memakai `Date.now()`.
+
 ## 5. Alur Presensi Offline (scan QR)
 
 1. **Persiapan (online)** — petugas membuka agenda → aplikasi mengunduh *roster*: `{qr_token → generus_id, nama, kelompok}` untuk sasaran agenda (5.000 generus ≈ < 500 KB) ke Dexie.

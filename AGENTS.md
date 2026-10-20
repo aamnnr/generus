@@ -14,3 +14,5 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Perubahan tabel: edit `src/db/schema.ts` lalu `pnpm db:generate`. Fungsi/trigger/RLS ditulis manual di migrasi custom (lihat `drizzle/0002_rls.sql`).
 - Setiap aturan akses (RLS) wajib punya tes di `tests/db/` (PGlite, tanpa Docker). Jalankan `pnpm test`.
 - `src/db/index.ts` memakai koneksi yang melewati RLS; query atas nama user harus lewat role `authenticated`.
+- Auth: lihat docs/ARCHITECTURE.md §4b. Baca sesi hanya lewat `src/lib/auth.ts`; query user lewat `withRls`. Jangan aktifkan `writeCookies` di luar aksi yang mengubah sesi.
+- Next 16 + cacheComponents: komponen yang membaca sesi/params/searchParams harus di dalam `<Suspense>`. Dokumentasi resmi ada di `node_modules/next/dist/docs/`.
