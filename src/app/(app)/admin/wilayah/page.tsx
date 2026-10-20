@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireSuperadmin } from "@/lib/auth";
 import { getWilayahTree } from "@/lib/wilayah";
@@ -11,12 +12,7 @@ export const metadata: Metadata = { title: "Wilayah · Generus" };
 export default function WilayahPage() {
   return (
     <>
-      <div>
-        <h1 className="text-2xl font-semibold">Wilayah</h1>
-        <p className="text-sm text-muted-foreground">
-          Desa dan kelompok di daerah ini. Unit hanya bisa dihapus bila sudah kosong.
-        </p>
-      </div>
+      <PageHeader title="Wilayah" description="Desa dan kelompok di daerah ini. Unit hanya bisa dihapus bila sudah kosong." />
       <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
         <Tree />
       </Suspense>

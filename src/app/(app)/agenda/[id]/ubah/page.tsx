@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { z } from "zod";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackLink, PageHeader } from "@/components/page-header";
+import { Card, CardContent } from "@/components/ui/card";
 import { getAgenda, listAgendaUnits } from "@/lib/agenda";
 import { segmentsOf, targetToSegments } from "@/lib/agenda-target";
 import { requireGenerusWriter } from "@/lib/auth";
@@ -33,13 +33,9 @@ async function Ubah({ params }: Pick<PageProps<"/agenda/[id]/ubah">, "params">) 
   const DAY = 86_400_000;
   return (
     <>
-      <Link href={`/agenda/${id}`} className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke agenda
-      </Link>
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Ubah agenda</CardTitle>
-        </CardHeader>
+      <BackLink href={`/agenda/${id}`}>Kembali ke agenda</BackLink>
+      <PageHeader title="Ubah agenda" />
+      <Card className="max-w-3xl">
         <CardContent>
           <AgendaForm
             action={updateAgenda}

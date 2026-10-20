@@ -112,23 +112,23 @@ export function AgendaForm({
       </div>
 
       <fieldset className="flex flex-col gap-2">
-        <legend className="mb-1 text-sm font-medium">Sasaran</legend>
-        <div className="flex flex-wrap gap-x-5 gap-y-2">
+        <legend className="mb-1 text-sm font-medium">Sasaran <span className="font-normal text-muted-foreground">(tidak dipilih = semua)</span></legend>
+        <div className="flex flex-wrap gap-2">
           {segments.map((s) => (
-            <label key={s.key} className="flex items-center gap-2 text-sm">
-              <input type="checkbox" name="segments" value={s.key} defaultChecked={selectedSegments.has(s.key)} className="size-4 accent-primary" />
+            <label key={s.key} className="flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50">
+              <input type="checkbox" name="segments" value={s.key} defaultChecked={selectedSegments.has(s.key)} className="sr-only" />
               {s.label}
             </label>
           ))}
         </div>
-        <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm">
+        <div className="flex flex-wrap gap-2">
           {[
             ["", "Laki-laki & perempuan"],
             ["L", "Laki-laki saja"],
             ["P", "Perempuan saja"],
           ].map(([val, label]) => (
-            <label key={val} className="flex items-center gap-2">
-              <input type="radio" name="gender" value={val} defaultChecked={(str(v.gender) ?? "") === val} className="size-4 accent-primary" />
+            <label key={val} className="flex h-10 cursor-pointer items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-medium has-checked:border-primary has-checked:bg-primary has-checked:text-primary-foreground has-focus-visible:ring-3 has-focus-visible:ring-ring/50">
+              <input type="radio" name="gender" value={val} defaultChecked={(str(v.gender) ?? "") === val} className="sr-only" />
               {label}
             </label>
           ))}
@@ -148,7 +148,7 @@ export function AgendaForm({
         </Field>
       )}
 
-      <Button type="submit" disabled={pending} className="w-fit">
+      <Button type="submit" disabled={pending} className="w-full sm:w-fit">
         {pending ? "Menyimpan…" : submitLabel}
       </Button>
     </form>

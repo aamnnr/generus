@@ -89,7 +89,7 @@ export function GenerusForm({
           <Input id="notes" name="notes" defaultValue={v.notes ?? ""} />
         </Field>
       </div>
-      <Button type="submit" disabled={pending} className="w-fit">
+      <Button type="submit" disabled={pending} className="w-full sm:w-fit">
         {pending ? "Menyimpan…" : submitLabel}
       </Button>
     </form>

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink, PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireGenerusWriter } from "@/lib/auth";
 import { listScopeUnits } from "@/lib/generus";
@@ -11,15 +11,8 @@ export const metadata: Metadata = { title: "Import Generus · Generus" };
 export default function ImportPage() {
   return (
     <>
-      <Link href="/generus" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke daftar generus
-      </Link>
-      <div>
-        <h1 className="text-2xl font-semibold">Import dari Excel</h1>
-        <p className="text-sm text-muted-foreground">
-          Tambahkan banyak generus sekaligus dari template. File diperiksa dulu sebelum disimpan.
-        </p>
-      </div>
+      <BackLink href="/generus">Kembali ke daftar generus</BackLink>
+      <PageHeader title="Import dari Excel" description="Tambahkan banyak generus sekaligus dari template. File diperiksa dulu sebelum disimpan." />
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
         <Card>
           <CardHeader>

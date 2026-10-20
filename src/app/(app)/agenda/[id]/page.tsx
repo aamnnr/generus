@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BackLink } from "@/components/page-header";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,9 +30,7 @@ const NOTICE: Record<string, string> = {
 export default function AgendaDetailPage({ params, searchParams }: PageProps<"/agenda/[id]">) {
   return (
     <>
-      <Link href="/agenda" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke agenda
-      </Link>
+      <BackLink href="/agenda">Kembali ke agenda</BackLink>
       <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
         <Detail params={params} searchParams={searchParams} />
       </Suspense>

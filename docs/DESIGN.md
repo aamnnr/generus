@@ -435,7 +435,7 @@ Daftarkan `--color-hero`, `--color-hero-foreground`, `--color-status-*` di `@the
 - [x] Generus: kartu di HP, tabel di desktop, chip jenjang, filter bisa dilipat, tombol tambah mengambang.
 - [x] Agenda/presensi & pemindai: token warna status, kotak statistik berwarna, checklist selebar layar di HP.
 - [x] Login dua panel, ikon PWA kubah, halaman offline, kartu QR cetak.
-- [ ] Halaman lain (wilayah, akun, form tambah/ubah, import, kenaikan) masih memakai gaya komponen dasar; dirapikan bertahap.
+- [x] Halaman lain (wilayah, akun, form tambah/ubah, import, kenaikan, kartu) dirapikan: `PageHeader`, `BackLink`, `EmptyState`, `Pill` di `src/components/page-header.tsx`; daftar akun kartu (HP) + tabel (desktop); pilihan sasaran agenda berupa chip.
 - [ ] Mode gelap: token siap, belum diaktifkan di UI.
 
 Mockup rujukan: kanvas "Mockup UI Generus" (artifact).

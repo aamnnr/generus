@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink, PageHeader, Pill } from "@/components/page-header";
+import { initials } from "@/components/shell/nav";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getAccount, listUnitGroups } from "@/lib/accounts";
@@ -16,9 +16,7 @@ export const metadata: Metadata = { title: "Detail Akun · Generus" };
 export default function DetailPage({ params }: PageProps<"/admin/akun/[id]">) {
   return (
     <>
-      <Link href="/admin/akun" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke daftar akun
-      </Link>
+      <BackLink href="/admin/akun">Kembali ke daftar akun</BackLink>
       <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
         <Detail params={params} />
       </Suspense>
@@ -35,12 +33,21 @@ async function Detail({ params }: Pick<PageProps<"/admin/akun/[id]">, "params">)
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-2">
-        <h1 className="text-2xl font-semibold">{account.name}</h1>
-        {account.active ? <Badge variant="outline">Aktif</Badge> : <Badge variant="destructive">Nonaktif</Badge>}
-        {account.mustChangePassword && <Badge variant="outline">Password sementara</Badge>}
+      <div className="flex items-center gap-4">
+        <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-secondary text-lg font-bold text-secondary-foreground md:size-16">
+          {initials(account.name)}
+        </span>
+        <PageHeader
+          title={account.name}
+          description={account.email}
+          badges={
+            <>
+              {account.active ? <Pill tone="ok">Aktif</Pill> : <Pill tone="danger">Nonaktif</Pill>}
+              {account.mustChangePassword && <Pill tone="muted">Password sementara</Pill>}
+            </>
+          }
+        />
       </div>
-      <p className="-mt-4 text-sm text-muted-foreground">{account.email}</p>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
@@ -61,7 +68,7 @@ async function Detail({ params }: Pick<PageProps<"/admin/akun/[id]">, "params">)
             {account.roles.length === 0 && <p className="text-sm text-muted-foreground">Belum punya peran.</p>}
             <ul className="flex flex-col gap-2">
               {account.roles.map((r) => (
-                <li key={r.id} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
+                <li key={r.id} className="flex items-center justify-between gap-2 rounded-xl bg-muted px-3 py-2 text-sm">
                   <span>
                     {roleLabel(r)} · <span className="text-muted-foreground">{r.unitName}</span>
                   </span>

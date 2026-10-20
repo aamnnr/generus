@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BackLink, PageHeader, Pill } from "@/components/page-header";
+import { initials } from "@/components/shell/nav";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -29,9 +31,7 @@ export const metadata: Metadata = { title: "Detail Generus · Generus" };
 export default function DetailPage({ params, searchParams }: PageProps<"/generus/[id]">) {
   return (
     <>
-      <Link href="/generus" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke daftar generus
-      </Link>
+      <BackLink href="/generus">Kembali ke daftar generus</BackLink>
       <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
         <Detail params={params} searchParams={searchParams} />
       </Suspense>
@@ -60,14 +60,15 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
           <AlertDescription>Generus ditambahkan.</AlertDescription>
         </Alert>
       )}
-      <div className="flex flex-col gap-1">
-        <div className="flex flex-wrap items-center gap-2">
-          <h1 className="text-2xl font-semibold">{g.name}</h1>
-          <Badge variant={g.status === "aktif" ? "secondary" : "outline"}>{STATUS_LABEL[g.status]}</Badge>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {jenjangLabel(g.jenjang, g.kategori)} · {ageOn(g.birthDate)} tahun · Kelompok {g.kelompok}, Desa {g.desa}
-        </p>
+      <div className="flex items-center gap-4">
+        <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-secondary text-lg font-bold text-secondary-foreground md:size-16">
+          {initials(g.name)}
+        </span>
+        <PageHeader
+          title={g.name}
+          badges={<Pill tone={g.status === "aktif" ? "ok" : "muted"}>{STATUS_LABEL[g.status]}</Pill>}
+          description={`${jenjangLabel(g.jenjang, g.kategori)} · ${ageOn(g.birthDate)} tahun · Kelompok ${g.kelompok}, Desa ${g.desa}`}
+        />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">

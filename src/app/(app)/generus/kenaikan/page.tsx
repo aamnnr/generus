@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import { BackLink, PageHeader } from "@/components/page-header";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,15 +20,8 @@ const paramsSchema = z.object({
 export default function KenaikanPage({ searchParams }: PageProps<"/generus/kenaikan">) {
   return (
     <>
-      <Link href="/generus" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke daftar generus
-      </Link>
-      <div>
-        <h1 className="text-2xl font-semibold">Kenaikan jenjang</h1>
-        <p className="text-sm text-muted-foreground">
-          Lakukan di awal tahun ajaran. Generus yang disarankan sudah dicentang; periksa lalu simpan.
-        </p>
-      </div>
+      <BackLink href="/generus">Kembali ke daftar generus</BackLink>
+      <PageHeader title="Kenaikan jenjang" description="Lakukan di awal tahun ajaran. Generus yang disarankan sudah dicentang; periksa lalu simpan." />
       <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
         <Kenaikan searchParams={searchParams} />
       </Suspense>

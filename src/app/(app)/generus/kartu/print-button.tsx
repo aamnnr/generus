@@ -1,7 +1,12 @@
 "use client";
 
+import { Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export function PrintButton() {
-  return <Button onClick={() => window.print()}>Cetak / simpan PDF</Button>;
+  return (
+    <Button onClick={() => window.print()}>
+      <Printer aria-hidden /> Cetak / simpan PDF
+    </Button>
+  );
 }

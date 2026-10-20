@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BackLink, PageHeader } from "@/components/page-header";
 import QRCode from "qrcode";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
@@ -77,38 +78,40 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
 
   return (
     <>
-      <div className="flex flex-col gap-3 print:hidden">
-        <Link href="/generus" className="text-sm text-muted-foreground hover:text-foreground">
-          ← Kembali ke daftar generus
-        </Link>
-        <h1 className="text-2xl font-semibold">Cetak kartu QR</h1>
-        <p className="text-sm text-muted-foreground">
-          10 kartu per lembar A4 (ukuran KTP). Saat mencetak pilih kertas A4, skala 100%, tanpa header/footer. Bisa juga
-          &quot;Simpan sebagai PDF&quot;. Kartu berisi kode acak saja; kalau hilang, terbitkan ulang dari halaman generus.
+      <div className="flex flex-col gap-4 print:hidden">
+        <BackLink href="/generus">Kembali ke daftar generus</BackLink>
+        <PageHeader
+          title="Cetak kartu QR"
+          description="10 kartu ukuran KTP per lembar A4. Saat mencetak pilih A4, skala 100%, tanpa header/footer — atau Simpan sebagai PDF."
+        />
+        <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card md:flex-row md:flex-wrap md:items-center">
+          {ids.length === 0 && (
+            <form className="flex flex-1 flex-wrap items-center gap-2">
+              <UnitSelect options={desaOptions} value={unitId} />
+              <Button type="submit" variant="outline">
+                Tampilkan
+              </Button>
+            </form>
+          )}
+          {cards.length > 0 && (
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                <span className="font-semibold text-foreground">{cards.length} kartu</span> · {Math.ceil(cards.length / 10)} lembar
+                {rows.length === MAX_CARDS && ` (maksimal ${MAX_CARDS}; pilih wilayah lebih kecil)`}
+              </span>
+              <PrintButton />
+              {ids.length > 0 && (
+                <Link href="/generus/kartu" className={buttonVariants({ variant: "ghost" })}>
+                  Cetak per wilayah
+                </Link>
+              )}
+            </div>
+          )}
+          {(ids.length > 0 || unitId) && cards.length === 0 && <p className="text-muted-foreground">Tidak ada generus aktif.</p>}
+        </div>
+        <p className="flex items-start gap-2 text-[13px] text-muted-foreground">
+          Kartu hanya berisi kode acak, bukan data pribadi. Kartu hilang? Terbitkan ulang dari halaman generus.
         </p>
-        {ids.length === 0 && (
-          <form className="flex flex-wrap items-end gap-2">
-            <UnitSelect options={desaOptions} value={unitId} />
-            <Button type="submit" variant="outline">
-              Tampilkan
-            </Button>
-          </form>
-        )}
-        {cards.length > 0 && (
-          <div className="flex flex-wrap items-center gap-3">
-            <PrintButton />
-            <span className="text-sm text-muted-foreground">
-              {cards.length} kartu · {Math.ceil(cards.length / 10)} lembar
-              {rows.length === MAX_CARDS && ` (maksimal ${MAX_CARDS}; pilih wilayah lebih kecil)`}
-            </span>
-            {ids.length > 0 && (
-              <Link href="/generus/kartu" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-                Cetak per wilayah
-              </Link>
-            )}
-          </div>
-        )}
-        {(ids.length > 0 || unitId) && cards.length === 0 && <p className="text-muted-foreground">Tidak ada generus aktif.</p>}
       </div>
 
       {cards.length > 0 && (
@@ -135,7 +138,7 @@ function UnitSelect({ options, value }: { options: UnitOption[]; value?: string 
   const byDesa = new Map<string, UnitOption[]>();
   for (const o of options) byDesa.set(o.desaName, [...(byDesa.get(o.desaName) ?? []), o]);
   return (
-    <NativeSelect name="unit" defaultValue={value ?? ""} required aria-label="Wilayah" className="min-w-64">
+    <NativeSelect name="unit" defaultValue={value ?? ""} required aria-label="Wilayah" className="min-w-0 sm:min-w-72">
       <NativeSelectOption value="" disabled>
         Pilih desa / kelompok
       </NativeSelectOption>

@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BackLink, PageHeader } from "@/components/page-header";
+import { Card, CardContent } from "@/components/ui/card";
 import { requireGenerusWriter } from "@/lib/auth";
 import { listJenjang, listScopeUnits } from "@/lib/generus";
 import { createGenerus } from "../actions";
@@ -12,13 +12,9 @@ export const metadata: Metadata = { title: "Tambah Generus · Generus" };
 export default function BaruPage() {
   return (
     <>
-      <Link href="/generus" className="text-sm text-muted-foreground hover:text-foreground">
-        ← Kembali ke daftar generus
-      </Link>
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Tambah generus</CardTitle>
-        </CardHeader>
+      <BackLink href="/generus">Kembali ke daftar generus</BackLink>
+      <PageHeader title="Tambah generus" />
+      <Card className="max-w-3xl">
         <CardContent>
           <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
             <FormLoader />
