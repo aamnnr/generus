@@ -21,7 +21,7 @@ Estimasi untuk 1–2 developer.
 - [x] Kelola pohon wilayah (Superadmin): tambah/ubah nama/hapus desa & kelompok kosong.
 - [x] CRUD generus sesuai lingkup (filter wilayah/jenjang/status, paginasi), Kyai read-only.
 - [x] Tandai Menikah / Pindah Sambung + aktifkan kembali (QR otomatis nonaktif), mutasi kelompok (admin desa/daerah), riwayat.
-- [ ] Import Excel dari template.
+- [x] Import Excel dari template: pratinjau per baris (OK/bermasalah/duplikat), hanya kelompok dalam lingkup, simpan dalam satu transaksi. `pnpm seed:xlsx` membuat file contoh.
 - [ ] Kenaikan jenjang/kategori massal.
 - [ ] PWA dasar: manifest, ikon, service worker, install prompt.
 
@@ -61,7 +61,7 @@ Estimasi untuk 1–2 developer.
 
 ## Persiapan Pilot (±1–2 minggu, setelah Fase 5)
 - [ ] Pilih 1 desa (± 4–6 kelompok) sebagai **pilot**.
-- [ ] Kumpulkan data asli desa pilot memakai [templates/Template_Data_Generus.xlsx](../templates/Template_Data_Generus.xlsx).
+- [ ] Kumpulkan data asli desa pilot memakai [public/templates/Template_Data_Generus.xlsx](../public/templates/Template_Data_Generus.xlsx).
 - [ ] Project Supabase **staging/production** terpisah dari development (data seed tidak boleh tercampur data asli).
 - [ ] Import data pilot, buat akun asli, cetak kartu QR.
 - [ ] Pilot 2–4 minggu: presensi kelompok (manual) + minimal satu pengajian desa (scan QR). Kumpulkan masukan & perbaiki.

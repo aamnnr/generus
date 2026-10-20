@@ -5,7 +5,7 @@ PWA untuk presensi pengajian, target materi bulanan, dan progres kitab di tingka
 - Kebutuhan produk: [docs/PRD.md](docs/PRD.md)
 - Arsitektur & model data: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Rencana fase: [docs/PLAN.md](docs/PLAN.md)
-- Template pengumpulan data: [templates/Template_Data_Generus.xlsx](templates/Template_Data_Generus.xlsx)
+- Template pengumpulan data: [public/templates/Template_Data_Generus.xlsx](public/templates/Template_Data_Generus.xlsx)
 
 ## Stack
 
@@ -44,7 +44,7 @@ src/app/              halaman Next.js
 src/db/schema.ts      skema Drizzle (sumber tabel)
 src/lib/env.ts        validasi environment server
 tests/db/             tes migrasi, RLS, dan seed (PGlite)
-templates/            template Excel untuk admin
+public/templates/     template Excel untuk admin (juga bisa diunduh dari halaman Import)
 ```
 
 ## Alur perubahan database
@@ -66,4 +66,5 @@ Migrasi hanya dikelola Drizzle (`drizzle/`). Folder `supabase/` berisi konfigura
 | `pnpm db:generate` | Buat migrasi dari perubahan skema |
 | `pnpm db:migrate` | Terapkan migrasi ke `DATABASE_URL` |
 | `pnpm db:seed` | Isi data contoh |
+| `pnpm seed:xlsx [n] [--with-errors]` | Buat file template berisi data contoh untuk menguji import |
 | `pnpm db:check` | Ringkasan database + jumlah generus yang terlihat tiap akun (cek RLS) |
