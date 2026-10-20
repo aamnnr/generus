@@ -81,15 +81,26 @@ attendance       (id UUID dari klien, agenda_id, generus_id, status,
                   method[manual|scan|delegasi|search|self], recorded_by,
                   recorded_at, device_id, UNIQUE(agenda_id, generus_id))
 
-materi           (id, jenjang_id, category, title, order)
-kitab            (id, title, unit_type[bab|halaman], total)
-monthly_targets  (id, daerah_id, jenjang_id, kategori_id?, year_month,
-                  materi_id?, kitab_id?, kitab_from?, kitab_to?)
-                  -- kategori_id NULL = berlaku untuk semua kategori di jenjang itu
-achievements     (generus_id, target_id, status[belum|proses|tuntas],
-                  updated_by, updated_at, note)
-kitab_progress   (id, generus_id, kitab_id, position, recorded_at, recorded_by)
-                  -- append-only; posisi terkini = baris terbaru per (generus, kitab)
+curriculum_periods (id, name, semester, starts_on, ends_on, published_at?)
+                  -- mis. "Oktober 2026", "1-2026", 2026-10-05 … 2026-11-07
+kitab            (id, title, unit[ayat|halaman|bab], total, sort)
+                  -- "lintasan" progres: Bacaan Al-Qur'an & Makna Al-Qur'an (unit ayat,
+                  --  total 6236, posisi = nomor ayat urut mushaf → ditampilkan surat:ayat),
+                  --  Makna Hadist K. Janaiz (unit halaman), dst.
+materi           (id, aspek[alim|faqih|akhlaq|mandiri], mapel, title, body?,
+                  arabic?, translation?, source?, assessment[generus|kelompok], archived)
+                  -- pustaka; dipakai ulang lintas periode (hafalan, dalil, doa)
+period_targets   (id, period_id, jenjang_id, kategori_id?, gender?, sort,
+                  aspek, mapel, materi_id? | (kitab_id, range_from, range_to),
+                  strategy?, optional bool)
+                  -- kategori_id/gender NULL = berlaku untuk semua
+achievements     (target_id, generus_id, status[belum|proses|tuntas], note,
+                  updated_by, updated_at, PK(target_id, generus_id))  -- assessment = generus
+target_deliveries(target_id, kelompok_id, delivered_on, note, by,
+                  PK(target_id, kelompok_id))                          -- assessment = kelompok
+kitab_progress   (id, generus_id, kitab_id, position, recorded_on, recorded_by)
+                  -- append-only; posisi terkini = view kitab_progress_latest;
+                  -- capaian target kitab: tuntas bila posisi ≥ range_to, proses bila > posisi awal periode
 
 audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb, at)
 ```
@@ -98,7 +109,7 @@ audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb
 - `units.path` memakai `ltree`, mis. `d01.ds03.k12`. "Unit X dan semua turunannya" = `path <@ X.path` — satu kondisi, ber-indeks GiST.
 - Fungsi SQL `user_scope_paths(uid)` mengembalikan path unit yang dipegang user. Kebijakan RLS di setiap tabel data: baris boleh diakses jika unit pemiliknya berada di bawah salah satu path tersebut.
 - Hak *tulis* lebih ketat dari *baca*: misalnya Admin Desa boleh **membaca** presensi agenda kelompok, tapi hanya **menulis** presensi agenda milik desanya; Admin Kelompok boleh menulis presensi agenda desa **hanya untuk generus kelompoknya** dan **sebelum `delegate_until`**.
-- Peran **kyai** tidak memiliki kebijakan tulis sama sekali (read-only di level RLS). Peran **kurikulum** hanya boleh menulis tabel `materi`, `kitab`, `monthly_targets`, dan membaca agregat capaian.
+- Peran **kyai** tidak memiliki kebijakan tulis sama sekali (read-only di level RLS). Peran **kurikulum** hanya boleh menulis tabel `curriculum_periods`, `materi`, `kitab`, `period_targets`, dan membaca agregat capaian. Periode yang belum diterbitkan hanya terlihat oleh kurikulum & superadmin.
 - Otorisasi dicek dua lapis: di server (pesan error ramah) dan di RLS (pengaman terakhir).
 
 ### Matriks akses ringkas
@@ -109,10 +120,10 @@ audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb
 | Generus | Tulis | – | Tulis (kelompok); mutasi (desa/daerah) | Baca |
 | Agenda & presensi | Tulis | – | Tulis agenda milik unitnya; delegasi untuk kelompok | Baca |
 | Materi, kitab, target | Tulis | Tulis | Baca | Baca |
-| Capaian & progres kitab | Tulis | Baca agregat | Tulis (kelompok) | Baca |
+| Capaian, penyampaian & progres kitab | Tulis | Baca agregat | Tulis (generus/kelompok miliknya) | Baca |
 
 ### Status generus & cakupan
-- Sasaran agenda dan target hanya menghitung generus `aktif` **pada tanggal agenda/bulan target**. Karena `status_date` disimpan, laporan bulan lalu tetap memuat generus yang baru menikah/pindah sambung bulan ini.
+- Sasaran agenda dan target hanya menghitung generus `aktif` **pada tanggal agenda / dalam rentang periode target**. Karena `status_date` disimpan, laporan bulan lalu tetap memuat generus yang baru menikah/pindah sambung bulan ini.
 - Saat status berubah ke `menikah`/`pindah_sambung`, `qr_token` dinonaktifkan (scan menampilkan "sudah tidak aktif").
 
 ### Peserta sasaran agenda

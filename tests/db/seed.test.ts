@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { generateSeedData } from "../../scripts/seed/generate";
 import { insertSeed, type Query } from "../../scripts/seed/insert";
+import { insertKurikulum } from "../../scripts/seed/kurikulum";
+import { KURIKULUM_OKTOBER_2026 } from "../../scripts/seed/kurikulum-data";
+import { formatAyatRange } from "@/lib/quran";
 import { createTestDb } from "./harness";
 
 describe("generateSeedData", () => {
@@ -40,4 +43,32 @@ describe("insertSeed", () => {
     const firstDesaTotal = generateSeedData().desa[0].kelompok.reduce((s, k) => s + k.generus.length, 0);
     expect(inside).toBe(firstDesaTotal);
   }, 120_000);
+});
+
+describe("insertKurikulum", () => {
+  it("mengisi periode Oktober 2026 dan aman dijalankan ulang", async () => {
+    const db = await createTestDb();
+    const q: Query = async (sql, params) => (await db.query(sql, params)).rows as never;
+
+    const first = await insertKurikulum(q, KURIKULUM_OKTOBER_2026);
+    expect(first.skipped).toBe(false);
+    expect(first.targets).toBe(KURIKULUM_OKTOBER_2026.targets.length);
+    expect((await insertKurikulum(q, KURIKULUM_OKTOBER_2026)).skipped).toBe(true);
+
+    const again = await insertKurikulum(q, KURIKULUM_OKTOBER_2026, { reset: true });
+    expect(again.periodId).not.toBe(first.periodId);
+    const [{ periods, targets, materi }] = await q<{ periods: number; targets: number; materi: number }>(
+      `SELECT (SELECT count(*)::int FROM curriculum_periods) periods,
+              (SELECT count(*)::int FROM period_targets) targets,
+              (SELECT count(*)::int FROM materi) materi`,
+    );
+    expect(periods).toBe(1);
+    expect(targets).toBe(KURIKULUM_OKTOBER_2026.targets.length);
+    expect(materi).toBe(KURIKULUM_OKTOBER_2026.targets.filter((t) => t.materi).length);
+
+    const [bacaan] = await q<{ range_from: number; range_to: number }>(
+      `SELECT range_from, range_to FROM period_targets WHERE mapel = 'Bacaan'`,
+    );
+    expect(formatAyatRange(bacaan.range_from, bacaan.range_to)).toBe("Al-Baqarah 253 – Ali 'Imran 91");
+  });
 });

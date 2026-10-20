@@ -57,9 +57,15 @@ Catatan:
 - **Pindah kelompok** di dalam daerah bukan status, melainkan *mutasi*: generus dipindah ke kelompok baru, riwayat tetap ada.
 - **Generus pindahan dari luar daerah** cukup didaftarkan seperti generus baru, tanpa keterangan asal.
 - **Agenda**: kegiatan pengajian milik satu unit. Peserta yang diharapkan = generus di unit tersebut beserta turunannya, bisa difilter jenjang/jenis kelamin.
-- **Kurikulum**: daftar materi (hafalan, doa, praktik, dll.) dan kitab (dengan bab/halaman), dikelompokkan per jenjang.
-- **Target bulanan**: materi/kitab yang harus dicapai jenjang tertentu pada bulan tertentu.
-- **Capaian**: status per generus per item target — `belum`, `proses`, `tuntas` — diisi Admin Kelompok.
+- **Periode target**: mengikuti dokumen Tim Kurikulum PPG, mis. "Periode Bulan Oktober" = 5 Okt – 7 Nov 2026, bagian dari Semester 1. Periode punya tanggal mulai & selesai sendiri, **bukan** bulan kalender.
+- **Struktur target**: Aspek → Mata pelajaran → Materi, plus teks *strategi pembelajaran*. Aspek: **Alim** (bacaan, keilmuan/makna, hafalan), **Faqih** (kefahaman agama, praktik ibadah), **Akhlaqul Karimah** (akhlaq, tata krama), **Mandiri** (kemandirian, olahraga & seni).
+- **Dokumen target per jenjang**: Pra Remaja dan Remaja punya target masing-masing; Remaja Pelajar & Mandiri memakai target yang sama. Materi bisa khusus putra atau putri, dan bisa ditandai *pilihan/extra* (tidak dihitung dalam persentase capaian).
+- **Pustaka materi**: materi yang berulang (menjaga hafalan, dalil, doa — lengkap dengan teks Arab, terjemahan, sumber) disimpan sekali dan dipilih ulang tiap periode.
+- **Lintasan kitab**: progres berurutan yang diukur posisi, mis. *Bacaan Al-Qur'an* dan *Makna Al-Qur'an* (posisi = surat:ayat), *Makna Hadist K. Janaiz* (posisi = halaman). Target kitab berupa rentang, mis. Al-Baqarah 253 s.d. Ali Imran 91.
+- **Capaian** — cara penilaian ditentukan Tim Kurikulum per materi:
+  - *per generus*: `belum` / `proses` / `tuntas` (bacaan, makna, hafalan, praktik ibadah);
+  - *per kelompok*: tanda "sudah disampaikan" + tanggal (akhlaq, tata krama, kefahaman, kemandirian);
+  - *kitab*: dihitung otomatis dari posisi terakhir generus terhadap rentang target.
 
 ## 5. Kebutuhan Fungsional
 
@@ -90,10 +96,11 @@ Status presensi: `hadir`, `terlambat`, `izin`, `sakit`, `alpa`.
 - F-26 *(Fase 2)* Self check-in: QR agenda yang berganti tiap 30 detik ditampilkan di layar, dipindai generus yang punya akun.
 
 ### 5.4 Kurikulum, Target & Capaian
-- F-30 Tim Kurikulum mengelola daftar materi dan kitab per jenjang/kategori (kitab: bab/halaman sebagai satuan progres).
-- F-31 Tim Kurikulum menetapkan target bulanan per jenjang/kategori (materi + rentang kitab), bisa disalin dari bulan sebelumnya.
-- F-32 Admin Kelompok mengisi capaian per generus (massal per materi atau per generus).
-- F-33 Progres kitab dicatat **per generus** sebagai posisi terakhir (bab/halaman), dengan riwayat tanggal. Input massal tersedia: pilih beberapa generus yang mengaji bersama → set posisi yang sama sekaligus.
+- F-30 Tim Kurikulum mengelola pustaka materi (aspek, mapel, isi, teks Arab/terjemahan/sumber, cara penilaian) dan lintasan kitab (satuan ayat/halaman/bab).
+- F-31 Tim Kurikulum membuat periode (nama, semester, tanggal mulai–selesai) dan menyusun target per jenjang lewat form; **salin dari periode sebelumnya** lalu ubah yang berbeda. Target baru terlihat oleh kelompok setelah *diterbitkan*.
+- F-32 Admin Kelompok mengisi capaian: materi per generus secara massal per materi (checklist seluruh generus) atau per generus; materi per kelompok cukup ditandai "sudah disampaikan".
+- F-33 Progres kitab dicatat **per generus** sebagai posisi terakhir (Al-Qur'an: surat:ayat; kitab lain: halaman/bab), dengan riwayat tanggal. Input massal tersedia: pilih beberapa generus yang mengaji bersama → set posisi yang sama sekaligus.
+- F-34 Tampilan target periode berjalan untuk semua peran (mirip dokumen PPG), termasuk lampiran dalil & doa dengan teks Arab.
 
 ### 5.5 Laporan & Dashboard
 - F-40 Dashboard per tingkat: persentase kehadiran, tren mingguan/bulanan, capaian target bulan berjalan, unit dengan kinerja terendah.

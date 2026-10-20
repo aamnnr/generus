@@ -64,6 +64,20 @@
       "when": 1792488336041,
       "tag": "0008_scanners_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1792495929257,
+      "tag": "0009_kurikulum",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1792495931368,
+      "tag": "0010_kurikulum_rls",
+      "breakpoints": true
     }
   ]
 }

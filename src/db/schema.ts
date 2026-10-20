@@ -14,6 +14,7 @@ import {
   unique,
   uuid,
   bigserial,
+  check,
 } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { authUsers } from "drizzle-orm/supabase";
@@ -263,6 +264,164 @@ export const agendaScanners = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [primaryKey({ columns: [t.agendaId, t.userId] }), index("agenda_scanners_user_idx").on(t.userId)],
+);
+
+// ---------------------------------------------------------------------------
+// Kurikulum, target & capaian (Fase 4) — format dokumen target Tim Kurikulum PPG
+// ---------------------------------------------------------------------------
+
+export const aspek = pgEnum("aspek", ["alim", "faqih", "akhlaq", "mandiri"]);
+/** Satuan posisi lintasan kitab. Al-Qur'an memakai `ayat` = nomor ayat urut mushaf (1–6236). */
+export const kitabUnit = pgEnum("kitab_unit", ["ayat", "halaman", "bab"]);
+/** Cara penilaian materi: per generus (belum/proses/tuntas) atau per kelompok (sudah disampaikan). */
+export const assessmentMode = pgEnum("assessment_mode", ["generus", "kelompok"]);
+export const achievementStatus = pgEnum("achievement_status", ["belum", "proses", "tuntas"]);
+
+/** Periode target, mis. "Oktober 2026" = 5 Okt – 7 Nov 2026. Bukan bulan kalender. */
+export const curriculumPeriods = pgTable(
+  "curriculum_periods",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    name: text("name").notNull().unique(),
+    semester: text("semester").notNull(),
+    startsOn: date("starts_on").notNull(),
+    endsOn: date("ends_on").notNull(),
+    /** Kosong = draf, hanya terlihat oleh tim kurikulum & superadmin. */
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    createdBy: uuid("created_by"),
+    ...timestamps,
+  },
+  (t) => [check("curriculum_periods_range", sql`${t.endsOn} >= ${t.startsOn}`), index("curriculum_periods_starts_idx").on(t.startsOn)],
+);
+
+/** Lintasan progres berurutan, mis. Bacaan Al-Qur'an, Makna Al-Qur'an, Makna Hadist K. Janaiz. */
+export const kitab = pgTable(
+  "kitab",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    title: text("title").notNull().unique(),
+    unit: kitabUnit("unit").notNull(),
+    total: integer("total").notNull(),
+    sortOrder: integer("sort_order").notNull().default(0),
+    archived: boolean("archived").notNull().default(false),
+    ...timestamps,
+  },
+  (t) => [check("kitab_total_positive", sql`${t.total} > 0`)],
+);
+
+/** Pustaka materi; dipakai ulang lintas periode (hafalan, dalil, doa, akhlaq, …). */
+export const materi = pgTable(
+  "materi",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    aspek: aspek("aspek").notNull(),
+    mapel: text("mapel").notNull(),
+    title: text("title").notNull(),
+    body: text("body"),
+    arabic: text("arabic"),
+    translation: text("translation"),
+    source: text("source"),
+    assessment: assessmentMode("assessment").notNull().default("generus"),
+    archived: boolean("archived").notNull().default(false),
+    ...timestamps,
+  },
+  (t) => [unique("materi_unique").on(t.aspek, t.mapel, t.title)],
+);
+
+/** Satu baris target dalam periode untuk satu jenjang: materi dari pustaka, atau rentang kitab. */
+export const periodTargets = pgTable(
+  "period_targets",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    periodId: uuid("period_id")
+      .notNull()
+      .references(() => curriculumPeriods.id, { onDelete: "cascade" }),
+    jenjangId: uuid("jenjang_id")
+      .notNull()
+      .references(() => jenjang.id, { onDelete: "restrict" }),
+    // Kosong = semua kategori / kedua jenis kelamin.
+    kategoriId: uuid("kategori_id").references(() => jenjangKategori.id, { onDelete: "restrict" }),
+    gender: gender("gender"),
+    sortOrder: integer("sort_order").notNull().default(0),
+    aspek: aspek("aspek").notNull(),
+    mapel: text("mapel").notNull(),
+    materiId: uuid("materi_id").references(() => materi.id, { onDelete: "restrict" }),
+    kitabId: uuid("kitab_id").references(() => kitab.id, { onDelete: "restrict" }),
+    rangeFrom: integer("range_from"),
+    rangeTo: integer("range_to"),
+    /** Keterangan tambahan, mis. "Juz 3". */
+    note: text("note"),
+    strategy: text("strategy"),
+    /** Materi pilihan/extra: tidak dihitung dalam persentase capaian. */
+    optional: boolean("optional").notNull().default(false),
+    ...timestamps,
+  },
+  (t) => [
+    check(
+      "period_targets_kind",
+      sql`(${t.materiId} IS NOT NULL AND ${t.kitabId} IS NULL AND ${t.rangeFrom} IS NULL AND ${t.rangeTo} IS NULL)
+        OR (${t.materiId} IS NULL AND ${t.kitabId} IS NOT NULL AND ${t.rangeFrom} >= 1 AND ${t.rangeTo} >= ${t.rangeFrom})`,
+    ),
+    index("period_targets_period_idx").on(t.periodId, t.jenjangId, t.sortOrder),
+  ],
+);
+
+/** Capaian per generus untuk target materi ber-penilaian `generus`. */
+export const achievements = pgTable(
+  "achievements",
+  {
+    targetId: uuid("target_id")
+      .notNull()
+      .references(() => periodTargets.id, { onDelete: "restrict" }),
+    generusId: uuid("generus_id")
+      .notNull()
+      .references(() => generus.id, { onDelete: "cascade" }),
+    status: achievementStatus("status").notNull(),
+    note: text("note"),
+    updatedBy: uuid("updated_by"),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.targetId, t.generusId] }), index("achievements_generus_idx").on(t.generusId)],
+);
+
+/** Tanda "sudah disampaikan" per kelompok untuk target materi ber-penilaian `kelompok`. */
+export const targetDeliveries = pgTable(
+  "target_deliveries",
+  {
+    targetId: uuid("target_id")
+      .notNull()
+      .references(() => periodTargets.id, { onDelete: "restrict" }),
+    kelompokId: uuid("kelompok_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "cascade" }),
+    // Salinan units.path kelompok; dipelihara trigger.
+    unitPath: ltree("unit_path").notNull().default(sql`''::ltree`),
+    deliveredOn: date("delivered_on").notNull(),
+    note: text("note"),
+    recordedBy: uuid("recorded_by"),
+    ...timestamps,
+  },
+  (t) => [primaryKey({ columns: [t.targetId, t.kelompokId] }), index("target_deliveries_unit_path_gist").using("gist", t.unitPath)],
+);
+
+/** Riwayat posisi kitab per generus (append-only). Posisi terkini = baris terbaru per (generus, kitab). */
+export const kitabProgress = pgTable(
+  "kitab_progress",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    generusId: uuid("generus_id")
+      .notNull()
+      .references(() => generus.id, { onDelete: "cascade" }),
+    kitabId: uuid("kitab_id")
+      .notNull()
+      .references(() => kitab.id, { onDelete: "restrict" }),
+    position: integer("position").notNull(),
+    recordedOn: date("recorded_on").notNull().default(sql`current_date`),
+    note: text("note"),
+    recordedBy: uuid("recorded_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("kitab_progress_latest_idx").on(t.generusId, t.kitabId, t.recordedOn, t.createdAt)],
 );
 
 // ---------------------------------------------------------------------------
