@@ -9,6 +9,7 @@ import { requireGenerusWriter } from "@/lib/auth";
 import { listPromotionCandidates, listScopeUnits, MAX_PROMOTION_ROWS, type UnitOption } from "@/lib/generus";
 import { academicYearStart, ageAt, isSuggested, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
 import { PromoteForm } from "./promote-form";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Kenaikan Jenjang · Generus" };
 
@@ -22,7 +23,7 @@ export default function KenaikanPage({ searchParams }: PageProps<"/generus/kenai
     <>
       <BackLink href="/generus">Kembali ke daftar generus</BackLink>
       <PageHeader title="Kenaikan jenjang" description="Lakukan di awal tahun ajaran. Generus yang disarankan sudah dicentang; periksa lalu simpan." />
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Kenaikan searchParams={searchParams} />
       </Suspense>
     </>

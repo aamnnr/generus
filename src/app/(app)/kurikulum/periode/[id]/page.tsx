@@ -21,6 +21,7 @@ import { ASPEK_LABEL, positionInput } from "@/lib/kurikulum-format";
 import { setPublished } from "../../actions";
 import { AddTargetPanel, Collapsible, DeletePeriodButton, PeriodForm, TargetRowEditor, type TargetDefaults, type TargetFormData } from "../../forms";
 import { dateRange, PeriodPills, TargetContent, todayIso } from "../../shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Target periode · Generus" };
 
@@ -28,7 +29,7 @@ export default function PeriodePage({ params, searchParams }: PageProps<"/kuriku
   return (
     <>
       <BackLink href="/kurikulum">Kembali ke kurikulum</BackLink>
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Periode params={params} searchParams={searchParams} />
       </Suspense>
     </>

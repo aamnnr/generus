@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { ChevronRight, Plus, Search } from "lucide-react";
 import { EmptyState, PageHeader, Pill } from "@/components/page-header";
 import { initials } from "@/components/shell/nav";
@@ -8,6 +8,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { listAccounts, type AccountRow } from "@/lib/accounts";
 import { requireSuperadmin, roleLabel } from "@/lib/auth";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Akun · Generus" };
 
@@ -23,7 +24,7 @@ export default function AkunPage({ searchParams }: PageProps<"/admin/akun">) {
           </Link>
         }
       />
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <AccountList searchParams={searchParams} />
       </Suspense>
     </>
@@ -104,9 +105,9 @@ async function AccountList({ searchParams }: Pick<PageProps<"/admin/akun">, "sea
             </TableHeader>
             <TableBody>
               {accounts.map((a) => (
-                <TableRow key={a.id} className="hover:bg-secondary/50">
+                <TableRow key={a.id} className="relative cursor-pointer hover:bg-secondary/50">
                   <TableCell className="pl-4">
-                    <Link href={`/admin/akun/${a.id}`} className="flex items-center gap-3 font-semibold">
+                    <Link href={`/admin/akun/${a.id}`} className="flex items-center gap-3 font-semibold after:absolute after:inset-0 after:content-['']">
                       <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">
                         {initials(a.name)}
                       </span>

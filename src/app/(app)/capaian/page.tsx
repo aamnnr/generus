@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { EmptyState, PageHeader } from "@/components/page-header";
@@ -15,12 +15,13 @@ import { dateRange } from "../kurikulum/shared";
 import { kelompokGroups, resolveCapaianContext } from "./context";
 import { DeliveryToggle, QuerySelect } from "./forms";
 import { ProgressBar } from "./shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Capaian · Generus" };
 
 export default function CapaianPage({ searchParams }: PageProps<"/capaian">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Capaian searchParams={searchParams} />
     </Suspense>
   );

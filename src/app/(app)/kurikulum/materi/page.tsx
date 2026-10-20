@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { ChevronRight, Plus, Search } from "lucide-react";
 import { EmptyState, PageHeader, Pill } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
@@ -8,6 +8,7 @@ import { requireCurriculumEditor } from "@/lib/auth";
 import { listMateri } from "@/lib/kurikulum";
 import { ASPEK_LABEL, ASPEK_ORDER, type Aspek } from "@/lib/kurikulum-format";
 import { KurikulumTabs } from "../shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Pustaka materi · Generus" };
 
@@ -24,7 +25,7 @@ export default function MateriPage({ searchParams }: PageProps<"/kurikulum/mater
         }
       />
       <KurikulumTabs active="materi" />
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <MateriList searchParams={searchParams} />
       </Suspense>
     </>

@@ -318,7 +318,7 @@ export function DeletePeriodButton({ id, name }: { id: string; name: string }) {
     );
   }
   return (
-    <form action={action} className="flex flex-col gap-2 rounded-xl bg-status-alpa-soft p-3">
+    <form action={action} className="animate-enter flex flex-col gap-2 rounded-xl bg-status-alpa-soft p-3">
       <input type="hidden" name="id" value={id} />
       <p className="text-sm font-semibold text-status-alpa">Hapus periode {name} beserta semua targetnya?</p>
       <div className="flex gap-2">
@@ -571,7 +571,7 @@ export function TargetRowEditor({ data, defaults, first, last, children }: { dat
 
   if (editing) {
     return (
-      <div className="rounded-xl border border-primary/30 bg-background p-3">
+      <div className="animate-enter rounded-xl border border-primary/30 bg-background p-3">
         <TargetForm data={data} defaults={defaults} onDone={() => setEditing(false)} />
       </div>
     );
@@ -584,7 +584,7 @@ export function TargetRowEditor({ data, defaults, first, last, children }: { dat
   };
   if (confirming) {
     return (
-      <div className="flex flex-col gap-2 rounded-xl bg-status-alpa-soft p-3">
+      <div className="animate-enter flex flex-col gap-2 rounded-xl bg-status-alpa-soft p-3">
         <div className="opacity-70">{children}</div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm font-semibold text-status-alpa">Hapus target ini?</span>
@@ -645,7 +645,7 @@ export function AddTargetPanel({ data }: { data: TargetFormData }) {
     );
   }
   return (
-    <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card md:p-5">
+    <div className="animate-enter flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card md:p-5">
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-bold">Tambah target</h2>
         <Button type="button" size="sm" variant="ghost" onClick={() => setOpen(false)}>
@@ -666,7 +666,7 @@ export function Collapsible({ label, children }: { label: string; children: Reac
       <Button type="button" variant="outline" className="w-full sm:w-fit" aria-expanded={open} onClick={() => setOpen((o) => !o)}>
         {open ? `Tutup ${label.toLowerCase()}` : label}
       </Button>
-      {open && children}
+      {open && <div className="animate-enter">{children}</div>}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { requireCurriculumEditor } from "@/lib/auth";
 import { listPeriods } from "@/lib/kurikulum";
 import { PeriodForm } from "../../forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Buat periode · Generus" };
 
@@ -15,7 +16,7 @@ export default function PeriodeBaruPage() {
       <PageHeader title="Buat periode" description="Periode baru dimulai sebagai draf; kelompok baru melihatnya setelah diterbitkan." />
       <Card className="max-w-3xl">
         <CardContent>
-          <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+          <Suspense fallback={<PageLoading />}>
             <Form />
           </Suspense>
         </CardContent>

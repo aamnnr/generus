@@ -9,6 +9,7 @@ import { formatPosition, KITAB_UNIT_LABEL } from "@/lib/kurikulum-format";
 import { setKitabArchived } from "../actions";
 import { KitabEditToggle, KitabForm } from "../forms";
 import { KurikulumTabs } from "../shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Kitab · Generus" };
 
@@ -20,7 +21,7 @@ export default function KitabPage() {
         description="Lintasan progres berurutan. Al-Qur'an memakai posisi surat:ayat; kitab lain memakai halaman atau bab."
       />
       <KurikulumTabs active="kitab" />
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <KitabList />
       </Suspense>
     </>

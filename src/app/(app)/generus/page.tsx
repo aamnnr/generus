@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { ChevronRight, Plus, Search } from "lucide-react";
 import { FilterDisclosure } from "@/components/filter-disclosure";
 import { initials } from "@/components/shell/nav";
@@ -22,6 +22,7 @@ import {
   type GenerusFilters,
   type UnitOption,
 } from "@/lib/generus";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Generus · Generus" };
 
@@ -35,7 +36,7 @@ const filterSchema = z.object({
 
 export default function GenerusPage({ searchParams }: PageProps<"/generus">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <GenerusList searchParams={searchParams} />
     </Suspense>
   );
@@ -203,9 +204,9 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
             </TableHeader>
             <TableBody>
               {rows.map((g) => (
-                <TableRow key={g.id} className="hover:bg-secondary/50">
+                <TableRow key={g.id} className="relative cursor-pointer hover:bg-secondary/50">
                   <TableCell className="pl-4">
-                    <Link href={`/generus/${g.id}`} className="flex items-center gap-3 font-semibold">
+                    <Link href={`/generus/${g.id}`} className="flex items-center gap-3 font-semibold after:absolute after:inset-0 after:content-['']">
                       <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">
                         {initials(g.name)}
                       </span>

@@ -9,6 +9,7 @@ import { listJenjang } from "@/lib/generus";
 import { utcToZoned, zoneLabel } from "@/lib/time";
 import { createAgenda } from "../actions";
 import { AgendaForm } from "../agenda-form";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Buat Agenda · Generus" };
 
@@ -19,7 +20,7 @@ export default function BaruPage() {
       <PageHeader title="Buat agenda" />
       <Card className="max-w-3xl">
         <CardContent>
-          <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+          <Suspense fallback={<PageLoading />}>
             <FormLoader />
           </Suspense>
         </CardContent>

@@ -328,6 +328,13 @@ Tetap 85,6 × 54 mm. Strip kiri `green-800` 6 mm dengan siluet kubah putih, nama
 - Hasil scan: kilas warna 300 ms + bunyi + getar.
 - Skeleton (bukan spinner) untuk konten yang dimuat > 300 ms; sesuaikan dengan bentuk kartu.
 - Hormati `prefers-reduced-motion`: matikan animasi non-esensial.
+- **Penerapan** (`globals.css` bagian "Gerak", `(app)/layout.tsx`):
+  - Perpindahan halaman: link dalam aplikasi memakai `@/components/app-link` (bukan `next/link`) yang menandai navigasi `page`; konten utama crossfade ±250 ms (lama keluar 120 ms, baru naik 6 px). Sidebar & tab bawah diam. Aksi/simpan form tidak memicu crossfade.
+  - Tab segmen (`SegmentNav`): pil aktif meluncur ke tab baru.
+  - Konten yang selesai dimuat & elemen baru di halaman: fade 220 ms. Pemuatan memakai kerangka (`PageLoading`), bukan teks.
+  - Panel yang dibuka (filter, pengaturan, konfirmasi, form ubah): kelas `animate-enter` (fade + naik 6 px, 200 ms).
+  - Hover/tekan pada link & tombol: transisi warna 150 ms.
+- **Area klik:** baris daftar/tabel yang membuka detail bisa diklik di seluruh baris (link dengan `after:absolute after:inset-0` di baris `relative`), bukan hanya di kolom nama.
 
 ---
 

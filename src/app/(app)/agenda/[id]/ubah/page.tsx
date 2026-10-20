@@ -11,12 +11,13 @@ import { listJenjang } from "@/lib/generus";
 import { utcToZoned, zoneLabel } from "@/lib/time";
 import { updateAgenda } from "../../actions";
 import { AgendaForm } from "../../agenda-form";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Ubah Agenda · Generus" };
 
 export default function UbahPage({ params }: PageProps<"/agenda/[id]/ubah">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Ubah params={params} />
     </Suspense>
   );

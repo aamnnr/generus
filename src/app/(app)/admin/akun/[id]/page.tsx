@@ -10,6 +10,7 @@ import { getAccount, listUnitGroups } from "@/lib/accounts";
 import { requireSuperadmin, roleLabel } from "@/lib/auth";
 import { removeRole, setActive } from "../actions";
 import { AddRoleForm, ProfileForm, ResetPasswordForm } from "./forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Detail Akun · Generus" };
 
@@ -17,7 +18,7 @@ export default function DetailPage({ params }: PageProps<"/admin/akun/[id]">) {
   return (
     <>
       <BackLink href="/admin/akun">Kembali ke daftar akun</BackLink>
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Detail params={params} />
       </Suspense>
     </>

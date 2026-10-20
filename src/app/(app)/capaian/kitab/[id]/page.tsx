@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { notFound, redirect } from "next/navigation";
 import { BackLink, EmptyState, PageHeader, Pill } from "@/components/page-header";
 import { canReadGenerus, getCurrentUser } from "@/lib/auth";
@@ -9,12 +9,13 @@ import { CAPAIAN_LABEL, formatPosition, formatRange, kitabStatus } from "@/lib/k
 import { resolveCapaianContext } from "../../context";
 import { KitabBulkForm } from "../../forms";
 import { ProgressBar } from "../../shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Progres kitab · Generus" };
 
 export default function KitabCapaianPage(props: PageProps<"/capaian/kitab/[id]">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Progres {...props} />
     </Suspense>
   );
@@ -74,8 +75,8 @@ async function Progres({ params, searchParams }: PageProps<"/capaian/kitab/[id]"
         ) : (
           <ul className="overflow-hidden rounded-2xl bg-card shadow-card">
             {rows.map((r, i) => (
-              <li key={r.generusId} className={`flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? "border-b border-muted" : ""}`}>
-                <Link href={`/generus/${r.generusId}`} className="min-w-0 flex-1 font-medium">
+              <li key={r.generusId} className={`relative flex items-center gap-3 px-4 py-3 hover:bg-secondary/40 ${i < rows.length - 1 ? "border-b border-muted" : ""}`}>
+                <Link href={`/generus/${r.generusId}`} className="min-w-0 flex-1 font-medium after:absolute after:inset-0 after:content-['']">
                   {r.name}
                 </Link>
                 <span className="text-sm text-muted-foreground">{r.position ? formatPosition(k.unit, r.position) : "–"}</span>

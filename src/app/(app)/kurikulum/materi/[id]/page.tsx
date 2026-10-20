@@ -10,6 +10,7 @@ import { listMapelNames, listMateri } from "@/lib/kurikulum";
 import { ASPEK_LABEL } from "@/lib/kurikulum-format";
 import { setMateriArchived } from "../../actions";
 import { MateriForm } from "../../forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Ubah materi · Generus" };
 
@@ -17,7 +18,7 @@ export default function MateriDetailPage({ params }: PageProps<"/kurikulum/mater
   return (
     <>
       <BackLink href="/kurikulum/materi">Kembali ke pustaka materi</BackLink>
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Detail params={params} />
       </Suspense>
     </>

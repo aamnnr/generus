@@ -10,12 +10,13 @@ import { getGenerus, jenjangLabel } from "@/lib/generus";
 import { ASPEK_LABEL, CAPAIAN_LABEL, formatPosition, formatRange, kitabStatus } from "@/lib/kurikulum-format";
 import { dateRange } from "../../../kurikulum/shared";
 import { GenerusAchievementForm, KitabSingleForm, QuerySelect } from "../../forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Capaian generus · Generus" };
 
 export default function GenerusCapaianPage(props: PageProps<"/capaian/generus/[id]">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Detail {...props} />
     </Suspense>
   );

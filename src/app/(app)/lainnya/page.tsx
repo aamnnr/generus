@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { ArrowUp, BookOpenText, ChartNoAxesColumn, FileBarChart, ChevronRight, Library, ScrollText, IdCard, KeyRound, LogOut, MapPin, Upload, UserCog, type LucideIcon } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { initials } from "@/components/shell/nav";
 import { MosqueSilhouette } from "@/components/shell/ornament";
 import { canEditCurriculum, canReadGenerus, canWriteGenerus, getCurrentUser, rekapRootUnit, roleLabel } from "@/lib/auth";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Lainnya · Generus" };
 
@@ -13,7 +14,7 @@ export default function LainnyaPage() {
   return (
     <>
       <h1 className="text-2xl font-bold">Lainnya</h1>
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Menu />
       </Suspense>
     </>
@@ -103,10 +104,10 @@ async function Menu() {
 
       <div className="relative overflow-hidden rounded-2xl bg-secondary p-4 text-center text-secondary-foreground">
         <MosqueSilhouette className="absolute -right-4 -bottom-3 w-36 opacity-15" />
-        <p lang="ar" dir="rtl" className="font-arabic text-2xl leading-10 font-bold">
-          بَارَكَ اللّٰهُ فِيْكُمْ
+        <p lang="ar" dir="rtl" className="font-arabic text-2xl leading-[2.6rem] font-bold">
+          اَلْحَمْدُ لِلّٰهِ جَزَاكُمُ اللّٰهُ خَيْرًا
         </p>
-        <p className="text-[13px]">Semoga Allah memberkahi kalian</p>
+        <p className="text-[13px]">Semoga Allah Paring Aman, Selamat, Lancar, dan Barokah.</p>
       </div>
     </div>
   );

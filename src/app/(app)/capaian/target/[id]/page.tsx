@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { notFound, redirect } from "next/navigation";
 import { BackLink, EmptyState, PageHeader, Pill } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,12 +10,13 @@ import { ASPEK_LABEL, CAPAIAN_LABEL } from "@/lib/kurikulum-format";
 import { TargetContent } from "../../../kurikulum/shared";
 import { resolveCapaianContext } from "../../context";
 import { AchievementChecklist } from "../../forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Isi capaian · Generus" };
 
 export default function TargetCapaianPage(props: PageProps<"/capaian/target/[id]">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Roster {...props} />
     </Suspense>
   );
@@ -64,8 +65,8 @@ async function Roster({ params, searchParams }: PageProps<"/capaian/target/[id]"
         ) : (
           <ul className="overflow-hidden rounded-2xl bg-card shadow-card">
             {rows.map((r, i) => (
-              <li key={r.generusId} className={`flex items-center gap-3 px-4 py-3 ${i < rows.length - 1 ? "border-b border-muted" : ""}`}>
-                <Link href={`/generus/${r.generusId}`} className="min-w-0 flex-1 font-medium">
+              <li key={r.generusId} className={`relative flex items-center gap-3 px-4 py-3 hover:bg-secondary/40 ${i < rows.length - 1 ? "border-b border-muted" : ""}`}>
+                <Link href={`/generus/${r.generusId}`} className="min-w-0 flex-1 font-medium after:absolute after:inset-0 after:content-['']">
                   {r.name}
                 </Link>
                 <Pill tone={TONE[r.status]}>{CAPAIAN_LABEL[r.status]}</Pill>

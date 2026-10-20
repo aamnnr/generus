@@ -16,7 +16,7 @@ export function FilterDisclosure({ label, children }: { label: string; children:
       >
         <SlidersHorizontal className="size-[18px]" aria-hidden /> {label}
       </button>
-      <div className={`${open ? "flex" : "hidden"} w-full flex-col gap-2 md:flex md:w-auto md:flex-row md:items-center`}>{children}</div>
+      <div className={`${open ? "animate-enter flex" : "hidden"} w-full flex-col gap-2 md:flex md:w-auto md:flex-row md:items-center`}>{children}</div>
     </>
   );
 }

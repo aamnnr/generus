@@ -6,6 +6,7 @@ import { requireGenerusWriter } from "@/lib/auth";
 import { listJenjang, listScopeUnits } from "@/lib/generus";
 import { createGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Tambah Generus · Generus" };
 
@@ -16,7 +17,7 @@ export default function BaruPage() {
       <PageHeader title="Tambah generus" />
       <Card className="max-w-3xl">
         <CardContent>
-          <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+          <Suspense fallback={<PageLoading />}>
             <FormLoader />
           </Suspense>
         </CardContent>

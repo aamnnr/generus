@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { ChevronLeft } from "lucide-react";
 import { MosqueSilhouette } from "@/components/shell/ornament";
 

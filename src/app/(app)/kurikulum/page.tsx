@@ -1,18 +1,19 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { ChevronRight, Plus } from "lucide-react";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { canEditCurriculum, getCurrentUser } from "@/lib/auth";
 import { listPeriods } from "@/lib/kurikulum";
 import { dateRange, KurikulumTabs, PeriodPills, todayIso } from "./shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Kurikulum · Generus" };
 
 export default function KurikulumPage() {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <PeriodList />
     </Suspense>
   );

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { BackLink, PageHeader } from "@/components/page-header";
 import QRCode from "qrcode";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
@@ -15,6 +15,7 @@ import { jenjangLabel, listScopeUnits, type UnitOption } from "@/lib/generus";
 import { qrPayload } from "@/lib/qr";
 import { IdCard } from "./id-card";
 import { PrintButton } from "./print-button";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Kartu QR · Generus" };
 
@@ -30,7 +31,7 @@ const paramsSchema = z.object({
 
 export default function KartuPage({ searchParams }: PageProps<"/generus/kartu">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Kartu searchParams={searchParams} />
     </Suspense>
   );

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { sql } from "drizzle-orm";
 import { ArrowRight, BookOpenText, CalendarDays, ClipboardCheck, IdCard, ScanLine, Users, type LucideIcon } from "lucide-react";
 import { generus } from "@/db/schema";

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { BackLink } from "@/components/page-header";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -17,6 +17,7 @@ import { formatDateLong, formatDateTime, formatTime, zoneLabel } from "@/lib/tim
 import { AttendanceChecklist } from "./checklist";
 import { removeScanner } from "../actions";
 import { AddScannerForm, CancelForm, LockForm } from "./manage-forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Agenda · Generus" };
 
@@ -31,7 +32,7 @@ export default function AgendaDetailPage({ params, searchParams }: PageProps<"/a
   return (
     <>
       <BackLink href="/agenda">Kembali ke agenda</BackLink>
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Detail params={params} searchParams={searchParams} />
       </Suspense>
     </>

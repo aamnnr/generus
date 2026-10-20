@@ -57,7 +57,7 @@ export function UnitRow({
 
   if (editing) {
     return (
-      <form action={rename} className="flex flex-col gap-2 py-1">
+      <form action={rename} className="animate-enter flex flex-col gap-2 py-1">
         <input type="hidden" name="id" value={id} />
         <div className="flex gap-2">
           <Input name="name" defaultValue={name} required minLength={2} autoFocus aria-label={`Nama ${label}`} />

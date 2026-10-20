@@ -1,13 +1,15 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { redirect } from "next/navigation";
 import { ChevronRight, Plus } from "lucide-react";
 import { EmptyState, PageHeader, Pill } from "@/components/page-header";
+import { SegmentNav } from "@/components/segment-nav";
 import { buttonVariants } from "@/components/ui/button";
 import { listAgendas, lockDueAgendas, type AgendaListItem } from "@/lib/agenda";
 import { canReadGenerus, canWriteGenerus, getCurrentUser } from "@/lib/auth";
 import { formatDateLong, formatTime, utcToZoned, zoneLabel } from "@/lib/time";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Agenda · Generus" };
 
@@ -15,7 +17,7 @@ const LEVEL = { daerah: "Daerah", desa: "Desa", kelompok: "Kelompok" } as const;
 
 export default function AgendaPage({ searchParams }: PageProps<"/agenda">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <AgendaList searchParams={searchParams} />
     </Suspense>
   );
@@ -36,17 +38,6 @@ async function AgendaList({ searchParams }: Pick<PageProps<"/agenda">, "searchPa
     byDate.set(key, [...(byDate.get(key) ?? []), a]);
   }
   const now = new Date();
-  const tab = (t: "mendatang" | "selesai", label: string) => (
-    <Link
-      href={t === "mendatang" ? "/agenda" : "/agenda?tab=selesai"}
-      aria-current={range === t ? "page" : undefined}
-      className={`flex h-9 flex-1 items-center justify-center rounded-full px-4 text-sm whitespace-nowrap sm:flex-none ${
-        range === t ? "bg-card font-semibold text-foreground shadow-card" : "text-muted-foreground hover:text-foreground"
-      }`}
-    >
-      {label}
-    </Link>
-  );
 
   return (
     <>
@@ -61,10 +52,13 @@ async function AgendaList({ searchParams }: Pick<PageProps<"/agenda">, "searchPa
           )
         }
       />
-      <nav aria-label="Rentang agenda" className="flex w-full gap-1 rounded-full bg-muted p-1 sm:w-fit">
-        {tab("mendatang", "Mendatang & berlangsung")}
-        {tab("selesai", "Selesai")}
-      </nav>
+      <SegmentNav
+        label="Rentang agenda"
+        items={[
+          { href: "/agenda", label: "Mendatang & berlangsung", active: range === "mendatang" },
+          { href: "/agenda?tab=selesai", label: "Selesai", active: range === "selesai" },
+        ]}
+      />
 
       {rows.length === 0 && (
         <EmptyState

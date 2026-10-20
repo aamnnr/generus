@@ -1,6 +1,6 @@
 import { Fragment, Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { EmptyState, PageHeader, Pill } from "@/components/page-header";
@@ -13,12 +13,13 @@ import { ASPEK_LABEL, formatRange, percent } from "@/lib/kurikulum-format";
 import { dateRange } from "../../kurikulum/shared";
 import { QuerySelect } from "../forms";
 import { ProgressBar } from "../shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Rekap capaian · Generus" };
 
 export default function RekapPage({ searchParams }: PageProps<"/capaian/rekap">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Rekap searchParams={searchParams} />
     </Suspense>
   );

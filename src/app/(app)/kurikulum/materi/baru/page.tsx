@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { requireCurriculumEditor } from "@/lib/auth";
 import { listMapelNames } from "@/lib/kurikulum";
 import { MateriForm } from "../../forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Tambah materi · Generus" };
 
@@ -15,7 +16,7 @@ export default function MateriBaruPage() {
       <PageHeader title="Tambah materi" description="Materi disimpan di pustaka dan bisa dipilih di periode mana pun." />
       <Card className="max-w-3xl">
         <CardContent>
-          <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+          <Suspense fallback={<PageLoading />}>
             <Form />
           </Suspense>
         </CardContent>

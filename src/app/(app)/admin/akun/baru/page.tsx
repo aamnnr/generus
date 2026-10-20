@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { listUnitGroups } from "@/lib/accounts";
 import { requireSuperadmin } from "@/lib/auth";
 import { CreateAccountForm } from "./create-form";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Tambah Akun · Generus" };
 
@@ -15,7 +16,7 @@ export default function BaruPage() {
       <PageHeader title="Tambah akun" description="Sistem membuat password sementara yang wajib diganti saat pemilik akun pertama kali masuk." />
       <Card className="max-w-3xl">
         <CardContent>
-          <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+          <Suspense fallback={<PageLoading />}>
             <FormLoader />
           </Suspense>
         </CardContent>

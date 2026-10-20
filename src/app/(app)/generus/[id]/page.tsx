@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { BackLink, PageHeader, Pill } from "@/components/page-header";
 import { initials } from "@/components/shell/nav";
 import { notFound } from "next/navigation";
@@ -27,6 +27,7 @@ import { updateGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
 import { formatDateTime } from "@/lib/time";
 import { DeleteForm, MutateForm, ReactivateForm, ReissueCardForm, StatusForm } from "./forms";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Detail Generus · Generus" };
 
@@ -34,7 +35,7 @@ export default function DetailPage({ params, searchParams }: PageProps<"/generus
   return (
     <>
       <BackLink href="/generus">Kembali ke daftar generus</BackLink>
-      <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+      <Suspense fallback={<PageLoading />}>
         <Detail params={params} searchParams={searchParams} />
       </Suspense>
     </>
@@ -137,8 +138,8 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
               <CardContent>
                 <ul className="flex flex-col gap-1.5 text-sm">
                   {kehadiran.rows.map((r) => (
-                    <li key={r.agendaId} className="flex items-center justify-between gap-2">
-                      <Link href={`/agenda/${r.agendaId}`} className="min-w-0 truncate hover:underline">
+                    <li key={r.agendaId} className="relative -mx-2 flex items-center justify-between gap-2 rounded-lg px-2 py-1 hover:bg-secondary/40">
+                      <Link href={`/agenda/${r.agendaId}`} className="min-w-0 truncate after:absolute after:inset-0 after:content-['']">
                         <span className="text-muted-foreground">{formatDateTime(r.startsAt)}</span> · {r.title}
                       </Link>
                       <Badge variant={r.status === "alpa" ? "destructive" : r.status === "hadir" ? "secondary" : "outline"}>

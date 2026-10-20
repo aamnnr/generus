@@ -1,6 +1,6 @@
 import { Fragment, Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { redirect } from "next/navigation";
 import { AlertTriangle, ChevronRight, Download } from "lucide-react";
 import { EmptyState, PageHeader, Pill } from "@/components/page-header";
@@ -28,12 +28,13 @@ import {
 import { PrintButton } from "../generus/kartu/print-button";
 import { QuerySelect } from "../capaian/forms";
 import { ProgressBar } from "../capaian/shared";
+import { PageLoading } from "@/components/page-loading";
 
 export const metadata: Metadata = { title: "Laporan · Generus" };
 
 export default function LaporanPage({ searchParams }: PageProps<"/laporan">) {
   return (
-    <Suspense fallback={<p className="text-muted-foreground">Memuat…</p>}>
+    <Suspense fallback={<PageLoading />}>
       <Laporan searchParams={searchParams} />
     </Suspense>
   );
@@ -182,8 +183,8 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
               ) : (
                 <ul className="flex flex-col gap-1 text-sm">
                   {alpa.slice(0, 8).map((a) => (
-                    <li key={a.generusId} className="flex justify-between gap-2">
-                      <Link href={`/generus/${a.generusId}`} className="min-w-0 truncate font-medium hover:underline">
+                    <li key={a.generusId} className="relative -mx-2 flex justify-between gap-2 rounded-lg px-2 py-0.5 hover:bg-secondary/40">
+                      <Link href={`/generus/${a.generusId}`} className="min-w-0 truncate font-medium after:absolute after:inset-0 after:content-['']">
                         {a.name}
                       </Link>
                       <span className="shrink-0 text-muted-foreground">Kelompok {a.kelompok}</span>
@@ -246,9 +247,9 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
                   </TableHeader>
                   <TableBody>
                     {generus.map((g) => (
-                      <TableRow key={g.generusId}>
+                      <TableRow key={g.generusId} className="relative cursor-pointer hover:bg-secondary/50">
                         <TableCell className="pl-4 md:pl-2">
-                          <Link href={`/generus/${g.generusId}`} className="font-medium hover:underline">
+                          <Link href={`/generus/${g.generusId}`} className="font-medium hover:underline after:absolute after:inset-0 after:content-['']">
                             {g.name}
                           </Link>
                           <span className="ml-2 inline-flex gap-1">

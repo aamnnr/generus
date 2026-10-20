@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
+import { PAGE_TRANSITION } from "@/components/app-link";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +59,7 @@ export function QuerySelect({
         onChange={(e) => {
           const next = new URLSearchParams(params);
           next.set(name, e.target.value);
-          router.push(`${pathname}?${next}`);
+          router.push(`${pathname}?${next}`, { scroll: false, transitionTypes: [PAGE_TRANSITION] });
         }}
       >
         {options?.map((o) => (

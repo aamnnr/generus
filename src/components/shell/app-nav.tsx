@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/app-link";
 import { usePathname } from "next/navigation";
 import { BookOpenText, CalendarDays, ChartNoAxesColumn, FileBarChart, House, IdCard, LayoutGrid, LogOut, MapPin, UserCog, Users, type LucideIcon } from "lucide-react";
 import { logout } from "@/app/actions/auth";
@@ -50,7 +50,7 @@ export function Sidebar({ nav }: { nav: ShellNav }) {
   };
 
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-1 border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex print:hidden">
+    <aside style={{ viewTransitionName: "app-sidebar" }} className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-1 border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex print:hidden">
       <Link href="/beranda" className="mb-5 flex items-center gap-2.5 px-2">
         <BrandMark />
         <span className="font-heading text-[22px] font-semibold">Generus</span>
@@ -93,6 +93,7 @@ export function BottomNav({ nav }: { nav: ShellNav }) {
   return (
     <nav
       aria-label="Navigasi utama"
+      style={{ viewTransitionName: "app-tabs" }}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_oklch(0.26_0.04_167/0.06)] backdrop-blur lg:hidden print:hidden"
     >
       <div className="mx-auto grid h-16 max-w-xl" style={{ gridTemplateColumns: `repeat(${nav.tabs.length}, minmax(0, 1fr))` }}>
