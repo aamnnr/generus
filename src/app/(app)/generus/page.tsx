@@ -69,7 +69,10 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold">Generus</h1>
         {canWriteGenerus(me) && (
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link href="/generus/kenaikan" className={buttonVariants({ variant: "outline" })}>
+              Kenaikan jenjang
+            </Link>
             <Link href="/generus/import" className={buttonVariants({ variant: "outline" })}>
               Import Excel
             </Link>

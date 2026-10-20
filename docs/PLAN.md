@@ -22,7 +22,7 @@ Estimasi untuk 1–2 developer.
 - [x] CRUD generus sesuai lingkup (filter wilayah/jenjang/status, paginasi), Kyai read-only.
 - [x] Tandai Menikah / Pindah Sambung + aktifkan kembali (QR otomatis nonaktif), mutasi kelompok (admin desa/daerah), riwayat.
 - [x] Import Excel dari template: pratinjau per baris (OK/bermasalah/duplikat), hanya kelompok dalam lingkup, simpan dalam satu transaksi. `pnpm seed:xlsx` membuat file contoh.
-- [ ] Kenaikan jenjang/kategori massal.
+- [x] Kenaikan jenjang/kategori massal (/generus/kenaikan): saran otomatis per usia 1 Juli & kelas, centang lalu simpan; pengingat di beranda Juli–Agustus.
 - [ ] PWA dasar: manifest, ikon, service worker, install prompt.
 
 **Selesai bila:** akun uji Admin Kelompok bisa login dari HP dan melihat/mengelola hanya generus kelompoknya (data seed). Import diuji dengan file template berisi data seed.

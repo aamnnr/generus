@@ -1,12 +1,14 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Link from "next/link";
 import { sql } from "drizzle-orm";
 import { generus } from "@/db/schema";
 import { withRls } from "@/db/rls";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCurrentUser, roleLabel } from "@/lib/auth";
+import { canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
+import { isPromotionSeason } from "@/lib/kenaikan-rules";
 
 export const metadata: Metadata = { title: "Beranda · Generus" };
 
@@ -39,6 +41,17 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
       {params.status === "password-diganti" && (
         <Alert>
           <AlertDescription>Password berhasil diganti.</AlertDescription>
+        </Alert>
+      )}
+      {canWriteGenerus(user) && isPromotionSeason(new Date()) && (
+        <Alert>
+          <AlertDescription>
+            Awal tahun ajaran: periksa generus yang lulus SLTP atau selesai sekolah di{" "}
+            <Link href="/generus/kenaikan" className="font-medium underline">
+              Kenaikan jenjang
+            </Link>
+            .
+          </AlertDescription>
         </Alert>
       )}
       <div className="flex flex-col gap-2">

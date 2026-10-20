@@ -248,6 +248,51 @@ export async function getGenerus(claims: JwtClaims, id: string): Promise<Generus
   });
 }
 
+export const MAX_PROMOTION_ROWS = 500;
+
+export interface PromotionCandidate {
+  id: string;
+  name: string;
+  gender: "L" | "P";
+  birthDate: string;
+  school: string | null;
+  kelompok: string;
+}
+
+/** Generus aktif dengan jenjang/kategori asal tertentu di dalam unit (desa/kelompok). */
+export async function listPromotionCandidates(
+  claims: JwtClaims,
+  from: { jenjang: string; kategori: string | null },
+  unitId: string,
+): Promise<{ rows: PromotionCandidate[]; truncated: boolean }> {
+  return withRls(claims, async (tx) => {
+    const rows = await tx
+      .select({
+        id: generus.id,
+        name: generus.name,
+        gender: generus.gender,
+        birthDate: generus.birthDate,
+        school: generus.school,
+        kelompok: units.name,
+      })
+      .from(generus)
+      .innerJoin(jenjang, eq(jenjang.id, generus.jenjangId))
+      .leftJoin(jenjangKategori, eq(jenjangKategori.id, generus.kategoriId))
+      .innerJoin(units, eq(units.id, generus.kelompokId))
+      .where(
+        and(
+          eq(generus.status, "aktif"),
+          eq(jenjang.name, from.jenjang),
+          from.kategori ? eq(jenjangKategori.name, from.kategori) : sql`${generus.kategoriId} IS NULL`,
+          sql`${generus.unitPath} <@ (SELECT path FROM units WHERE id = ${unitId})`,
+        ),
+      )
+      .orderBy(asc(units.name), asc(generus.birthDate), asc(generus.name))
+      .limit(MAX_PROMOTION_ROWS + 1);
+    return { rows: rows.slice(0, MAX_PROMOTION_ROWS), truncated: rows.length > MAX_PROMOTION_ROWS };
+  });
+}
+
 /** Usia dalam tahun pada tanggal `on`. */
 export function ageOn(birthDate: string, on = new Date()): number {
   const b = new Date(`${birthDate}T00:00:00`);
