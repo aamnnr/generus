@@ -10,6 +10,7 @@ import { ASPEK_LABEL, ASPEK_ORDER, type Aspek } from "@/lib/kurikulum-format";
 import { KurikulumTabs } from "../shared";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
+import { TAB_TRANSITION } from "@/lib/transitions";
 
 export const metadata: Metadata = { title: "Pustaka materi · Generus" };
 
@@ -49,6 +50,8 @@ async function MateriList({ searchParams }: Pick<PageProps<"/kurikulum/materi">,
   };
   const chip = (label: string, active: boolean, to: string) => (
     <Link
+      transitionTypes={[TAB_TRANSITION]}
+      scroll={false}
       key={label}
       href={to}
       aria-current={active ? "true" : undefined}

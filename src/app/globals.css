@@ -268,11 +268,16 @@
 /* Panel yang dibuka (filter, pengaturan, konfirmasi, form). */
 .animate-enter { animation: enter-rise 200ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
 
-/* Crossfade halaman: lama cepat pergi, baru datang sedikit naik. */
+/* Pindah halaman: crossfade bersamaan (tidak ada jeda kosong), konten baru sedikit naik. */
 ::view-transition { pointer-events: none; }
-::view-transition-group(.page-fade) { animation-duration: 260ms; }
-::view-transition-old(.page-fade) { animation: 120ms ease-in both leave-fade; }
-::view-transition-new(.page-fade) { animation: 240ms cubic-bezier(0.2, 0.7, 0.2, 1) 60ms both enter-rise; }
+::view-transition-group(.page-fade) { animation-duration: 220ms; }
+::view-transition-old(.page-fade) { animation: 160ms ease-out both leave-fade; }
+::view-transition-new(.page-fade) { animation: 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both enter-rise; }
+/* Ganti kategori/filter: crossfade bawaan browser (lama & baru ditumpuk, plus-lighter), jadi
+   bagian yang sama (judul, tab, filter) tetap diam; hanya data yang berubah memudar. */
+::view-transition-group(.tab-swap),
+::view-transition-old(.tab-swap),
+::view-transition-new(.tab-swap) { animation-duration: 180ms; animation-timing-function: ease-out; }
 /* Navigasi tetap diam (tab bawah menimpa konten). */
 ::view-transition-group(app-tabs), ::view-transition-group(app-sidebar) { animation: none; z-index: 100; }
 ::view-transition-old(app-tabs), ::view-transition-old(app-sidebar) { display: none; }

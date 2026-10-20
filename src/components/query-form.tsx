@@ -2,7 +2,7 @@
 
 import type { ComponentProps } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { PAGE_TRANSITION } from "@/components/app-link";
+import { TAB_TRANSITION } from "@/lib/transitions";
 
 /**
  * Form GET untuk filter/pencarian: berpindah lewat router (tanpa muat ulang
@@ -26,7 +26,7 @@ export function QueryForm({ action, onSubmit, ...props }: Omit<ComponentProps<"f
           if (typeof v === "string" && v !== "") params.append(k, v);
         }
         const qs = params.toString();
-        router.push(qs ? `${target}?${qs}` : target, { scroll: false, transitionTypes: [PAGE_TRANSITION] });
+        router.push(qs ? `${target}?${qs}` : target, { scroll: false, transitionTypes: [TAB_TRANSITION] });
       }}
     />
   );

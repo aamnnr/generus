@@ -24,6 +24,7 @@ import {
 } from "@/lib/generus";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
+import { TAB_TRANSITION } from "@/lib/transitions";
 
 export const metadata: Metadata = { title: "Generus · Generus" };
 
@@ -138,6 +139,8 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
               <Link
                 key={c.label}
                 href={href({ jenjang: c.key, page: undefined })}
+                scroll={false}
+                transitionTypes={[TAB_TRANSITION]}
                 aria-current={on ? "true" : undefined}
                 className={`flex h-9 shrink-0 items-center rounded-full px-4 text-sm whitespace-nowrap ${
                   on ? "bg-primary font-semibold text-primary-foreground" : "bg-tile text-foreground hover:bg-secondary"
@@ -240,7 +243,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
       {pages > 1 && (
         <nav className="flex flex-wrap items-center justify-between gap-2 text-sm" aria-label="Halaman">
           {page > 1 ? (
-            <Link href={href({ page: String(page - 1) })} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <Link transitionTypes={[TAB_TRANSITION]} href={href({ page: String(page - 1) })} className={buttonVariants({ variant: "outline", size: "sm" })}>
               ← Sebelumnya
             </Link>
           ) : (
@@ -250,7 +253,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
             Halaman {page} dari {pages}
           </span>
           {page < pages ? (
-            <Link href={href({ page: String(page + 1) })} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <Link transitionTypes={[TAB_TRANSITION]} href={href({ page: String(page + 1) })} className={buttonVariants({ variant: "outline", size: "sm" })}>
               Berikutnya →
             </Link>
           ) : (

@@ -1,5 +1,5 @@
 import { Suspense, ViewTransition } from "react";
-import { PAGE_TRANSITION } from "@/components/app-link";
+import { PAGE_TRANSITION, TAB_TRANSITION } from "@/lib/transitions";
 import { OutboxSync } from "@/components/outbox-sync";
 import { BottomNav, Sidebar } from "@/components/shell/app-nav";
 import { buildNav } from "@/components/shell/nav";
@@ -14,8 +14,8 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
         <ShellNav part="sidebar" />
       </Suspense>
       <main className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 flex-col px-4 pt-5 pb-28 md:px-6 lg:px-8 lg:pt-7 lg:pb-12 print:p-0">
-        {/* Perpindahan halaman (link bertanda PAGE_TRANSITION) = crossfade halus; aksi lain tidak beranimasi. */}
-        <ViewTransition update={{ [PAGE_TRANSITION]: "page-fade", default: "none" }} default="none">
+        {/* Pindah halaman = crossfade; ganti kategori/filter = hanya bagian yang berubah memudar; aksi/simpan tidak beranimasi. */}
+        <ViewTransition update={{ [PAGE_TRANSITION]: "page-fade", [TAB_TRANSITION]: "tab-swap", default: "none" }} default="none">
           <div className="page-body flex flex-1 flex-col gap-5">{children}</div>
         </ViewTransition>
       </main>

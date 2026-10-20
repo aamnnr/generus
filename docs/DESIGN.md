@@ -329,7 +329,8 @@ Tetap 85,6 × 54 mm. Strip kiri `green-800` 6 mm dengan siluet kubah putih, nama
 - Skeleton (bukan spinner) untuk konten yang dimuat > 300 ms; sesuaikan dengan bentuk kartu.
 - Hormati `prefers-reduced-motion`: matikan animasi non-esensial.
 - **Penerapan** (`globals.css` bagian "Gerak", `(app)/layout.tsx`):
-  - Perpindahan halaman: link dalam aplikasi memakai `@/components/app-link` (bukan `next/link`) yang menandai navigasi `page`; konten utama crossfade ±250 ms (lama keluar 120 ms, baru naik 6 px). Sidebar & tab bawah diam. Aksi/simpan form tidak memicu crossfade.
+  - Perpindahan halaman: link dalam aplikasi memakai `@/components/app-link` (bukan `next/link`) yang menandai navigasi `page`; konten utama crossfade bersamaan ±220 ms (konten baru naik 6 px), tanpa jeda kosong. Sidebar & tab bawah diam. Aksi/simpan form tidak memicu crossfade.
+  - Ganti kategori/tab/filter/halaman daftar di halaman yang sama: tandai `transitionTypes={[TAB_TRANSITION]}` (sudah otomatis di `SegmentNav`, `QueryForm`, `QuerySelect`) + `scroll={false}`. Memakai crossfade bawaan browser 180 ms, sehingga judul/tab/filter yang sama tetap diam dan hanya data yang berubah memudar.
   - Tab segmen (`SegmentNav`): pil aktif meluncur ke tab baru.
   - Konten yang selesai dimuat & elemen baru di halaman: fade 220 ms. Pemuatan memakai kerangka (`PageLoading`), bukan teks.
   - Panel yang dibuka (filter, pengaturan, konfirmasi, form ubah): kelas `animate-enter` (fade + naik 6 px, 200 ms).

@@ -29,6 +29,7 @@ import { PrintButton } from "../generus/kartu/print-button";
 import { QuerySelect } from "../capaian/forms";
 import { ProgressBar } from "../capaian/shared";
 import { PageLoading } from "@/components/page-loading";
+import { TAB_TRANSITION } from "@/lib/transitions";
 
 export const metadata: Metadata = { title: "Laporan · Generus" };
 
@@ -111,7 +112,7 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
             <Fragment key={u.id}>
               {i > 0 && <ChevronRight className="size-4" aria-hidden />}
               {i < all.length - 1 ? (
-                <Link href={`/laporan${query({ unit: u.id })}`} className="font-medium text-primary hover:underline">
+                <Link transitionTypes={[TAB_TRANSITION]} href={`/laporan${query({ unit: u.id })}`} className="font-medium text-primary hover:underline">
                   {unitLabel(u)}
                 </Link>
               ) : (
@@ -322,7 +323,7 @@ function UnitTable({
             const rate = hadirRate(k);
             return (
               <li key={u.id}>
-                <Link href={href(u)} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-3 hover:bg-secondary/40">
+                <Link transitionTypes={[TAB_TRANSITION]} href={href(u)} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-3 hover:bg-secondary/40">
                   <span className="flex min-w-0 flex-1 flex-col gap-1.5">
                     <span className="font-medium">{label(u)}</span>
                     <ProgressBar done={k.hadir} proses={k.terlambat} total={k.total} />

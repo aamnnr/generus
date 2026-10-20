@@ -14,6 +14,7 @@ import { dateRange } from "../../kurikulum/shared";
 import { QuerySelect } from "../forms";
 import { ProgressBar } from "../shared";
 import { PageLoading } from "@/components/page-loading";
+import { TAB_TRANSITION } from "@/lib/transitions";
 
 export const metadata: Metadata = { title: "Rekap capaian · Generus" };
 
@@ -92,7 +93,7 @@ async function Rekap({ searchParams }: Pick<PageProps<"/capaian/rekap">, "search
             <Fragment key={u.id}>
               {i > 0 && <ChevronRight className="size-4" aria-hidden />}
               {i < all.length - 1 ? (
-                <Link href={`/capaian/rekap${query({ unit: u.id })}`} className="font-medium text-primary hover:underline">
+                <Link transitionTypes={[TAB_TRANSITION]} href={`/capaian/rekap${query({ unit: u.id })}`} className="font-medium text-primary hover:underline">
                   {unitLabel(u)}
                 </Link>
               ) : (
@@ -159,7 +160,7 @@ async function Rekap({ searchParams }: Pick<PageProps<"/capaian/rekap">, "search
                 return (
                   <li key={c.id}>
                     {href ? (
-                      <Link href={href} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-3 hover:bg-secondary/40">
+                      <Link transitionTypes={[TAB_TRANSITION]} href={href} className="-mx-2 flex items-center gap-3 rounded-xl px-2 py-3 hover:bg-secondary/40">
                         {body}
                       </Link>
                     ) : (

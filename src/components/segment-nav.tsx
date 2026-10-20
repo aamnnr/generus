@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 import Link from "@/components/app-link";
+import { TAB_TRANSITION } from "@/lib/transitions";
 
 /** Tab segmen berbentuk pil (DESIGN.md §7), berupa tautan. Pil aktif meluncur saat berpindah tab. */
 export function SegmentNav({ label, items }: { label: string; items: { href: string; label: string; active: boolean }[] }) {
@@ -12,6 +13,7 @@ export function SegmentNav({ label, items }: { label: string; items: { href: str
           key={i.href}
           href={i.href}
           scroll={false}
+          transitionTypes={[TAB_TRANSITION]}
           aria-current={i.active ? "page" : undefined}
           style={i.active ? pill : undefined}
           className={`flex h-9 flex-1 items-center justify-center rounded-full px-4 text-sm whitespace-nowrap sm:flex-none ${
