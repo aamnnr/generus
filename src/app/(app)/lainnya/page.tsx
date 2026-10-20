@@ -5,7 +5,7 @@ import { ArrowUp, BookOpenText, ChartNoAxesColumn, ChevronRight, Library, Scroll
 import { logout } from "@/app/actions/auth";
 import { initials } from "@/components/shell/nav";
 import { MosqueSilhouette } from "@/components/shell/ornament";
-import { canEditCurriculum, canReadGenerus, canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
+import { canEditCurriculum, canReadGenerus, canWriteGenerus, getCurrentUser, rekapRootUnit, roleLabel } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Lainnya · Generus" };
 
@@ -39,6 +39,7 @@ async function Menu() {
     : [];
   const kurikulum: Item[] = [
     ...(canReadGenerus(me) ? [{ href: "/capaian", label: "Capaian", icon: ChartNoAxesColumn }] : []),
+    ...(rekapRootUnit(me) ? [{ href: "/capaian/rekap", label: "Rekap capaian", icon: ChartNoAxesColumn }] : []),
     { href: "/kurikulum", label: "Target periode", icon: BookOpenText },
     ...(canEditCurriculum(me)
       ? [

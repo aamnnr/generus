@@ -109,7 +109,7 @@ audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb
 - `units.path` memakai `ltree`, mis. `d01.ds03.k12`. "Unit X dan semua turunannya" = `path <@ X.path` — satu kondisi, ber-indeks GiST.
 - Fungsi SQL `user_scope_paths(uid)` mengembalikan path unit yang dipegang user. Kebijakan RLS di setiap tabel data: baris boleh diakses jika unit pemiliknya berada di bawah salah satu path tersebut.
 - Hak *tulis* lebih ketat dari *baca*: misalnya Admin Desa boleh **membaca** presensi agenda kelompok, tapi hanya **menulis** presensi agenda milik desanya; Admin Kelompok boleh menulis presensi agenda desa **hanya untuk generus kelompoknya** dan **sebelum `delegate_until`**.
-- Peran **kyai** tidak memiliki kebijakan tulis sama sekali (read-only di level RLS). Peran **kurikulum** hanya boleh menulis tabel `curriculum_periods`, `materi`, `kitab`, `period_targets`, dan membaca agregat capaian. Periode yang belum diterbitkan hanya terlihat oleh kurikulum & superadmin.
+- Peran **kyai** tidak memiliki kebijakan tulis sama sekali (read-only di level RLS). Peran **kurikulum** hanya boleh menulis tabel `curriculum_periods`, `materi`, `kitab`, `period_targets`, dan membaca agregat capaian. Periode yang belum diterbitkan hanya terlihat oleh kurikulum & superadmin. Rekap lintas unit memakai fungsi agregat SECURITY DEFINER `app.capaian_rekap_units` / `app.capaian_rekap_targets` (cek akses `app.can_read_rekap`): Tim Kurikulum mendapat angka agregat tanpa akses ke baris generus.
 - Otorisasi dicek dua lapis: di server (pesan error ramah) dan di RLS (pengaman terakhir).
 
 ### Matriks akses ringkas

@@ -5,8 +5,9 @@ import { redirect } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { EmptyState, PageHeader } from "@/components/page-header";
 import { SegmentNav } from "@/components/segment-nav";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { canReadGenerus, getCurrentUser } from "@/lib/auth";
+import { canReadGenerus, getCurrentUser, rekapRootUnit } from "@/lib/auth";
 import { getKelompokSummary, todayIso, type TargetSummary } from "@/lib/capaian";
 import { groupTargets } from "@/lib/kurikulum";
 import { ASPEK_LABEL, formatRange, percent } from "@/lib/kurikulum-format";
@@ -56,6 +57,13 @@ async function Capaian({ searchParams }: Pick<PageProps<"/capaian">, "searchPara
       <PageHeader
         title="Capaian"
         description={`Periode ${period.name} · ${dateRange(period.startsOn, period.endsOn)} · Kelompok ${kelompok.name}`}
+        actions={
+          rekapRootUnit(me) && (
+            <Link href={`/capaian/rekap?periode=${period.id}&jenjang=${current.id}`} className={buttonVariants({ variant: "outline" })}>
+              Rekap lintas kelompok
+            </Link>
+          )
+        }
       />
 
       <div className="flex flex-col gap-3 sm:flex-row">

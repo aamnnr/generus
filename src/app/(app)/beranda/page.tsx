@@ -10,8 +10,8 @@ import { initials } from "@/components/shell/nav";
 import { EightStar, MosqueSilhouette } from "@/components/shell/ornament";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getBerandaSummary, listMyScanTasks, type HeroAgenda } from "@/lib/agenda";
-import { canReadGenerus, canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
-import { listPublishedPeriods, pickActivePeriod } from "@/lib/capaian";
+import { canReadGenerus, canWriteGenerus, getCurrentUser, rekapRootUnit, roleLabel } from "@/lib/auth";
+import { getRekapUnits, listPublishedPeriods, pickActivePeriod, type RekapUnit } from "@/lib/capaian";
 import { isPromotionSeason } from "@/lib/kenaikan-rules";
 import type { PeriodListItem } from "@/lib/kurikulum";
 import { dateRange } from "../kurikulum/shared";
@@ -54,6 +54,9 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
   ]);
   const hero = summary?.hero ?? null;
   const period = pickActivePeriod(periods);
+  // Rekap capaian unit tertinggi user (atau kelompoknya), semua jenjang.
+  const rekapUnit = rekapRootUnit(user)?.unitId ?? user.roles.find((r) => r.level === "kelompok" && r.role !== "kurikulum")?.unitId;
+  const [rekap] = period && rekapUnit ? await getRekapUnits(user.claims, period.id, null, [rekapUnit]) : [];
 
   const tiles: { href: string; label: string; icon: LucideIcon }[] = [];
   if (writer || scanTasks.length) {
@@ -184,7 +187,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
       </div>
 
 
-      {period && <PeriodCard period={period} reader={reader} writer={writer} />}
+      {period && <PeriodCard period={period} reader={reader} writer={writer} rekap={rekap ?? null} rekapHref={rekapRootUnit(user) ? "/capaian/rekap" : "/capaian"} />}
 
       {counts && (
         <div className="grid grid-cols-3 gap-3">
@@ -311,7 +314,20 @@ function BerandaSkeleton() {
 }
 
 
-function PeriodCard({ period, reader, writer }: { period: PeriodListItem; reader: boolean; writer: boolean }) {
+function PeriodCard({
+  period,
+  reader,
+  writer,
+  rekap,
+  rekapHref,
+}: {
+  period: PeriodListItem;
+  reader: boolean;
+  writer: boolean;
+  rekap: RekapUnit | null;
+  rekapHref: string;
+}) {
+  const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
   return (
     <section className="flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 shadow-card md:p-5">
       <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-tile text-primary">
@@ -323,6 +339,24 @@ function PeriodCard({ period, reader, writer }: { period: PeriodListItem; reader
           {dateRange(period.startsOn, period.endsOn)} · {period.targetCount} target dari Tim Kurikulum PPG
         </p>
       </div>
+      {rekap && rekap.slots + rekap.deliverable > 0 && (
+        <Link href={`${rekapHref}?periode=${period.id}`} className="grid w-full grid-cols-2 gap-3 rounded-xl bg-background p-3">
+          <span className="flex flex-col gap-1.5">
+            <span className="text-xs text-muted-foreground">Capaian per generus</span>
+            <span className="text-xl leading-none font-bold tabular-nums">{pct(rekap.tuntas, rekap.slots)}%</span>
+            <span className="flex h-1.5 overflow-hidden rounded-full bg-muted">
+              <span className="bg-status-hadir" style={{ width: `${pct(rekap.tuntas, rekap.slots)}%` }} />
+            </span>
+          </span>
+          <span className="flex flex-col gap-1.5">
+            <span className="text-xs text-muted-foreground">Materi kelompok disampaikan</span>
+            <span className="text-xl leading-none font-bold tabular-nums">{pct(rekap.delivered, rekap.deliverable)}%</span>
+            <span className="flex h-1.5 overflow-hidden rounded-full bg-muted">
+              <span className="bg-status-hadir" style={{ width: `${pct(rekap.delivered, rekap.deliverable)}%` }} />
+            </span>
+          </span>
+        </Link>
+      )}
       <div className="flex w-full gap-2 sm:w-auto">
         <Link href={`/kurikulum/periode/${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold sm:flex-none">
           Lihat target

@@ -121,6 +121,17 @@ export async function requireCurriculumEditor(): Promise<CurrentUser> {
   return user;
 }
 
+/**
+ * Unit tertinggi tempat user boleh melihat rekap capaian (Tim Kurikulum &
+ * superadmin: daerah). Null bila hanya berperan di tingkat kelompok.
+ */
+export function rekapRootUnit(user: CurrentUser): UserRole | null {
+  const rank = { daerah: 0, desa: 1, kelompok: 2 } as const;
+  const roles = [...user.roles].sort((a, b) => rank[a.level] - rank[b.level]);
+  const top = roles[0];
+  return top && top.level !== "kelompok" ? top : null;
+}
+
 export const ROLE_LABEL: Record<AppRole, string> = {
   superadmin: "Superadmin",
   kurikulum: "Tim Kurikulum",

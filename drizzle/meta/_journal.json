@@ -78,6 +78,20 @@
       "when": 1792495931368,
       "tag": "0010_kurikulum_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1792498572006,
+      "tag": "0011_capaian_rekap",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1792498966188,
+      "tag": "0012_capaian_rekap_fast",
+      "breakpoints": true
     }
   ]
 }

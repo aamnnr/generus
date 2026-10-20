@@ -1,5 +1,5 @@
 import type { CurrentUser } from "@/lib/auth";
-import { canReadGenerus, canWriteGenerus, roleLabel } from "@/lib/auth";
+import { canReadGenerus, canWriteGenerus, rekapRootUnit, roleLabel } from "@/lib/auth";
 
 // Struktur navigasi per peran (DESIGN.md §6.3). Dibangun di server, dirender
 // oleh komponen klien yang hanya menandai item aktif.
@@ -37,6 +37,7 @@ export function buildNav(user: CurrentUser): ShellNav {
   }
   if (canWriteGenerus(user)) main.push({ href: "/generus/kartu", label: "Kartu QR", icon: "kartu" });
   if (read) main.push({ href: "/capaian", label: "Capaian", icon: "capaian" });
+  else if (rekapRootUnit(user)) main.push({ href: "/capaian/rekap", label: "Rekap capaian", icon: "capaian" });
   main.push({ href: "/kurikulum", label: "Kurikulum", icon: "kurikulum" });
 
   const admin: NavItem[] = user.isSuperadmin

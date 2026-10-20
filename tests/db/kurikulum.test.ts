@@ -246,3 +246,55 @@ describe("progres kitab", () => {
     await expect(progress("kyaiKelA1", g["a1-putra"], 10)).rejects.toThrow(/row-level security/);
   });
 });
+
+describe("rekap capaian lintas unit", () => {
+  type Row = { unit_id: string; generus: number; slots: number; tuntas: number; proses: number; kelompok: number; delivered: number; deliverable: number };
+  const rekap = (user: keyof typeof u, units: string[], periodId = period) =>
+    as(user, async () =>
+      (await db.query<Row>(`SELECT * FROM app.capaian_rekap_units($1, $2, $3::uuid[])`, [periodId, j.remaja, units])).rows,
+    );
+  const strip = (row: Row) => {
+    const r: Partial<Row> = { ...row };
+    delete r.unit_id;
+    return r;
+  };
+
+  it("menghitung generus, capaian, dan penyampaian per unit", async () => {
+    const rows = await rekap("superadmin", [unit.desaA, unit.desaB, unit.daerah]);
+    const by = (id: string) => strip(rows.find((r) => r.unit_id === id)!);
+    // desa A: a1-putra, a1-putri, a1-menikah-baru (a1-menikah-lama keluar sebelum periode).
+    expect(by(unit.desaA)).toEqual({ generus: 3, slots: 7, tuntas: 3, proses: 1, kelompok: 1, delivered: 1, deliverable: 1 });
+    expect(by(unit.desaB)).toEqual({ generus: 1, slots: 2, tuntas: 1, proses: 0, kelompok: 1, delivered: 0, deliverable: 1 });
+    expect(by(unit.daerah)).toEqual({ generus: 4, slots: 9, tuntas: 4, proses: 1, kelompok: 2, delivered: 1, deliverable: 2 });
+  });
+
+  it("melewati unit di luar lingkup; kurikulum boleh membaca agregat daerah", async () => {
+    expect((await rekap("adminKelA1", [unit.desaA, unit.kelA1, unit.kelB1])).map((r) => r.unit_id)).toEqual([unit.kelA1]);
+    expect((await rekap("kyaiKelA1", [unit.daerah, unit.kelA1])).map((r) => r.unit_id)).toEqual([unit.kelA1]);
+    expect((await rekap("adminDesaA", [unit.desaA, unit.desaB])).map((r) => r.unit_id)).toEqual([unit.desaA]);
+    expect((await rekap("kurikulum", [unit.daerah]))[0].slots).toBe(9);
+  });
+
+  it("periode draf tidak direkap untuk selain penyusun", async () => {
+    expect(await rekap("adminDesaA", [unit.desaA], draft)).toEqual([]);
+    expect(await rekap("kurikulum", [unit.daerah], draft)).toHaveLength(1);
+  });
+
+  it("rekap per target; ditolak untuk unit di luar lingkup", async () => {
+    const rows = await as("kurikulum", async () =>
+      (await db.query<{ target_id: string; slots: number; tuntas: number; delivered: number; kelompok: number }>(
+        `SELECT * FROM app.capaian_rekap_targets($1, $2, $3)`,
+        [period, j.remaja, unit.daerah],
+      )).rows,
+    );
+    const hafalan = rows.find((r) => r.target_id === t.hafalan)!;
+    expect(hafalan).toMatchObject({ slots: 4, tuntas: 3 });
+    expect(rows.find((r) => r.target_id === t.akhlaq)).toMatchObject({ delivered: 1, kelompok: 2 });
+    await expect(
+      as("adminKelB1", () => db.query(`SELECT * FROM app.capaian_rekap_targets($1, $2, $3)`, [period, j.remaja, unit.desaA])),
+    ).rejects.toThrow(/tidak punya akses/);
+    await expect(as("adminKelA1", () => db.query(`SELECT * FROM app.capaian_pairs($1, $2, '')`, [period, j.remaja]))).rejects.toThrow(
+      /permission denied/,
+    );
+  });
+});

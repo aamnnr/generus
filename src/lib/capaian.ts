@@ -180,3 +180,81 @@ export async function getGenerusCapaian(claims: JwtClaims, generusId: string, pe
       return { ...t, status: r.status ?? "belum", note: r.note, position: r.position, recordedOn: r.recorded_on, deliveredOn: r.delivered_on };
     });
 }
+
+// ---------------------------------------------------------------------------
+// Rekap lintas unit (agregat, lewat fungsi SECURITY DEFINER app.capaian_rekap_*)
+// ---------------------------------------------------------------------------
+
+export interface RekapUnit {
+  unitId: string;
+  generus: number;
+  /** Pasangan (target, generus) yang dinilai per generus/kitab, tanpa target pilihan. */
+  slots: number;
+  tuntas: number;
+  proses: number;
+  kelompok: number;
+  delivered: number;
+  deliverable: number;
+}
+
+export async function getRekapUnits(claims: JwtClaims, periodId: string, jenjangId: string | null, unitIds: string[]): Promise<RekapUnit[]> {
+  if (unitIds.length === 0) return [];
+  const rows = await withRls(claims, (tx) =>
+    tx.execute<{ unit_id: string; generus: number; slots: number; tuntas: number; proses: number; kelompok: number; delivered: number; deliverable: number }>(
+      sql`SELECT * FROM app.capaian_rekap_units(${periodId}::uuid, ${jenjangId}::uuid, ${`{${unitIds.join(",")}}`}::uuid[])`,
+    ),
+  );
+  return rows.map((r) => ({
+    unitId: r.unit_id,
+    generus: r.generus,
+    slots: r.slots,
+    tuntas: r.tuntas,
+    proses: r.proses,
+    kelompok: r.kelompok,
+    delivered: r.delivered,
+    deliverable: r.deliverable,
+  }));
+}
+
+export type RekapTarget = {
+  slots: number;
+  tuntas: number;
+  proses: number;
+  delivered: number;
+  kelompok: number;
+};
+
+export async function getRekapTargets(claims: JwtClaims, periodId: string, jenjangId: string, unitId: string): Promise<Map<string, RekapTarget>> {
+  const rows = await withRls(claims, (tx) =>
+    tx.execute<{ target_id: string } & RekapTarget>(sql`SELECT * FROM app.capaian_rekap_targets(${periodId}::uuid, ${jenjangId}::uuid, ${unitId}::uuid)`),
+  );
+  return new Map(rows.map(({ target_id, ...r }) => [target_id, r]));
+}
+
+export interface UnitNode {
+  id: string;
+  name: string;
+  level: "daerah" | "desa" | "kelompok";
+  parentId: string | null;
+}
+
+/** Unit beserta leluhurnya (untuk breadcrumb) dan anak langsungnya. Nama unit boleh dibaca semua akun. */
+export async function getUnitWithChildren(claims: JwtClaims, unitId: string): Promise<{ unit: UnitNode; ancestors: UnitNode[]; children: UnitNode[] } | null> {
+  return withRls(claims, async (tx) => {
+    const rows = await tx.execute<{ id: string; name: string; level: UnitNode["level"]; parent_id: string | null; rel: "self" | "anc" | "child" }>(sql`
+      WITH me AS (SELECT path FROM units WHERE id = ${unitId})
+      SELECT u.id, u.name, u.level, u.parent_id,
+        CASE WHEN u.id = ${unitId} THEN 'self' WHEN u.parent_id = ${unitId} THEN 'child' ELSE 'anc' END AS rel
+      FROM units u, me
+      WHERE u.id = ${unitId} OR u.parent_id = ${unitId} OR me.path <@ u.path
+      ORDER BY nlevel(u.path), u.name`);
+    const map = (r: (typeof rows)[number]): UnitNode => ({ id: r.id, name: r.name, level: r.level, parentId: r.parent_id });
+    const self = rows.find((r) => r.rel === "self");
+    if (!self) return null;
+    return {
+      unit: map(self),
+      ancestors: rows.filter((r) => r.rel === "anc").map(map),
+      children: rows.filter((r) => r.rel === "child").map(map),
+    };
+  });
+}
