@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUp, BookOpenText, ChartNoAxesColumn, ChevronRight, Library, ScrollText, IdCard, KeyRound, LogOut, MapPin, Upload, UserCog, type LucideIcon } from "lucide-react";
+import { ArrowUp, BookOpenText, ChartNoAxesColumn, FileBarChart, ChevronRight, Library, ScrollText, IdCard, KeyRound, LogOut, MapPin, Upload, UserCog, type LucideIcon } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { initials } from "@/components/shell/nav";
 import { MosqueSilhouette } from "@/components/shell/ornament";
@@ -38,7 +38,12 @@ async function Menu() {
       ]
     : [];
   const kurikulum: Item[] = [
-    ...(canReadGenerus(me) ? [{ href: "/capaian", label: "Capaian", icon: ChartNoAxesColumn }] : []),
+    ...(canReadGenerus(me)
+      ? [
+          { href: "/laporan", label: "Laporan bulanan", icon: FileBarChart },
+          { href: "/capaian", label: "Capaian", icon: ChartNoAxesColumn },
+        ]
+      : []),
     ...(rekapRootUnit(me) ? [{ href: "/capaian/rekap", label: "Rekap capaian", icon: ChartNoAxesColumn }] : []),
     { href: "/kurikulum", label: "Target periode", icon: BookOpenText },
     ...(canEditCurriculum(me)
@@ -74,7 +79,7 @@ async function Menu() {
       </Link>
 
       {data.length > 0 && <Group title="DATA GENERUS" items={data} />}
-      <Group title="KURIKULUM" items={kurikulum} />
+      <Group title="LAPORAN & KURIKULUM" items={kurikulum} />
       {admin.length > 0 && <Group title="ADMINISTRASI" items={admin} />}
 
       <section className="flex flex-col gap-2">

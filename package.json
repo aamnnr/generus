@@ -14,6 +14,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx scripts/seed/index.ts",
     "db:seed:kurikulum": "tsx scripts/seed/kurikulum-cli.ts",
+    "db:seed:presensi": "tsx scripts/seed/presensi-cli.ts",
     "db:check": "tsx scripts/db-check.ts",
     "seed:xlsx": "tsx scripts/seed/export-xlsx.ts",
     "db:cron": "tsx scripts/db-cron.ts",

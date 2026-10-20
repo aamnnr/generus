@@ -11,7 +11,9 @@ import * as schema from "./schema";
 let client: ReturnType<typeof drizzle<typeof schema>> | undefined;
 
 export function db() {
-  client ??= drizzle(postgres(env().DATABASE_URL, { prepare: false }), { schema });
+  // Pooler Supabase memutus koneksi yang lama menganggur; tutup duluan agar
+  // tidak memakai soket yang sudah mati (CONNECTION_CLOSED).
+  client ??= drizzle(postgres(env().DATABASE_URL, { prepare: false, idle_timeout: 20, max_lifetime: 60 * 30 }), { schema });
   return client;
 }
 

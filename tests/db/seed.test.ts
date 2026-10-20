@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { generateSeedData } from "../../scripts/seed/generate";
 import { insertSeed, type Query } from "../../scripts/seed/insert";
 import { insertKurikulum } from "../../scripts/seed/kurikulum";
+import { insertPresensiSample } from "../../scripts/seed/presensi";
 import { KURIKULUM_OKTOBER_2026 } from "../../scripts/seed/kurikulum-data";
 import { formatAyatRange } from "@/lib/quran";
 import { createTestDb } from "./harness";
@@ -70,5 +71,24 @@ describe("insertKurikulum", () => {
       `SELECT range_from, range_to FROM period_targets WHERE mapel = 'Bacaan'`,
     );
     expect(formatAyatRange(bacaan.range_from, bacaan.range_to)).toBe("Al-Baqarah 253 – Ali 'Imran 91");
+  });
+});
+
+describe("insertPresensiSample", () => {
+  it("membuat agenda mingguan terkunci beserta presensi, dan bisa diulang", async () => {
+    const db = await createTestDb();
+    const q: Query = async (sql, params) => (await db.query(sql, params)).rows as never;
+    await insertSeed(q, generateSeedData({ desaCount: 1, kelompokPerDesa: 2, generusPerKelompok: 10 }));
+    const res = await insertPresensiSample(q, { today: "2026-10-20" });
+    const [{ aktif }] = await q<{ aktif: number }>(`SELECT count(*)::int AS aktif FROM generus WHERE status = 'aktif'`);
+    // 2 kelompok × 8 pekan; tiap generus aktif tercatat di 8 agenda kelompoknya.
+    expect(res).toMatchObject({ skipped: false, agendas: 16, attendance: aktif * 8 });
+    expect((await insertPresensiSample(q, { today: "2026-10-20" })).skipped).toBe(true);
+    const [{ open, last }] = await q<{ open: number; last: string }>(
+      `SELECT count(*) FILTER (WHERE locked_at IS NULL)::int AS open, max(starts_at AT TIME ZONE 'Asia/Jakarta')::text AS last FROM agendas`,
+    );
+    expect(open).toBe(0);
+    expect(last).toBe("2026-10-18 19:30:00");
+    expect((await insertPresensiSample(q, { reset: true, today: "2026-10-20" })).attendance).toBe(aktif * 8);
   });
 });

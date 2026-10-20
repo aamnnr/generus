@@ -55,11 +55,12 @@ Format acuan: dokumen "Target Materi Pembelajaran Remaja — Periode Bulan Oktob
 - [x] 4d. Admin Kelompok (`/capaian`, `/capaian/target/[id]`, `/capaian/kitab/[id]`, `/capaian/generus/[id]`): capaian massal per materi / per generus, tanda "sudah disampaikan", progres kitab massal (surat:ayat / halaman).
 - [x] 4e. Rekap capaian lintas unit `/capaian/rekap` (daerah → desa → kelompok, per target; juga untuk Tim Kurikulum lewat fungsi agregat `app.capaian_rekap_*`) + kartu capaian di beranda.
 
-## Fase 5 — Dashboard & Laporan (±2 minggu)
-- [ ] Materialized views kehadiran & capaian bulanan.
-- [ ] Dashboard per tingkat + drill-down Daerah → Desa → Kelompok → Generus.
-- [ ] Peringatan (alpa beruntun, capaian belum diisi).
-- [ ] Ekspor Excel/PDF laporan bulanan.
+## Fase 5 — Dashboard & Laporan (±2 minggu) ✅
+- [x] Agregat presensi & capaian lewat fungsi SQL `app.kehadiran_*`, `app.laporan_generus`, `app.peringatan_alpa`, `app.capaian_rekap_*` (dihitung per kelompok sekali lalu dijumlahkan). Materialized view **ditunda**: pada skala satu daerah (±5.000 generus, ±40 rb presensi/2 bulan) query langsung cukup cepat (±200 ms); dipertimbangkan lagi bila laporan melambat.
+- [x] Dashboard `/laporan` per tingkat + drill-down Daerah → Desa → Kelompok → Generus, tren kehadiran 6 bulan.
+- [x] Peringatan: alpa 3× berturut-turut; kelompok yang belum mengisi capaian (ditandai merah bila periode berakhir ≤ 7 hari).
+- [x] Ekspor Excel (`/laporan/ekspor`: ringkasan, per generus, peringatan) & cetak/simpan PDF dari browser.
+- [x] Data contoh presensi: `pnpm db:seed:presensi` (8 pekan pengajian rutin per kelompok, terkunci).
 
 ## Persiapan Pilot (±1–2 minggu, setelah Fase 5)
 - [ ] Pilih 1 desa (± 4–6 kelompok) sebagai **pilot**.
