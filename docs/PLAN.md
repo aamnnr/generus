@@ -51,8 +51,8 @@ Estimasi untuk 1–2 developer.
 Format acuan: dokumen "Target Materi Pembelajaran Remaja — Periode Bulan Oktober" Tim Kurikulum PPG.
 - [x] 4a. Skema + RLS + tes (`drizzle/0009–0010`, `tests/db/kurikulum.test.ts`, `src/lib/quran.ts`, `pnpm db:seed:kurikulum`): `curriculum_periods`, `kitab`, `materi`, `period_targets`, `achievements`, `target_deliveries`, `kitab_progress`; data surat Al-Qur'an (114 surat, 6236 ayat) untuk konversi surat:ayat; seed contoh periode Oktober 2026.
 - [x] 4b. Tim Kurikulum (`/kurikulum`, `/kurikulum/materi`, `/kurikulum/kitab`): pustaka materi & lintasan kitab; periode + penyusun target per jenjang (form, salin periode, terbitkan).
-- [ ] 4c. Tampilan target periode berjalan (mirip dokumen PPG, termasuk lampiran dalil & doa berteks Arab) untuk semua peran.
-- [ ] 4d. Admin Kelompok: capaian massal per materi / per generus, tanda "sudah disampaikan", progres kitab massal (surat:ayat / halaman).
+- [x] 4c. Tampilan target periode berjalan (`/kurikulum/periode/[id]` baca-saja + kartu di beranda) (mirip dokumen PPG, termasuk lampiran dalil & doa berteks Arab) untuk semua peran.
+- [x] 4d. Admin Kelompok (`/capaian`, `/capaian/target/[id]`, `/capaian/kitab/[id]`, `/capaian/generus/[id]`): capaian massal per materi / per generus, tanda "sudah disampaikan", progres kitab massal (surat:ayat / halaman).
 - [ ] 4e. Rekap capaian read-only untuk Kyai (per kelompok & per generus) + kartu capaian di beranda.
 
 ## Fase 5 — Dashboard & Laporan (±2 minggu)

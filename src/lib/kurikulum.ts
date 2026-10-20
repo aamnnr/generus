@@ -101,16 +101,16 @@ export async function listTargets(claims: JwtClaims, periodId: string, jenjangId
     .sort((a, b) => ASPEK_ORDER.indexOf(a.aspek) - ASPEK_ORDER.indexOf(b.aspek) || a.sortOrder - b.sortOrder);
 }
 
-export interface MapelGroup {
+export interface MapelGroup<T extends TargetRow = TargetRow> {
   aspek: Aspek;
   mapel: string;
   strategy: string | null;
-  targets: TargetRow[];
+  targets: T[];
 }
 
 /** Kelompokkan target berurutan menjadi blok aspek → mapel seperti tabel dokumen PPG. */
-export function groupTargets(rows: TargetRow[]): { aspek: Aspek; mapel: MapelGroup[] }[] {
-  const out: { aspek: Aspek; mapel: MapelGroup[] }[] = [];
+export function groupTargets<T extends TargetRow>(rows: T[]): { aspek: Aspek; mapel: MapelGroup<T>[] }[] {
+  const out: { aspek: Aspek; mapel: MapelGroup<T>[] }[] = [];
   for (const t of rows) {
     let a = out.find((x) => x.aspek === t.aspek);
     if (!a) out.push((a = { aspek: t.aspek, mapel: [] }));

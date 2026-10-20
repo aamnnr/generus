@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { sql } from "drizzle-orm";
-import { ArrowRight, CalendarDays, ClipboardCheck, IdCard, ScanLine, Users, type LucideIcon } from "lucide-react";
+import { ArrowRight, BookOpenText, CalendarDays, ClipboardCheck, IdCard, ScanLine, Users, type LucideIcon } from "lucide-react";
 import { generus } from "@/db/schema";
 import { withRls } from "@/db/rls";
 import { InstallPrompt } from "@/components/install-prompt";
@@ -11,7 +11,10 @@ import { EightStar, MosqueSilhouette } from "@/components/shell/ornament";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { getBerandaSummary, listMyScanTasks, type HeroAgenda } from "@/lib/agenda";
 import { canReadGenerus, canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
+import { listPublishedPeriods, pickActivePeriod } from "@/lib/capaian";
 import { isPromotionSeason } from "@/lib/kenaikan-rules";
+import type { PeriodListItem } from "@/lib/kurikulum";
+import { dateRange } from "../kurikulum/shared";
 import { formatDateLong, formatDateTime, formatTime, zoneLabel } from "@/lib/time";
 
 export const metadata: Metadata = { title: "Beranda · Generus" };
@@ -30,8 +33,9 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
   const [user, params] = await Promise.all([getCurrentUser(), searchParams]);
   const reader = canReadGenerus(user);
   const writer = canWriteGenerus(user);
-  const [scanTasks, summary, counts] = await Promise.all([
+  const [scanTasks, periods, summary, counts] = await Promise.all([
     listMyScanTasks(user.claims),
+    listPublishedPeriods(user.claims),
     reader ? getBerandaSummary(user.claims) : Promise.resolve(null),
     reader
       ? withRls(user.claims, async (tx) => {
@@ -49,6 +53,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
       : Promise.resolve(null),
   ]);
   const hero = summary?.hero ?? null;
+  const period = pickActivePeriod(periods);
 
   const tiles: { href: string; label: string; icon: LucideIcon }[] = [];
   if (writer || scanTasks.length) {
@@ -179,6 +184,8 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
       </div>
 
 
+      {period && <PeriodCard period={period} reader={reader} writer={writer} />}
+
       {counts && (
         <div className="grid grid-cols-3 gap-3">
           <Stat title="Generus aktif" value={counts.total} />
@@ -303,3 +310,29 @@ function BerandaSkeleton() {
   );
 }
 
+
+function PeriodCard({ period, reader, writer }: { period: PeriodListItem; reader: boolean; writer: boolean }) {
+  return (
+    <section className="flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 shadow-card md:p-5">
+      <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-tile text-primary">
+        <BookOpenText className="size-6" strokeWidth={1.75} aria-hidden />
+      </span>
+      <div className="flex min-w-0 flex-[1_1_200px] flex-col">
+        <h2 className="text-lg font-bold">Target Periode {period.name}</h2>
+        <p className="text-[13px] text-muted-foreground">
+          {dateRange(period.startsOn, period.endsOn)} · {period.targetCount} target dari Tim Kurikulum PPG
+        </p>
+      </div>
+      <div className="flex w-full gap-2 sm:w-auto">
+        <Link href={`/kurikulum/periode/${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold sm:flex-none">
+          Lihat target
+        </Link>
+        {reader && (
+          <Link href={`/capaian?periode=${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground sm:flex-none">
+            {writer ? "Isi capaian" : "Lihat capaian"}
+          </Link>
+        )}
+      </div>
+    </section>
+  );
+}

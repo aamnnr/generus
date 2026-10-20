@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpenText, CalendarDays, House, IdCard, LayoutGrid, LogOut, MapPin, UserCog, Users, type LucideIcon } from "lucide-react";
+import { BookOpenText, CalendarDays, ChartNoAxesColumn, House, IdCard, LayoutGrid, LogOut, MapPin, UserCog, Users, type LucideIcon } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import type { NavIcon, NavItem, ShellNav } from "./nav";
 import { BrandMark } from "./ornament";
 
 const ICONS: Record<NavIcon, LucideIcon> = {
   kurikulum: BookOpenText,
+  capaian: ChartNoAxesColumn,
   home: House,
   agenda: CalendarDays,
   generus: Users,

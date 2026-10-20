@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ATTENDANCE_LABEL, getGenerusAttendance } from "@/lib/agenda";
+import { getGenerusCapaian, listPublishedPeriods, pickActivePeriod } from "@/lib/capaian";
+import { kitabStatus } from "@/lib/kurikulum-format";
 import { canMutateGenerus, canWriteGenerus, requireGenerusReader } from "@/lib/auth";
 import {
   ageOn,
@@ -47,11 +49,16 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
 
   const writer = canWriteGenerus(me);
   const mutator = canMutateGenerus(me);
-  const [jenjang, mutateTargets, kehadiran] = await Promise.all([
+  const [jenjang, mutateTargets, kehadiran, periods] = await Promise.all([
     writer ? listJenjang(me.claims) : Promise.resolve([]),
     mutator && g.status === "aktif" ? listScopeUnits(me.claims, "mutate") : Promise.resolve([]),
     getGenerusAttendance(me.claims, g.id, 10),
+    listPublishedPeriods(me.claims),
   ]);
+  const period = pickActivePeriod(periods);
+  const capaian = period ? await getGenerusCapaian(me.claims, g.id, period.id) : [];
+  const dinilai = capaian.filter((t) => !t.optional && (t.kitab || t.materi?.assessment === "generus"));
+  const tuntas = dinilai.filter((t) => (t.kitab ? kitabStatus(t.position, t.kitab.from, t.kitab.to) : t.status) === "tuntas").length;
 
   return (
     <>
@@ -102,6 +109,21 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
         </Card>
 
         <div className="flex flex-col gap-6">
+          {period && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Capaian Periode {period.name}</CardTitle>
+                <CardDescription>
+                  {dinilai.length > 0 ? `${tuntas} dari ${dinilai.length} target tuntas` : "Tidak ada target yang dinilai per generus."}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Link href={`/capaian/generus/${g.id}?periode=${period.id}`} className={buttonVariants({ variant: "outline" })}>
+                  {writer ? "Lihat & isi capaian" : "Lihat capaian"}
+                </Link>
+              </CardContent>
+            </Card>
+          )}
           <Card>
             <CardHeader>
               <CardTitle>Kehadiran</CardTitle>

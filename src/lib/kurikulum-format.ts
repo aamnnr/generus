@@ -58,3 +58,23 @@ export function positionInput(unit: KitabUnit, position: number | null | undefin
   if (position == null) return "";
   return unit === "ayat" ? formatAyat(position) : String(position);
 }
+
+export type CapaianStatus = "belum" | "proses" | "tuntas";
+
+export const CAPAIAN_LABEL: Record<CapaianStatus, string> = {
+  belum: "Belum",
+  proses: "Proses",
+  tuntas: "Tuntas",
+};
+
+/** Status target kitab dari posisi terakhir: tuntas bila sudah sampai akhir rentang, proses bila sudah masuk rentang. */
+export function kitabStatus(position: number | null | undefined, from: number, to: number): CapaianStatus {
+  if (position == null) return "belum";
+  if (position >= to) return "tuntas";
+  return position >= from ? "proses" : "belum";
+}
+
+/** Persentase bulat; 0 bila tidak ada sasaran. */
+export function percent(part: number, total: number): number {
+  return total > 0 ? Math.round((part / total) * 100) : 0;
+}

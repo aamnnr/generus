@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowUp, BookOpenText, ChevronRight, Library, ScrollText, IdCard, KeyRound, LogOut, MapPin, Upload, UserCog, type LucideIcon } from "lucide-react";
+import { ArrowUp, BookOpenText, ChartNoAxesColumn, ChevronRight, Library, ScrollText, IdCard, KeyRound, LogOut, MapPin, Upload, UserCog, type LucideIcon } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import { initials } from "@/components/shell/nav";
 import { MosqueSilhouette } from "@/components/shell/ornament";
-import { canEditCurriculum, canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
+import { canEditCurriculum, canReadGenerus, canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
 
 export const metadata: Metadata = { title: "Lainnya · Generus" };
 
@@ -38,6 +38,7 @@ async function Menu() {
       ]
     : [];
   const kurikulum: Item[] = [
+    ...(canReadGenerus(me) ? [{ href: "/capaian", label: "Capaian", icon: ChartNoAxesColumn }] : []),
     { href: "/kurikulum", label: "Target periode", icon: BookOpenText },
     ...(canEditCurriculum(me)
       ? [

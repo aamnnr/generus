@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatPosition, formatRange, juzLabel, parsePosition, positionInput } from "@/lib/kurikulum-format";
+import { formatPosition, formatRange, juzLabel, kitabStatus, parsePosition, percent, positionInput } from "@/lib/kurikulum-format";
 import { toIndex } from "@/lib/quran";
 
 describe("kurikulum-format", () => {
@@ -22,5 +22,18 @@ describe("kurikulum-format", () => {
     expect(positionInput("ayat", toIndex(7, 144))).toBe("Al-A'raf 144");
     expect(positionInput("bab", 4)).toBe("4");
     expect(positionInput("bab", null)).toBe("");
+  });
+});
+
+describe("kitabStatus", () => {
+  it("membandingkan posisi dengan rentang target", () => {
+    expect(kitabStatus(null, 10, 20)).toBe("belum");
+    expect(kitabStatus(9, 10, 20)).toBe("belum");
+    expect(kitabStatus(10, 10, 20)).toBe("proses");
+    expect(kitabStatus(19, 10, 20)).toBe("proses");
+    expect(kitabStatus(20, 10, 20)).toBe("tuntas");
+    expect(kitabStatus(300, 10, 20)).toBe("tuntas");
+    expect(percent(1, 3)).toBe(33);
+    expect(percent(0, 0)).toBe(0);
   });
 });
