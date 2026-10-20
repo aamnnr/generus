@@ -15,6 +15,7 @@ export interface SeedGenerus {
   school: string | null;
   guardianName: string | null;
   guardianPhone: string | null;
+  notes?: string | null;
 }
 
 export interface SeedKelompok {

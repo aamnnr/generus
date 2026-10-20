@@ -1,8 +1,9 @@
 /**
  * Mengisi database development dengan data contoh.
  *
- *   pnpm db:seed            # gagal jika data wilayah sudah ada
- *   pnpm db:seed --reset    # hapus wilayah & generus lama lalu isi ulang
+ *   pnpm db:seed            # data uji Desa Samber, Klaten Timur 1 (gagal jika wilayah sudah ada)
+ *   pnpm db:seed --reset    # hapus wilayah, generus, agenda, presensi, capaian lama lalu isi ulang
+ *   pnpm db:seed --dummy    # data sintetis besar (10 desa × 6 kelompok) untuk uji beban
  *
  * Butuh DATABASE_URL. Akun uji dibuat jika NEXT_PUBLIC_SUPABASE_URL,
  * SUPABASE_SERVICE_ROLE_KEY, dan SEED_USER_PASSWORD diisi.
@@ -11,6 +12,7 @@ import "dotenv/config";
 import postgres from "postgres";
 import { createClient } from "@supabase/supabase-js";
 import { generateSeedData, TEST_ACCOUNTS } from "./generate";
+import { generateSamberData } from "./samber-data";
 import { insertSeed, type InsertResult, type Query } from "./insert";
 
 async function main() {
@@ -35,7 +37,7 @@ async function main() {
       if (n > 0) {
         await txq(`TRUNCATE generus, generus_mutations, generus_status_history, user_roles, units, audit_log CASCADE`);
       }
-      return insertSeed(txq, generateSeedData());
+      return insertSeed(txq, process.argv.includes("--dummy") ? generateSeedData() : generateSamberData());
     });
 
     console.log(

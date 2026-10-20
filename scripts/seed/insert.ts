@@ -10,7 +10,7 @@ export interface InsertResult {
 
 const GENERUS_COLUMNS = [
   "kelompok_id", "name", "gender", "birth_date", "jenjang_id",
-  "kategori_id", "school", "guardian_name", "guardian_phone",
+  "kategori_id", "school", "guardian_name", "guardian_phone", "notes",
 ] as const;
 const BATCH = 500;
 
@@ -54,7 +54,7 @@ export async function insertSeed(q: Query, data: SeedData): Promise<InsertResult
       for (const g of kel.generus) {
         rows.push([
           k.id, g.name, g.gender, g.birthDate, jenjangId(g.jenjang),
-          kategoriId(g.kategori), g.school, g.guardianName, g.guardianPhone,
+          kategoriId(g.kategori), g.school, g.guardianName, g.guardianPhone, g.notes ?? null,
         ]);
       }
     }

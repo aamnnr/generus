@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BackLink, PageHeader } from "@/components/page-header";
 import QRCode from "qrcode";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { generus, jenjang, jenjangKategori, units } from "@/db/schema";
 import { withRls } from "@/db/rls";
@@ -12,9 +13,13 @@ import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/compon
 import { requireGenerusWriter } from "@/lib/auth";
 import { jenjangLabel, listScopeUnits, type UnitOption } from "@/lib/generus";
 import { qrPayload } from "@/lib/qr";
+import { IdCard } from "./id-card";
 import { PrintButton } from "./print-button";
 
 export const metadata: Metadata = { title: "Kartu QR · Generus" };
+
+const PER_SHEET = 9;
+const desaUnit = alias(units, "desa");
 
 const MAX_CARDS = 600;
 
@@ -47,12 +52,16 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
               id: generus.id,
               name: generus.name,
               token: generus.qrToken,
+              gender: generus.gender,
               kelompok: units.name,
+              desa: desaUnit.name,
+              daerah: sql<string>`(SELECT d.name FROM units d WHERE d.path = subpath(${units.path}, 0, 1))`,
               jenjang: jenjang.name,
               kategori: jenjangKategori.name,
             })
             .from(generus)
             .innerJoin(units, eq(units.id, generus.kelompokId))
+            .innerJoin(desaUnit, eq(desaUnit.id, units.parentId))
             .innerJoin(jenjang, eq(jenjang.id, generus.jenjangId))
             .leftJoin(jenjangKategori, eq(jenjangKategori.id, generus.kategoriId))
             .where(
@@ -71,7 +80,14 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
 
   const cards = await Promise.all(
     rows.map(async (r) => ({
-      ...r,
+      id: r.id,
+      name: r.name,
+      gender: r.gender,
+      kelompok: r.kelompok,
+      desa: r.desa,
+      daerah: r.daerah,
+      jenjang: jenjangLabel(r.jenjang, r.kategori),
+      token: r.token,
       svg: await QRCode.toString(qrPayload(r.token), { type: "svg", errorCorrectionLevel: "M", margin: 0 }),
     })),
   );
@@ -81,8 +97,8 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
       <div className="flex flex-col gap-4 print:hidden">
         <BackLink href="/generus">Kembali ke daftar generus</BackLink>
         <PageHeader
-          title="Cetak kartu QR"
-          description="10 kartu ukuran KTP per lembar A4. Saat mencetak pilih A4, skala 100%, tanpa header/footer — atau Simpan sebagai PDF."
+          title="Cetak kartu generus"
+          description="Kartu identitas berdiri ukuran KTP (54 × 85,6 mm) untuk lanyard, 9 kartu per lembar A4. Saat mencetak pilih A4, skala 100%, aktifkan grafis latar, tanpa header/footer — atau Simpan sebagai PDF."
         />
         <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card md:flex-row md:flex-wrap md:items-center">
           {ids.length === 0 && (
@@ -96,7 +112,7 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
           {cards.length > 0 && (
             <div className="flex flex-wrap items-center gap-3">
               <span className="text-sm text-muted-foreground">
-                <span className="font-semibold text-foreground">{cards.length} kartu</span> · {Math.ceil(cards.length / 10)} lembar
+                <span className="font-semibold text-foreground">{cards.length} kartu</span> · {Math.ceil(cards.length / PER_SHEET)} lembar
                 {rows.length === MAX_CARDS && ` (maksimal ${MAX_CARDS}; pilih wilayah lebih kecil)`}
               </span>
               <PrintButton />
@@ -110,23 +126,14 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
           {(ids.length > 0 || unitId) && cards.length === 0 && <p className="text-muted-foreground">Tidak ada generus aktif.</p>}
         </div>
         <p className="flex items-start gap-2 text-[13px] text-muted-foreground">
-          Kartu hanya berisi kode acak, bukan data pribadi. Kartu hilang? Terbitkan ulang dari halaman generus.
+          QR hanya berisi kode acak, bukan data pribadi. Potong mengikuti garis putus-putus, lalu lubangi tanda di bagian atas untuk tali lanyard (atau pakai holder kartu). Kartu hilang? Terbitkan ulang dari halaman generus.
         </p>
       </div>
 
       {cards.length > 0 && (
         <div className="kartu-sheet">
           {cards.map((c) => (
-            <div key={c.id} className="kartu">
-              <div className="kartu-qr" dangerouslySetInnerHTML={{ __html: c.svg }} />
-              <div className="kartu-info">
-                <div className="kartu-brand">GENERUS</div>
-                <div className="kartu-name">{c.name}</div>
-                <div className="kartu-meta">Kelompok {c.kelompok}</div>
-                <div className="kartu-meta">{jenjangLabel(c.jenjang, c.kategori)}</div>
-                <div className="kartu-hint">Tunjukkan kartu ini saat presensi pengajian.</div>
-              </div>
-            </div>
+            <IdCard key={c.id} c={c} />
           ))}
         </div>
       )}
