@@ -38,6 +38,9 @@ Lakukan di dashboard Supabase:
 | `APP_ENV` | `staging` |
 | `NEXT_PUBLIC_APP_TIMEZONE` | `Asia/Jakarta` |
 
+   **Jangan pakai Session pooler (5432) di Vercel**: batasnya ±15 klien untuk semua instance
+   (ditambah server dev & script lokal), sehingga halaman setelah login gagal dengan
+   `EMAXCONNSESSION max clients reached in session mode`. Setelah mengubah env, **Redeploy**.
    Transaction pooler cocok untuk server Vercel yang membuka banyak koneksi singkat;
    aplikasi sudah memakai `prepare: false` dan semua query user berjalan di dalam transaksi.
    `.env` lokal tetap memakai Session pooler (5432) untuk migrasi & seed.
