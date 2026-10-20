@@ -3,7 +3,7 @@ import { APP_NAME, BRAND_COLOR } from "@/lib/app-icon";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Pemantauan Ketertiban Generus",
+    name: "Pantau Generus",
     short_name: APP_NAME,
     description: "Presensi pengajian, target materi bulanan, dan progres kitab generus.",
     lang: "id",
