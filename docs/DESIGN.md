@@ -150,7 +150,10 @@ Warna umpan balik pemindai: **berhasil** = Hadir, **sudah tercatat** = Terlambat
 - **Ubin ikon:** kotak 48 px (mobile) / 44 px (desktop), radius 14 px, latar `cream-200`, ikon `green-700`. Varian aktif: latar `green-100`.
 - **Ornamen:** siluet masjid/kubah garis tipis (SVG inline, `brass-500` atau putih 8–12 % opasitas) di sudut kartu hero, halaman login, dan *empty state*. Pola geometri Islami (bintang 8) boleh sebagai tekstur 4–6 % opasitas. Selalu `aria-hidden`.
 - **Avatar:** lingkaran inisial (2 huruf) latar `green-100`, teks `green-800`. Tidak ada foto.
-- Ikon aplikasi (PWA) diperbarui mengikuti palet: kubah sederhana putih di atas `green-800` (pengganti huruf "G").
+- **Logo** (`src/components/brand/logo.tsx`): bintang delapan (*rub el hizb*) bergaris `brass-500`, di depannya masjid berkubah bawang dengan pintu mihrab terbuka (`green-800`, atau `cream` di atas latar hijau). Pintu selalu tembus ke latar; ada celah antara garis bintang dan masjid.
+  - **Varian lengkap** (bulan sabit di puncak kubah): halaman login, kop/judul besar.
+  - **Varian ikon** (tanpa sabit, garis lebih tebal): ikon PWA & favicon (di kotak `green-800`), tanda di sidebar, kartu ID. Tetap terbaca sampai 16–24 px dan saat dicetak satu warna.
+  - Jangan menambah bayangan/gradien; warna hanya dari palet ini.
 
 ---
 

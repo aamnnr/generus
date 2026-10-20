@@ -1,3 +1,5 @@
+import { BrandTile } from "@/components/brand/logo";
+
 // Ornamen & tanda merek (DESIGN.md §5). Selalu dekoratif: aria-hidden.
 
 /** Siluet masjid garis sederhana untuk watermark kartu hero, login, empty state. */
@@ -9,15 +11,9 @@ export function MosqueSilhouette({ className }: { className?: string }) {
   );
 }
 
-/** Tanda aplikasi: kubah putih di kotak hijau tua. */
+/** Tanda aplikasi: logo (varian ikon) di kotak hijau tua. */
 export function BrandMark({ className }: { className?: string }) {
-  return (
-    <span className={`flex items-center justify-center rounded-xl bg-hero text-hero-foreground ${className ?? "size-10"}`}>
-      <svg viewBox="0 0 64 64" className="size-[65%]" aria-hidden="true" fill="currentColor">
-        <path d="M32 10c-10 0-17 8.5-17 18.5V34h34v-5.5C49 18.5 42 10 32 10zM31 3h2v6h-2zM12 36h40v4H12zM16 42h32v16H16z" />
-      </svg>
-    </span>
-  );
+  return <BrandTile className={className} />;
 }
 
 /** Bintang delapan (pola geometri Islami) untuk kartu info. */

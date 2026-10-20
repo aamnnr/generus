@@ -1,3 +1,5 @@
+import { LOGO_COLORS, LogoGlyph } from "@/components/brand/logo";
+
 // Kartu identitas generus: ukuran KTP berdiri (54 × 85,6 mm), untuk lanyard.
 // Gaya ada di globals.css (.idc-*) memakai satuan mm agar cetak presisi.
 
@@ -26,11 +28,7 @@ export function IdCard({ c }: { c: IdCardData }) {
           <path d="M12 2l2.6 3.7L19 5l-.7 4.4L22 12l-3.7 2.6L19 19l-4.4-.7L12 22l-2.6-3.7L5 19l.7-4.4L2 12l3.7-2.6L5 5l4.4.7z" />
         </svg>
         <div className="idc-brand">
-          <span className="idc-mark" aria-hidden>
-            <svg viewBox="0 0 64 64" fill="currentColor">
-              <path d="M32 10c-10 0-17 8.5-17 18.5V34h34v-5.5C49 18.5 42 10 32 10zM31 3h2v6h-2zM12 36h40v4H12zM16 42h32v16H16z" />
-            </svg>
-          </span>
+          <LogoGlyph variant="icon" mosque={LOGO_COLORS.cream} id={`idc-${c.id}`} className="idc-mark" />
           <span className="idc-brand-text">
             <span className="idc-app">KARTU GENERUS</span>
             <span className="idc-daerah">{/^daerah\b/i.test(c.daerah) ? c.daerah : `Daerah ${c.daerah}`}</span>

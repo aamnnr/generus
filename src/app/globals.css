@@ -167,7 +167,8 @@
    Garis putus-putus = garis potong; lubang tali ditandai di bagian atas. */
 .kartu-sheet {
   display: grid;
-  grid-template-columns: repeat(3, 54mm);
+  /* Di layar, jumlah kolom mengikuti lebar (HP tidak bergeser ke samping); cetak 3 kolom. */
+  grid-template-columns: repeat(auto-fill, 54mm);
   grid-auto-rows: 85.6mm;
   gap: 5mm 6mm;
   justify-content: center;
@@ -211,12 +212,7 @@
 }
 .idc-star { position: absolute; right: -6mm; bottom: -9mm; width: 26mm; height: 26mm; color: rgb(255 255 255 / 0.12); }
 .idc-brand { position: relative; display: flex; align-items: center; gap: 2mm; }
-.idc-mark {
-  display: flex; align-items: center; justify-content: center;
-  width: 8mm; height: 8mm; flex-shrink: 0;
-  border-radius: 2mm; background: #fff; color: #1A4A39;
-}
-.idc-mark svg { width: 5.4mm; height: 5.4mm; }
+.idc-mark { width: 10mm; height: 10mm; flex-shrink: 0; }
 .idc-brand-text { display: flex; flex-direction: column; line-height: 1.15; min-width: 0; }
 .idc-app { font-size: 2.5mm; font-weight: 800; letter-spacing: 0.35mm; }
 .idc-daerah { font-size: 2.6mm; opacity: 0.85; }
@@ -249,6 +245,6 @@
 @media print {
   @page { size: A4; margin: 10mm 8mm; }
   body { background: #fff !important; }
-  .kartu-sheet { gap: 4mm 6mm; }
+  .kartu-sheet { grid-template-columns: repeat(3, 54mm); gap: 4mm 6mm; }
   .idc:nth-child(9n) { break-after: page; }
 }
