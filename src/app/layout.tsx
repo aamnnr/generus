@@ -1,5 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Pwa } from "@/components/pwa";
+import { APP_NAME, BRAND_COLOR } from "@/lib/app-icon";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +15,15 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Generus",
+  title: APP_NAME,
   description: "Pemantauan ketertiban generus: presensi, target materi, dan progres kitab",
+  applicationName: APP_NAME,
+  appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "default" },
+  formatDetection: { telephone: false },
+};
+
+export const viewport: Viewport = {
+  themeColor: BRAND_COLOR,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -23,7 +32,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="id"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <Pwa />
+        {children}
+      </body>
     </html>
   );
 }

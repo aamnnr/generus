@@ -23,16 +23,17 @@ Estimasi untuk 1–2 developer.
 - [x] Tandai Menikah / Pindah Sambung + aktifkan kembali (QR otomatis nonaktif), mutasi kelompok (admin desa/daerah), riwayat.
 - [x] Import Excel dari template: pratinjau per baris (OK/bermasalah/duplikat), hanya kelompok dalam lingkup, simpan dalam satu transaksi. `pnpm seed:xlsx` membuat file contoh.
 - [x] Kenaikan jenjang/kategori massal (/generus/kenaikan): saran otomatis per usia 1 Juli & kelas, centang lalu simpan; pengingat di beranda Juli–Agustus.
-- [ ] PWA dasar: manifest, ikon, service worker, install prompt.
+- [x] PWA dasar: manifest + ikon (dibuat dari kode), service worker (cache aset statis + halaman offline, tanpa menyimpan data pribadi), banner offline (`useOffline`), ajakan pasang aplikasi (Android & iOS).
 
 **Selesai bila:** akun uji Admin Kelompok bisa login dari HP dan melihat/mengelola hanya generus kelompoknya (data seed). Import diuji dengan file template berisi data seed.
 
 ## Fase 2 — Agenda & Presensi Manual (±2 minggu)
-- [ ] CRUD agenda (sekali & berulang mingguan), filter jenjang/kategori/gender.
-- [ ] Agenda tingkat atas tampil di unit bawahnya.
-- [ ] Checklist presensi manual (offline via outbox Dexie).
-- [ ] Penguncian otomatis + `alpa` default (cron).
-- [ ] Rekap presensi sederhana per agenda & per generus.
+- [x] CRUD agenda (sekali & berulang mingguan hingga 26 pekan), sasaran jenjang/kategori/gender, batalkan satu/seri.
+- [x] Agenda tingkat atas tampil di unit bawahnya; admin kelompok melengkapi presensi anggotanya (delegasi) sampai batas waktu.
+- [x] Checklist presensi manual (H/T/I/S/A, simpan sekaligus, "hadirkan semua yang belum").
+- [x] Checklist presensi offline-first: tiap ketukan disimpan di antrian IndexedDB (Dexie), dikirim di latar belakang & saat online, bertahan walau halaman ditutup. (Membuka halaman agenda dari nol saat offline menyusul di Fase 3 bersama unduhan roster.)
+- [x] Penguncian otomatis + `alpa` default: `app.lock_due_agendas()` dipanggil saat halaman agenda dibuka & terjadwal via `pnpm db:cron` (pg_cron); kunci manual oleh pengelola.
+- [x] Rekap presensi per agenda (per status & per kelompok) dan per generus (persentase + riwayat).
 
 **Uji internal 1:** simulasikan beberapa minggu agenda & presensi manual dengan akun uji per peran (data seed), termasuk mode offline.
 

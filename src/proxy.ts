@@ -47,5 +47,9 @@ function redirectWithCookies(request: NextRequest, response: NextResponse, pathn
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
+  // Aset publik PWA (manifest, ikon, service worker, halaman offline, template)
+  // tidak melewati proxy agar bisa diambil tanpa sesi login.
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.webmanifest|sw.js|offline.html|icon|apple-icon|icons/|templates/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|xlsx)$).*)",
+  ],
 };

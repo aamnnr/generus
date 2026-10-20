@@ -1,12 +1,14 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
+import { OutboxSync } from "@/components/outbox-sync";
 import { Button } from "@/components/ui/button";
 import { canReadGenerus, getCurrentUser } from "@/lib/auth";
 
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex flex-1 flex-col">
+      <OutboxSync />
       <header className="border-b bg-background">
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <Link href="/beranda" className="font-semibold">
@@ -31,9 +33,14 @@ async function UserNav() {
           Beranda
         </Link>
         {canReadGenerus(user) && (
-          <Link href="/generus" className="rounded-md px-2 py-1 hover:bg-muted">
-            Generus
-          </Link>
+          <>
+            <Link href="/agenda" className="rounded-md px-2 py-1 hover:bg-muted">
+              Agenda
+            </Link>
+            <Link href="/generus" className="rounded-md px-2 py-1 hover:bg-muted">
+              Generus
+            </Link>
+          </>
         )}
         {user.isSuperadmin && (
           <>

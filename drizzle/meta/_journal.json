@@ -36,6 +36,20 @@
       "when": 1792481357192,
       "tag": "0004_profiles_email_sync",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792485646341,
+      "tag": "0005_agenda",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792485648633,
+      "tag": "0006_agenda_rls",
+      "breakpoints": true
     }
   ]
 }

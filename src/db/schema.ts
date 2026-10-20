@@ -182,6 +182,72 @@ export const generusStatusHistory = pgTable("generus_status_history", {
 });
 
 // ---------------------------------------------------------------------------
+// Agenda & presensi (Fase 2)
+// ---------------------------------------------------------------------------
+
+export const agendas = pgTable(
+  "agendas",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    unitId: uuid("unit_id")
+      .notNull()
+      .references(() => units.id, { onDelete: "restrict" }),
+    // Salinan units.path pemilik agenda; dipelihara trigger.
+    unitPath: ltree("unit_path").notNull().default(sql`''::ltree`),
+    title: text("title").notNull(),
+    location: text("location"),
+    startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+    endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+    /** Hadir setelah waktu ini dihitung terlambat. */
+    lateAfter: timestamp("late_after", { withTimezone: true }).notNull(),
+    // Sasaran. Kosong = semua. Filter kategori hanya berlaku untuk jenjang yang punya kategori.
+    targetJenjangIds: uuid("target_jenjang_ids").array().notNull().default(sql`'{}'::uuid[]`),
+    targetKategoriIds: uuid("target_kategori_ids").array().notNull().default(sql`'{}'::uuid[]`),
+    targetGender: gender("target_gender"),
+    /** Agenda mingguan berbagi recurrence_id yang sama. */
+    recurrenceId: uuid("recurrence_id"),
+    /** Batas admin kelompok melengkapi presensi anggotanya (delegasi); juga saat dikunci otomatis. */
+    delegateUntil: timestamp("delegate_until", { withTimezone: true }).notNull(),
+    lockedAt: timestamp("locked_at", { withTimezone: true }),
+    cancelledAt: timestamp("cancelled_at", { withTimezone: true }),
+    createdBy: uuid("created_by"),
+    ...timestamps,
+  },
+  (t) => [
+    index("agendas_unit_path_gist").using("gist", t.unitPath),
+    index("agendas_starts_at_idx").on(t.startsAt),
+    index("agendas_recurrence_idx").on(t.recurrenceId),
+  ],
+);
+
+export const attendanceStatus = pgEnum("attendance_status", ["hadir", "terlambat", "izin", "sakit", "alpa"]);
+export const attendanceMethod = pgEnum("attendance_method", ["manual", "scan", "delegasi", "search", "self", "otomatis"]);
+
+export const attendance = pgTable(
+  "attendance",
+  {
+    // Boleh dibuat di klien (antrian offline) agar pengiriman ulang idempoten.
+    id: uuid("id").primaryKey().defaultRandom(),
+    agendaId: uuid("agenda_id")
+      .notNull()
+      .references(() => agendas.id, { onDelete: "cascade" }),
+    generusId: uuid("generus_id")
+      .notNull()
+      .references(() => generus.id, { onDelete: "cascade" }),
+    status: attendanceStatus("status").notNull(),
+    method: attendanceMethod("method").notNull().default("manual"),
+    note: text("note"),
+    recordedBy: uuid("recorded_by"),
+    recordedAt: timestamp("recorded_at", { withTimezone: true }).notNull().defaultNow(),
+    ...timestamps,
+  },
+  (t) => [
+    unique("attendance_agenda_generus_unique").on(t.agendaId, t.generusId),
+    index("attendance_generus_idx").on(t.generusId),
+  ],
+);
+
+// ---------------------------------------------------------------------------
 // Audit
 // ---------------------------------------------------------------------------
 

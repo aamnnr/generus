@@ -25,7 +25,7 @@
 | Database | **PostgreSQL** (Supabase managed) | Relasional, Row Level Security untuk hierarki wilayah, ekstensi `ltree` |
 | ORM / migrasi | Drizzle ORM + drizzle-kit | Type-safe, SQL-dekat, migrasi berbasis file |
 | Auth | Supabase Auth (email + password / magic link; opsional login WhatsApp OTP nanti) | Terintegrasi dengan RLS (`auth.uid()`) |
-| PWA | Serwist (service worker untuk Next.js) | Precache app shell, offline fallback |
+| PWA | Fase 1: `public/sw.js` manual (aset statis + halaman offline) & `experimental.useOffline`. Fase 2: Serwist bila perlu precache lebih luas | Sederhana dulu; data pribadi tidak disimpan di cache |
 | Penyimpanan offline | Dexie (IndexedDB) | Antrian presensi & roster agenda |
 | Scan QR | `barcode-detector` (polyfill zxing-wasm) | Native di Android Chrome, fallback WASM di iOS |
 | Cetak kartu QR | `qrcode` + `@react-pdf/renderer` | PDF kartu massal |
@@ -44,7 +44,7 @@
 │                                     │ Modul Scanner (offline-first) │    │
 │                                     │  Dexie: roster + outbox       │    │
 │                                     └──────────────┬───────────────┘    │
-│  Service Worker (Serwist): app shell cache, offline fallback            │
+│  Service Worker (public/sw.js): aset statis, halaman offline           │
 └───────────────────────────────┬─────────────────────────────────────────┘
                                 │ HTTPS (Server Actions / Route Handlers)
 ┌───────────────────────────────┴─────────────────────────────────────────┐
@@ -126,6 +126,13 @@ Tidak disimpan per baris; dihitung: generus `aktif` yang `kelompok.path <@ agend
 - **Query atas nama user**: `withRls(claims, tx => …)` di `src/db/rls.ts` menjalankan transaksi dengan `SET LOCAL ROLE authenticated` + klaim JWT, sehingga kebijakan RLS berlaku sama seperti lewat PostgREST.
 - **Operasi Auth admin** (buat akun, reset password, blokir) memakai service role key, hanya setelah `requireSuperadmin()`. Menonaktifkan akun = `profiles.active = false` (RLS) **dan** ban di Supabase Auth (tidak bisa login).
 - **Cache Components**: semua bagian yang membaca sesi berada di dalam `<Suspense>`; `getSession()` memanggil `connection()` karena klien auth Supabase memakai `Date.now()`.
+
+## 4c. Antrian presensi (Fase 2, sudah berjalan)
+
+- `src/lib/offline/outbox.ts`: tabel `outbox` di IndexedDB (Dexie), kunci `agenda:generus` sehingga ketukan terakhir menimpa yang lama.
+- Checklist menulis ke antrian lalu memanggil `requestSync()`; `src/components/outbox-sync.tsx` (dipasang di layout) mengirim antrian saat dimuat, saat `online`, saat diminta, dan tiap 20 detik bila masih ada antrian.
+- Server melakukan upsert per (agenda, generus) → pengiriman ulang aman. Item hanya dihapus bila server membalas jelas (`saved`); item yang ditolak (RLS/batas waktu) ditandai dan bisa dicoba lagi atau dibuang.
+- Scan QR di Fase 3 memakai antrian yang sama, ditambah unduhan roster (§5).
 
 ## 5. Alur Presensi Offline (scan QR)
 

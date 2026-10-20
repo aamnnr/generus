@@ -6,6 +6,7 @@ import { generus } from "@/db/schema";
 import { withRls } from "@/db/rls";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { InstallPrompt } from "@/components/install-prompt";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { canWriteGenerus, getCurrentUser, roleLabel } from "@/lib/auth";
 import { isPromotionSeason } from "@/lib/kenaikan-rules";
@@ -65,6 +66,8 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
           ))}
         </div>
       </div>
+
+      <InstallPrompt />
 
       {canSeeGenerus && (
         <div className="grid gap-4 sm:grid-cols-3">

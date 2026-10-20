@@ -67,4 +67,5 @@ Migrasi hanya dikelola Drizzle (`drizzle/`). Folder `supabase/` berisi konfigura
 | `pnpm db:migrate` | Terapkan migrasi ke `DATABASE_URL` |
 | `pnpm db:seed` | Isi data contoh |
 | `pnpm seed:xlsx [n] [--with-errors]` | Buat file template berisi data contoh untuk menguji import |
+| `pnpm db:cron` | Jadwalkan penguncian presensi otomatis tiap 15 menit (pg_cron di Supabase) |
 | `pnpm db:check` | Ringkasan database + jumlah generus yang terlihat tiap akun (cek RLS) |

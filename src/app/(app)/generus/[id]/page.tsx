@@ -6,6 +6,7 @@ import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ATTENDANCE_LABEL, getGenerusAttendance } from "@/lib/agenda";
 import { canMutateGenerus, canWriteGenerus, requireGenerusReader } from "@/lib/auth";
 import {
   ageOn,
@@ -19,6 +20,7 @@ import {
 } from "@/lib/generus";
 import { updateGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
+import { formatDateTime } from "@/lib/time";
 import { DeleteForm, MutateForm, ReactivateForm, StatusForm } from "./forms";
 
 export const metadata: Metadata = { title: "Detail Generus · Generus" };
@@ -44,9 +46,10 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
 
   const writer = canWriteGenerus(me);
   const mutator = canMutateGenerus(me);
-  const [jenjang, mutateTargets] = await Promise.all([
+  const [jenjang, mutateTargets, kehadiran] = await Promise.all([
     writer ? listJenjang(me.claims) : Promise.resolve([]),
     mutator && g.status === "aktif" ? listScopeUnits(me.claims, "mutate") : Promise.resolve([]),
+    getGenerusAttendance(me.claims, g.id, 10),
   ]);
 
   return (
@@ -97,6 +100,33 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
         </Card>
 
         <div className="flex flex-col gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Kehadiran</CardTitle>
+              <CardDescription>
+                {kehadiran.stats.total > 0
+                  ? `${Math.round((kehadiran.stats.hadir / kehadiran.stats.total) * 100)}% hadir dari ${kehadiran.stats.total} agenda yang sudah dikunci · ${kehadiran.stats.alpa} alpa`
+                  : "Belum ada agenda yang dikunci."}
+              </CardDescription>
+            </CardHeader>
+            {kehadiran.rows.length > 0 && (
+              <CardContent>
+                <ul className="flex flex-col gap-1.5 text-sm">
+                  {kehadiran.rows.map((r) => (
+                    <li key={r.agendaId} className="flex items-center justify-between gap-2">
+                      <Link href={`/agenda/${r.agendaId}`} className="min-w-0 truncate hover:underline">
+                        <span className="text-muted-foreground">{formatDateTime(r.startsAt)}</span> · {r.title}
+                      </Link>
+                      <Badge variant={r.status === "alpa" ? "destructive" : r.status === "hadir" ? "secondary" : "outline"}>
+                        {ATTENDANCE_LABEL[r.status]}
+                      </Badge>
+                    </li>
+                  ))}
+                </ul>
+              </CardContent>
+            )}
+          </Card>
+
           {writer && (
             <Card>
               <CardHeader>
