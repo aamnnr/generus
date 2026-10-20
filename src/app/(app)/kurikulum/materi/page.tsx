@@ -9,6 +9,7 @@ import { listMateri } from "@/lib/kurikulum";
 import { ASPEK_LABEL, ASPEK_ORDER, type Aspek } from "@/lib/kurikulum-format";
 import { KurikulumTabs } from "../shared";
 import { PageLoading } from "@/components/page-loading";
+import { QueryForm } from "@/components/query-form";
 
 export const metadata: Metadata = { title: "Pustaka materi · Generus" };
 
@@ -68,7 +69,7 @@ async function MateriList({ searchParams }: Pick<PageProps<"/kurikulum/materi">,
   return (
     <>
       <div className="flex flex-col gap-3 md:flex-row md:items-center">
-        <form role="search" className="flex md:w-80">
+        <QueryForm role="search" className="flex md:w-80">
           {aspek && <input type="hidden" name="aspek" value={aspek} />}
           {archived && <input type="hidden" name="arsip" value="1" />}
           <label className="flex h-11 w-full items-center gap-2 rounded-full border border-border bg-card px-4 text-muted-foreground md:h-10">
@@ -81,7 +82,7 @@ async function MateriList({ searchParams }: Pick<PageProps<"/kurikulum/materi">,
               className="w-full min-w-0 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-[15px]"
             />
           </label>
-        </form>
+        </QueryForm>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
           {chip("Semua", !aspek, href({ aspek: undefined }))}
           {ASPEK_ORDER.map((a) => chip(ASPEK_LABEL[a], aspek === a, href({ aspek: a })))}

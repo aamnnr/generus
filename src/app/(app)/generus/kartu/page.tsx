@@ -16,6 +16,7 @@ import { qrPayload } from "@/lib/qr";
 import { IdCard } from "./id-card";
 import { PrintButton } from "./print-button";
 import { PageLoading } from "@/components/page-loading";
+import { QueryForm } from "@/components/query-form";
 
 export const metadata: Metadata = { title: "Kartu QR · Generus" };
 
@@ -103,12 +104,12 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
         />
         <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card md:flex-row md:flex-wrap md:items-center">
           {ids.length === 0 && (
-            <form className="flex flex-1 flex-wrap items-center gap-2">
+            <QueryForm className="flex flex-1 flex-wrap items-center gap-2">
               <UnitSelect options={desaOptions} value={unitId} />
               <Button type="submit" variant="outline">
                 Tampilkan
               </Button>
-            </form>
+            </QueryForm>
           )}
           {cards.length > 0 && (
             <div className="flex flex-wrap items-center gap-3">

@@ -23,6 +23,7 @@ import {
   type UnitOption,
 } from "@/lib/generus";
 import { PageLoading } from "@/components/page-loading";
+import { QueryForm } from "@/components/query-form";
 
 export const metadata: Metadata = { title: "Generus · Generus" };
 
@@ -103,7 +104,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
       </div>
 
       <div className="flex flex-col gap-3 md:rounded-2xl md:bg-card md:p-4 md:shadow-card">
-        <form role="search" className="flex flex-wrap items-center gap-2">
+        <QueryForm role="search" className="flex flex-wrap items-center gap-2">
           {p.jenjang && <input type="hidden" name="jenjang" value={p.jenjang} />}
           <label className="flex h-11 min-w-0 flex-[1_1_220px] items-center gap-2 rounded-full border border-border bg-card px-4 text-muted-foreground md:h-10 md:border-0 md:bg-background">
             <Search className="size-[18px] shrink-0" aria-hidden />
@@ -129,7 +130,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
                 Terapkan
               </Button>
           </FilterDisclosure>
-        </form>
+        </QueryForm>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden" role="group" aria-label="Jenjang">
           {chips.map((c) => {
             const on = p.jenjang === c.key;

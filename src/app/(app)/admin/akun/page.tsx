@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { listAccounts, type AccountRow } from "@/lib/accounts";
 import { requireSuperadmin, roleLabel } from "@/lib/auth";
 import { PageLoading } from "@/components/page-loading";
+import { QueryForm } from "@/components/query-form";
 
 export const metadata: Metadata = { title: "Akun · Generus" };
 
@@ -47,7 +48,7 @@ async function AccountList({ searchParams }: Pick<PageProps<"/admin/akun">, "sea
 
   return (
     <>
-      <form role="search" className="flex">
+      <QueryForm role="search" className="flex">
         <label className="flex h-11 w-full items-center gap-2 rounded-full border border-border bg-card px-4 text-muted-foreground md:h-10 md:max-w-sm">
           <Search className="size-[18px] shrink-0" aria-hidden />
           <input
@@ -58,7 +59,7 @@ async function AccountList({ searchParams }: Pick<PageProps<"/admin/akun">, "sea
             className="w-full min-w-0 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-[15px]"
           />
         </label>
-      </form>
+      </QueryForm>
 
       {accounts.length === 0 && <EmptyState title="Tidak ada akun yang cocok" />}
 

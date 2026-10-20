@@ -43,7 +43,8 @@ Lakukan di dashboard Supabase:
    `EMAXCONNSESSION max clients reached in session mode`. Setelah mengubah env, **Redeploy**.
    Transaction pooler cocok untuk server Vercel yang membuka banyak koneksi singkat;
    aplikasi sudah memakai `prepare: false` dan semua query user berjalan di dalam transaksi.
-   `.env` lokal tetap memakai Session pooler (5432) untuk migrasi & seed.
+   Di komputer developer: `.env.local` (aplikasi `pnpm dev`) juga memakai 6543, sedangkan `.env`
+   (migrasi & seed) tetap Session pooler 5432.
 4. **Deploy**. Setelah selesai, buka domainnya dan login sebagai `superadmin@generus.test`.
 
 ## 3. Cek setelah deploy

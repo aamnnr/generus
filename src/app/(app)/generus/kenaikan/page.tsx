@@ -10,6 +10,7 @@ import { listPromotionCandidates, listScopeUnits, MAX_PROMOTION_ROWS, type UnitO
 import { academicYearStart, ageAt, isSuggested, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
 import { PromoteForm } from "./promote-form";
 import { PageLoading } from "@/components/page-loading";
+import { QueryForm } from "@/components/query-form";
 
 export const metadata: Metadata = { title: "Kenaikan Jenjang · Generus" };
 
@@ -53,7 +54,7 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
     <>
       <Card>
         <CardContent>
-          <form className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+          <QueryForm className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
             <div className="flex flex-col gap-2">
               <label htmlFor="t" className="text-sm font-medium">
                 Jenis kenaikan
@@ -79,7 +80,7 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
             <Button type="submit" variant="outline">
               Tampilkan
             </Button>
-          </form>
+          </QueryForm>
         </CardContent>
       </Card>
 
