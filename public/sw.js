@@ -7,7 +7,7 @@
  * - Halaman lain yang berisi data pribadi TIDAK disimpan di cache perangkat.
  * Naikkan VERSION bila isi file ini berubah agar cache lama dibersihkan.
  */
-const VERSION = "v4";
+const VERSION = "v5";
 const STATIC_CACHE = `generus-static-${VERSION}`;
 const PRECACHE = ["/offline.html", "/icons/icon-192.png", "/icons/icon-512.png"];
 

@@ -273,3 +273,81 @@ export async function listMyScanTasks(claims: JwtClaims) {
     return rows.map((r) => ({ id: r.id, title: r.title, startsAt: new Date(r.starts_at), unitName: r.unit_name }));
   });
 }
+
+export interface HeroAgenda {
+  id: string;
+  title: string;
+  location: string | null;
+  startsAt: Date;
+  endsAt: Date;
+  unitName: string;
+  level: "daerah" | "desa" | "kelompok";
+  ongoing: boolean;
+  /** Peserta sasaran yang terlihat user & yang sudah tercatat (hadir/terlambat). */
+  targets: number;
+  present: number;
+  canManage: boolean;
+  isScanner: boolean;
+}
+
+export interface BerandaSummary {
+  hero: HeroAgenda | null;
+  month: { agendas: number; locked: number; rate: number | null; alpaStreak: number };
+}
+
+/** Data beranda: agenda berlangsung/berikutnya + ringkasan kehadiran bulan berjalan. */
+export async function getBerandaSummary(claims: JwtClaims): Promise<BerandaSummary> {
+  return withRls(claims, async (tx) => {
+    const [a] = await tx.execute<{
+      id: string; title: string; location: string | null; starts_at: string; ends_at: string;
+      unit_name: string; level: HeroAgenda["level"]; targets: number; present: number; can_manage: boolean; is_scanner: boolean;
+    }>(sql`
+      SELECT a.id, a.title, a.location, a.starts_at, a.ends_at, u.name AS unit_name, u.level,
+             (SELECT count(*)::int FROM generus g WHERE app.agenda_is_target(a, g)) AS targets,
+             (SELECT count(*)::int FROM attendance at WHERE at.agenda_id = a.id AND at.status IN ('hadir','terlambat')) AS present,
+             app.can_manage_agenda(a.id) AS can_manage,
+             app.is_agenda_scanner(a.id) AS is_scanner
+      FROM agendas a JOIN units u ON u.id = a.unit_id
+      WHERE a.cancelled_at IS NULL AND a.ends_at >= now()
+      ORDER BY a.starts_at
+      LIMIT 1`);
+    const [m] = await tx.execute<{ agendas: number; locked: number; present: number; total: number }>(sql`
+      SELECT count(DISTINCT a.id)::int AS agendas,
+             count(DISTINCT a.id) FILTER (WHERE a.locked_at IS NOT NULL)::int AS locked,
+             count(at.*) FILTER (WHERE a.locked_at IS NOT NULL AND at.status IN ('hadir','terlambat'))::int AS present,
+             count(at.*) FILTER (WHERE a.locked_at IS NOT NULL)::int AS total
+      FROM agendas a LEFT JOIN attendance at ON at.agenda_id = a.id
+      WHERE a.cancelled_at IS NULL AND a.starts_at >= date_trunc('month', now()) AND a.starts_at < date_trunc('month', now()) + interval '1 month'`);
+    // Generus dengan 3 agenda terkunci terakhirnya berstatus alpa (PRD F-43).
+    const [s] = await tx.execute<{ n: number }>(sql`
+      SELECT count(*)::int AS n FROM (
+        SELECT at.generus_id, bool_and(at.status = 'alpa') AS all_alpa, count(*) AS c
+        FROM (
+          SELECT at.generus_id, at.status,
+                 row_number() OVER (PARTITION BY at.generus_id ORDER BY a.starts_at DESC) AS rn
+          FROM attendance at JOIN agendas a ON a.id = at.agenda_id
+          WHERE a.locked_at IS NOT NULL AND a.cancelled_at IS NULL
+        ) at WHERE at.rn <= 3 GROUP BY at.generus_id
+      ) x WHERE x.all_alpa AND x.c = 3`);
+    const now = Date.now();
+    return {
+      hero: a
+        ? {
+            id: a.id,
+            title: a.title,
+            location: a.location,
+            startsAt: new Date(a.starts_at),
+            endsAt: new Date(a.ends_at),
+            unitName: a.unit_name,
+            level: a.level,
+            ongoing: new Date(a.starts_at).getTime() <= now,
+            targets: a.targets,
+            present: a.present,
+            canManage: a.can_manage,
+            isScanner: a.is_scanner,
+          }
+        : null,
+      month: { agendas: m.agendas, locked: m.locked, rate: m.total ? m.present / m.total : null, alpaStreak: s.n },
+    };
+  });
+}

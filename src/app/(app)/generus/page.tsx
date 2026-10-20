@@ -1,11 +1,13 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ChevronRight, Plus, Search } from "lucide-react";
+import { FilterDisclosure } from "@/components/filter-disclosure";
+import { initials } from "@/components/shell/nav";
+import { MosqueSilhouette } from "@/components/shell/ornament";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { canWriteGenerus, requireGenerusReader } from "@/lib/auth";
@@ -51,13 +53,21 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const singleKelompok = unitOptions.filter((u) => u.level === "kelompok").length <= 1;
 
-  const pageHref = (n: number) => {
+  const href = (o: Partial<Record<"q" | "unit" | "jenjang" | "status" | "page", string | undefined>>) => {
     const sp = new URLSearchParams();
-    for (const [k, v] of Object.entries({ q: p.q, unit: p.unit, jenjang: p.jenjang, status: p.status })) if (v) sp.set(k, v);
-    if (n > 1) sp.set("page", String(n));
+    const merged = { q: p.q, unit: p.unit, jenjang: p.jenjang, status: p.status, page: undefined as string | undefined, ...o };
+    for (const [k, v] of Object.entries(merged)) if (v && !(k === "page" && v === "1")) sp.set(k, v);
     const qs = sp.toString();
     return qs ? `/generus?${qs}` : "/generus";
   };
+  const writer = canWriteGenerus(me);
+  const chips: { key: string | undefined; label: string }[] = [
+    { key: undefined, label: "Semua" },
+    ...Object.entries(JENJANG_FILTERS)
+      .filter(([k]) => k !== "remaja")
+      .map(([k, v]) => ({ key: k, label: v.label })),
+  ];
+  const statusLabel = p.status === "semua" ? "generus" : STATUS_LABEL[p.status ?? "aktif"].toLowerCase();
 
   return (
     <>
@@ -66,127 +76,195 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
           <AlertDescription>Data generus dihapus.</AlertDescription>
         </Alert>
       )}
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold">Generus</h1>
-        {canWriteGenerus(me) && (
-          <div className="flex flex-wrap gap-2">
-            <Link href="/generus/kartu" className={buttonVariants({ variant: "outline" })}>
-              Cetak kartu QR
-            </Link>
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex min-w-0 flex-1 flex-col">
+          <h1 className="text-2xl font-bold">Generus</h1>
+          <span className="text-sm text-muted-foreground">
+            {total.toLocaleString("id-ID")} {statusLabel}
+          </span>
+        </div>
+        {writer && (
+          <div className="hidden flex-wrap gap-2 md:flex">
             <Link href="/generus/kenaikan" className={buttonVariants({ variant: "outline" })}>
               Kenaikan jenjang
             </Link>
             <Link href="/generus/import" className={buttonVariants({ variant: "outline" })}>
               Import Excel
             </Link>
+            <Link href="/generus/kartu" className={buttonVariants({ variant: "outline" })}>
+              Cetak kartu QR
+            </Link>
             <Link href="/generus/baru" className={buttonVariants()}>
-              Tambah generus
+              <Plus aria-hidden /> Tambah generus
             </Link>
           </div>
         )}
       </div>
 
-      <form className="grid gap-2 sm:grid-cols-2 lg:grid-cols-5" role="search">
-        <Input name="q" defaultValue={p.q} placeholder="Cari nama" aria-label="Cari nama" className="lg:col-span-2" />
-        {!singleKelompok && <UnitSelect options={unitOptions} value={p.unit} />}
-        <NativeSelect name="jenjang" defaultValue={p.jenjang ?? ""} aria-label="Jenjang">
-          <NativeSelectOption value="">Semua jenjang</NativeSelectOption>
-          {Object.entries(JENJANG_FILTERS).map(([k, v]) => (
-            <NativeSelectOption key={k} value={k}>
-              {v.label}
-            </NativeSelectOption>
-          ))}
-        </NativeSelect>
-        <NativeSelect name="status" defaultValue={p.status ?? "aktif"} aria-label="Status">
-          {Object.entries(STATUS_LABEL).map(([k, v]) => (
-            <NativeSelectOption key={k} value={k}>
-              {v}
-            </NativeSelectOption>
-          ))}
-          <NativeSelectOption value="semua">Semua status</NativeSelectOption>
-        </NativeSelect>
-        <div className="flex gap-2 sm:col-span-2 lg:col-span-5">
-          <Button type="submit" variant="outline">
-            Terapkan
-          </Button>
-          <Link href="/generus" className={buttonVariants({ variant: "ghost" })}>
-            Reset
-          </Link>
+      <div className="flex flex-col gap-3 md:rounded-2xl md:bg-card md:p-4 md:shadow-card">
+        <form role="search" className="flex flex-wrap items-center gap-2">
+          {p.jenjang && <input type="hidden" name="jenjang" value={p.jenjang} />}
+          <label className="flex h-11 min-w-0 flex-[1_1_220px] items-center gap-2 rounded-full border border-border bg-card px-4 text-muted-foreground md:h-10 md:border-0 md:bg-background">
+            <Search className="size-[18px] shrink-0" aria-hidden />
+            <input
+              name="q"
+              defaultValue={p.q}
+              placeholder="Cari nama"
+              aria-label="Cari nama"
+              className="w-full min-w-0 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground md:text-[15px]"
+            />
+          </label>
+          <FilterDisclosure label={singleKelompok ? "Status" : "Wilayah & status"}>
+              {!singleKelompok && <UnitSelect options={unitOptions} value={p.unit} />}
+              <NativeSelect name="status" defaultValue={p.status ?? "aktif"} aria-label="Status" className="md:w-44">
+                {Object.entries(STATUS_LABEL).map(([k, v]) => (
+                  <NativeSelectOption key={k} value={k}>
+                    {v}
+                  </NativeSelectOption>
+                ))}
+                <NativeSelectOption value="semua">Semua status</NativeSelectOption>
+              </NativeSelect>
+              <Button type="submit" variant="outline">
+                Terapkan
+              </Button>
+          </FilterDisclosure>
+        </form>
+        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden" role="group" aria-label="Jenjang">
+          {chips.map((c) => {
+            const on = p.jenjang === c.key;
+            return (
+              <Link
+                key={c.label}
+                href={href({ jenjang: c.key, page: undefined })}
+                aria-current={on ? "true" : undefined}
+                className={`flex h-9 shrink-0 items-center rounded-full px-4 text-sm whitespace-nowrap ${
+                  on ? "bg-primary font-semibold text-primary-foreground" : "bg-tile text-foreground hover:bg-secondary"
+                }`}
+              >
+                {c.label}
+              </Link>
+            );
+          })}
         </div>
-      </form>
-
-      <p className="text-sm text-muted-foreground">{total.toLocaleString("id-ID")} generus</p>
-
-      <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nama</TableHead>
-              <TableHead className="hidden sm:table-cell">L/P</TableHead>
-              <TableHead className="hidden sm:table-cell">Usia</TableHead>
-              <TableHead>Jenjang</TableHead>
-              {!singleKelompok && <TableHead className="hidden md:table-cell">Kelompok</TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground">
-                  Tidak ada generus yang cocok.
-                </TableCell>
-              </TableRow>
-            )}
-            {rows.map((g) => (
-              <TableRow key={g.id}>
-                <TableCell>
-                  <Link href={`/generus/${g.id}`} className="font-medium underline-offset-4 hover:underline">
-                    {g.name}
-                  </Link>
-                  {g.status !== "aktif" && (
-                    <Badge variant="outline" className="ml-2">
-                      {STATUS_LABEL[g.status]}
-                    </Badge>
-                  )}
-                  {!singleKelompok && (
-                    <div className="text-xs text-muted-foreground md:hidden">
-                      {g.kelompok} · {g.desa}
-                    </div>
-                  )}
-                </TableCell>
-                <TableCell className="hidden sm:table-cell">{g.gender}</TableCell>
-                <TableCell className="hidden tabular-nums sm:table-cell">{ageOn(g.birthDate)}</TableCell>
-                <TableCell>{jenjangLabel(g.jenjang, g.kategori)}</TableCell>
-                {!singleKelompok && (
-                  <TableCell className="hidden md:table-cell">
-                    {g.kelompok} <span className="text-muted-foreground">· {g.desa}</span>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
       </div>
 
+      {rows.length === 0 && (
+        <div className="flex flex-col items-center gap-2 rounded-2xl bg-card px-6 py-10 text-center shadow-card">
+          <MosqueSilhouette className="w-24 text-brass opacity-40" />
+          <p className="font-bold">Tidak ada generus yang cocok</p>
+          <Link href="/generus" className="text-sm font-semibold text-primary">
+            Hapus filter
+          </Link>
+        </div>
+      )}
+
+      {/* HP: kartu */}
+      {rows.length > 0 && (
+        <ul className="flex flex-col gap-2 md:hidden">
+          {rows.map((g) => (
+            <li key={g.id}>
+              <Link href={`/generus/${g.id}`} className="flex items-center gap-3 rounded-2xl bg-card px-3.5 py-3 shadow-card">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground">
+                  {initials(g.name)}
+                </span>
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="truncate font-semibold">{g.name}</span>
+                  <span className="truncate text-[13px] text-muted-foreground">
+                    {g.gender} · {ageOn(g.birthDate)} th{singleKelompok ? "" : ` · ${g.kelompok}`}
+                    {g.status !== "aktif" ? ` · ${STATUS_LABEL[g.status]}` : ""}
+                  </span>
+                </span>
+                <span className="shrink-0 rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold text-accent-foreground">
+                  {g.kategori ?? g.jenjang}
+                </span>
+                <ChevronRight className="size-5 shrink-0 text-muted-foreground" aria-hidden />
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Desktop: tabel */}
+      {rows.length > 0 && (
+        <div className="hidden overflow-x-auto rounded-2xl bg-card shadow-card md:block">
+          <Table>
+            <TableHeader>
+              <TableRow className="text-xs tracking-wide">
+                <TableHead className="pl-4">NAMA</TableHead>
+                <TableHead>L/P</TableHead>
+                <TableHead>USIA</TableHead>
+                <TableHead>JENJANG</TableHead>
+                {!singleKelompok && <TableHead>KELOMPOK</TableHead>}
+                <TableHead>STATUS</TableHead>
+                <TableHead className="w-10 pr-4">
+                  <span className="sr-only">Buka</span>
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rows.map((g) => (
+                <TableRow key={g.id} className="hover:bg-secondary/50">
+                  <TableCell className="pl-4">
+                    <Link href={`/generus/${g.id}`} className="flex items-center gap-3 font-semibold">
+                      <span className="flex size-9 items-center justify-center rounded-full bg-secondary text-xs font-bold text-secondary-foreground">
+                        {initials(g.name)}
+                      </span>
+                      {g.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{g.gender}</TableCell>
+                  <TableCell className="tabular-nums">{ageOn(g.birthDate)}</TableCell>
+                  <TableCell>
+                    <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap text-accent-foreground">
+                      {jenjangLabel(g.jenjang, g.kategori)}
+                    </span>
+                  </TableCell>
+                  {!singleKelompok && (
+                    <TableCell className="whitespace-nowrap">
+                      {g.kelompok} <span className="text-muted-foreground">· {g.desa}</span>
+                    </TableCell>
+                  )}
+                  <TableCell>{STATUS_LABEL[g.status]}</TableCell>
+                  <TableCell className="pr-4 text-right">
+                    <ChevronRight className="inline size-[18px] text-muted-foreground" aria-hidden />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
+
       {pages > 1 && (
-        <nav className="flex items-center justify-between gap-2 text-sm" aria-label="Halaman">
+        <nav className="flex flex-wrap items-center justify-between gap-2 text-sm" aria-label="Halaman">
           {page > 1 ? (
-            <Link href={pageHref(page - 1)} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <Link href={href({ page: String(page - 1) })} className={buttonVariants({ variant: "outline", size: "sm" })}>
               ← Sebelumnya
             </Link>
           ) : (
             <span />
           )}
-          <span className="text-muted-foreground">
+          <span className="font-semibold">
             Halaman {page} dari {pages}
           </span>
           {page < pages ? (
-            <Link href={pageHref(page + 1)} className={buttonVariants({ variant: "outline", size: "sm" })}>
+            <Link href={href({ page: String(page + 1) })} className={buttonVariants({ variant: "outline", size: "sm" })}>
               Berikutnya →
             </Link>
           ) : (
             <span />
           )}
         </nav>
+      )}
+
+      {writer && (
+        <Link
+          href="/generus/baru"
+          aria-label="Tambah generus"
+          className="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-float md:hidden"
+        >
+          <Plus className="size-6" aria-hidden />
+        </Link>
       )}
     </>
   );

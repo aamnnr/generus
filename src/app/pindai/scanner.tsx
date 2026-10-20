@@ -114,7 +114,7 @@ export function Scanner() {
       <FeedbackPanel feedback={feedback} />
 
       {!agenda && download.state !== "loading" && (
-        <p className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-950 dark:bg-amber-950/30 dark:text-amber-100">
+        <p className="rounded-2xl bg-accent p-3 text-sm text-accent-foreground">
           {download.message ?? "Daftar peserta belum ada di perangkat ini. Buka halaman ini saat online untuk mengunduhnya."}
         </p>
       )}
@@ -125,9 +125,9 @@ export function Scanner() {
           <ManualInput onCode={(c) => void handleCode(c)} />
 
           <div className="flex flex-col gap-2">
-            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tanpa kartu? Cari nama (min. 2 huruf)" aria-label="Cari nama peserta" />
+            <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tanpa kartu? Cari nama (min. 2 huruf)" aria-label="Cari nama peserta" className="rounded-full" />
             {matches.length > 0 && (
-              <ul className="flex flex-col divide-y rounded-lg border">
+              <ul className="flex flex-col divide-y divide-muted overflow-hidden rounded-2xl bg-card shadow-card">
                 {matches.map((m) => (
                   <li key={m.generusId} className="flex items-center gap-2 px-3 py-2 text-sm">
                     <span className="flex-1">
@@ -156,14 +156,14 @@ export function Scanner() {
       )}
 
       <div className="grid grid-cols-2 gap-2 text-sm">
-        <div className="rounded-lg border px-3 py-2">
+        <div className="rounded-2xl bg-card px-3.5 py-2.5 shadow-card">
           <div className="text-xs text-muted-foreground">Tercatat</div>
-          <div className="text-xl font-semibold tabular-nums">
+          <div className="font-heading text-[26px] leading-8 font-semibold tabular-nums">
             {recorded}
             <span className="text-sm font-normal text-muted-foreground"> / {roster?.length ?? 0}</span>
           </div>
         </div>
-        <div className="rounded-lg border px-3 py-2">
+        <div className="rounded-2xl bg-card px-3.5 py-2.5 shadow-card">
           <div className="text-xs text-muted-foreground">Kirim ke server</div>
           <div role="status" className="text-sm">
             {rejected > 0
@@ -225,7 +225,7 @@ function resultTitle(r: ScanResult): string {
 function FeedbackPanel({ feedback }: { feedback: Feedback | null }) {
   if (!feedback) {
     return (
-      <div className="rounded-xl border-2 border-dashed px-4 py-6 text-center text-muted-foreground">
+      <div className="rounded-2xl border-2 border-dashed border-border px-4 py-6 text-center text-muted-foreground">
         Arahkan kamera ke kartu QR peserta
       </div>
     );
@@ -233,15 +233,15 @@ function FeedbackPanel({ feedback }: { feedback: Feedback | null }) {
   const r = feedback.result;
   const tone =
     r.kind === "ok"
-      ? "border-emerald-600 bg-emerald-50 text-emerald-950 dark:bg-emerald-950/40 dark:text-emerald-50"
+      ? "border-status-hadir bg-status-hadir-soft text-foreground"
       : r.kind === "duplicate"
-        ? "border-amber-500 bg-amber-50 text-amber-950 dark:bg-amber-950/40 dark:text-amber-50"
-        : "border-red-600 bg-red-50 text-red-950 dark:bg-red-950/40 dark:text-red-50";
+        ? "border-status-terlambat bg-status-terlambat-soft text-foreground"
+        : "border-status-alpa bg-status-alpa-soft text-foreground";
   return (
     <div key={feedback.at} role="alert" className={`rounded-xl border-2 px-4 py-5 text-center ${tone}`}>
       {r.kind === "ok" || r.kind === "duplicate" ? (
         <>
-          <div className="text-2xl font-bold">{r.name}</div>
+          <div className="font-heading text-2xl font-semibold">{r.name}</div>
           <div className="text-sm">
             {r.kelompok} · {r.kind === "ok" ? STATUS_LABEL[r.status] : `sudah tercatat (${STATUS_LABEL[r.status]})`}
           </div>
@@ -298,9 +298,9 @@ function Camera({ onCode }: { onCode: (code: string) => void }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className={`relative overflow-hidden rounded-xl bg-black ${state === "on" || state === "starting" ? "aspect-square" : "hidden"}`}>
+      <div className={`relative overflow-hidden rounded-[20px] bg-black ${state === "on" || state === "starting" ? "aspect-square" : "hidden"}`}>
         <video ref={videoRef} className="size-full object-cover" playsInline muted />
-        <div className="pointer-events-none absolute inset-[18%] rounded-lg border-2 border-white/80" />
+        <div className="pointer-events-none absolute inset-[18%] rounded-2xl border-[3px] border-white/85" />
       </div>
       {state === "on" ? (
         <Button variant="outline" onClick={() => (stopRef.current(), setState("off"))}>
@@ -333,10 +333,11 @@ function ManualInput({ onCode }: { onCode: (code: string) => void }) {
         onChange={(e) => setValue(e.target.value)}
         placeholder="Kode kartu (scanner USB / ketik)"
         aria-label="Kode kartu"
+        className="rounded-full"
         autoComplete="off"
         autoCapitalize="characters"
       />
-      <Button type="submit" variant="outline">
+      <Button type="submit" variant="outline" className="rounded-full">
         Catat
       </Button>
     </form>

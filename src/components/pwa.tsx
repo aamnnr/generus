@@ -21,7 +21,7 @@ export function Pwa() {
   return (
     <div
       role="status"
-      className="sticky top-0 z-50 bg-amber-100 print:hidden px-4 py-2 text-center text-sm text-amber-950 dark:bg-amber-900 dark:text-amber-50"
+      className="sticky top-0 z-50 bg-accent px-4 py-2 text-center text-sm font-medium text-accent-foreground print:hidden"
     >
       Anda sedang offline. Perubahan akan dikirim otomatis saat koneksi kembali.
     </div>

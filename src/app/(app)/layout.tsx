@@ -1,68 +1,28 @@
 import { Suspense } from "react";
-import Link from "next/link";
-import { logout } from "@/app/actions/auth";
 import { OutboxSync } from "@/components/outbox-sync";
-import { Button } from "@/components/ui/button";
-import { canReadGenerus, getCurrentUser } from "@/lib/auth";
+import { BottomNav, Sidebar } from "@/components/shell/app-nav";
+import { buildNav } from "@/components/shell/nav";
+import { getCurrentUser } from "@/lib/auth";
 
+// Kerangka aplikasi (DESIGN.md §6): menu samping di desktop, tab bawah di HP.
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="flex flex-1">
       <OutboxSync />
-      <header className="border-b bg-background print:hidden">
-        <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
-          <Link href="/beranda" className="font-semibold">
-            Generus
-          </Link>
-          <Suspense fallback={<div className="ml-auto h-7" />}>
-            <UserNav />
-          </Suspense>
-        </div>
-      </header>
-      <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 px-4 py-6">{children}</main>
+      <Suspense fallback={<div className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar lg:block" />}>
+        <ShellNav part="sidebar" />
+      </Suspense>
+      <main className="mx-auto flex w-full max-w-[1200px] min-w-0 flex-1 flex-col gap-5 px-4 pt-5 pb-28 md:px-6 lg:px-8 lg:pt-7 lg:pb-12 print:p-0">
+        {children}
+      </main>
+      <Suspense>
+        <ShellNav part="tabs" />
+      </Suspense>
     </div>
   );
 }
 
-async function UserNav() {
-  const user = await getCurrentUser({ allowPasswordChange: true });
-  return (
-    <>
-      <nav className="flex items-center gap-1 text-sm">
-        <Link href="/beranda" className="rounded-md px-2 py-1 hover:bg-muted">
-          Beranda
-        </Link>
-        {canReadGenerus(user) && (
-          <>
-            <Link href="/agenda" className="rounded-md px-2 py-1 hover:bg-muted">
-              Agenda
-            </Link>
-            <Link href="/generus" className="rounded-md px-2 py-1 hover:bg-muted">
-              Generus
-            </Link>
-          </>
-        )}
-        {user.isSuperadmin && (
-          <>
-            <Link href="/admin/wilayah" className="rounded-md px-2 py-1 hover:bg-muted">
-              Wilayah
-            </Link>
-            <Link href="/admin/akun" className="rounded-md px-2 py-1 hover:bg-muted">
-              Akun
-            </Link>
-          </>
-        )}
-      </nav>
-      <div className="ml-auto flex items-center gap-2 text-sm">
-        <Link href="/akun/password" className="hidden text-muted-foreground hover:text-foreground sm:inline">
-          {user.name}
-        </Link>
-        <form action={logout}>
-          <Button type="submit" variant="outline" size="sm">
-            Keluar
-          </Button>
-        </form>
-      </div>
-    </>
-  );
+async function ShellNav({ part }: { part: "sidebar" | "tabs" }) {
+  const nav = buildNav(await getCurrentUser({ allowPasswordChange: true }));
+  return part === "sidebar" ? <Sidebar nav={nav} /> : <BottomNav nav={nav} />;
 }

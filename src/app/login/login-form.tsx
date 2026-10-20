@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ArrowRight } from "lucide-react";
 import { login, type FormState } from "@/app/actions/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -32,8 +33,9 @@ export function LoginForm() {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" autoComplete="current-password" required />
       </div>
-      <Button type="submit" size="lg" disabled={pending}>
+      <Button type="submit" size="lg" disabled={pending} className="w-full">
         {pending ? "Masuk…" : "Masuk"}
+        {!pending && <ArrowRight aria-hidden />}
       </Button>
     </form>
   );

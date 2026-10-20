@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Amiri, Geist_Mono, Lora, Plus_Jakarta_Sans } from "next/font/google";
 import { Pwa } from "@/components/pwa";
 import { APP_NAME, BRAND_COLOR } from "@/lib/app-icon";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
+// Tipografi: docs/DESIGN.md §3.
+const sans = Plus_Jakarta_Sans({ variable: "--font-sans", subsets: ["latin"] });
+const display = Lora({ variable: "--font-display", subsets: ["latin"], weight: ["600"] });
+const arabic = Amiri({ variable: "--font-arabic", subsets: ["arabic"], weight: ["400", "700"] });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
@@ -30,7 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${sans.variable} ${display.variable} ${arabic.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Pwa />

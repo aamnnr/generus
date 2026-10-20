@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { ScanLine } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ATTENDANCE_LABEL, ATTENDANCE_STATUSES, getAgenda, getRoster, listScannerCandidates, listScanners, lockDueAgendas, summarize } from "@/lib/agenda";
@@ -75,7 +76,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
       )}
       <div className="flex flex-col gap-1">
         <div className="flex flex-wrap items-center gap-2">
-          <h1 className={`text-2xl font-semibold ${a.cancelledAt ? "line-through text-muted-foreground" : ""}`}>{a.title}</h1>
+          <h1 className={`text-2xl font-bold md:text-[26px] ${a.cancelledAt ? "line-through text-muted-foreground" : ""}`}>{a.title}</h1>
           <Badge variant="outline">
             {LEVEL[a.level]} {a.unitName}
           </Badge>
@@ -87,17 +88,17 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
           {a.location ? ` · ${a.location}` : ""}
         </p>
         {scanOpen && (
-          <Link href={`/pindai?agenda=${a.id}`} className={`${buttonVariants({ size: "lg" })} mt-2 w-fit`}>
-            Buka pemindai QR
+          <Link href={`/pindai?agenda=${a.id}`} className={`${buttonVariants({ size: "lg" })} mt-2 w-full sm:w-fit`}>
+            <ScanLine aria-hidden /> Buka pemindai QR
           </Link>
         )}
         <p className="text-sm text-muted-foreground">Sasaran: {targetLabel({ jenjangIds: a.targetJenjangIds, kategoriIds: a.targetKategoriIds, gender: a.targetGender }, jenjang)}</p>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-        <Stat label="Peserta" value={sum.total} />
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-6 md:gap-3">
+        <Stat label="Peserta" value={sum.total} className="bg-card text-foreground shadow-card" />
         {ATTENDANCE_STATUSES.map((s) => (
-          <Stat key={s} label={ATTENDANCE_LABEL[s]} value={sum.counts[s]} />
+          <Stat key={s} label={ATTENDANCE_LABEL[s]} value={sum.counts[s]} className={STAT_TONE[s]} />
         ))}
       </div>
       <p className="-mt-3 text-sm text-muted-foreground">
@@ -106,7 +107,8 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
       </p>
 
       <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-        <Card>
+        {/* HP: tanpa kartu luar agar baris checklist selebar layar (DESIGN.md §6.4). */}
+        <Card className="max-md:overflow-visible max-md:bg-transparent max-md:shadow-none max-md:[--card-spacing:0px]">
           <CardHeader>
             <CardTitle>Presensi</CardTitle>
             <CardDescription>
@@ -207,11 +209,19 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
   );
 }
 
-function Stat({ label, value }: { label: string; value: number }) {
+const STAT_TONE: Record<(typeof ATTENDANCE_STATUSES)[number], string> = {
+  hadir: "bg-status-hadir-soft text-status-hadir",
+  terlambat: "bg-status-terlambat-soft text-status-terlambat",
+  izin: "bg-status-izin-soft text-status-izin",
+  sakit: "bg-status-sakit-soft text-status-sakit",
+  alpa: "bg-status-alpa-soft text-status-alpa",
+};
+
+function Stat({ label, value, className }: { label: string; value: number; className: string }) {
   return (
-    <div className="rounded-lg border px-3 py-2">
-      <div className="text-xs text-muted-foreground">{label}</div>
-      <div className="text-xl font-semibold tabular-nums">{value.toLocaleString("id-ID")}</div>
+    <div className={`rounded-2xl px-3 py-2 md:px-4 md:py-3 ${className}`}>
+      <div className="text-xs font-semibold">{label}</div>
+      <div className="font-heading text-xl font-semibold tabular-nums md:text-[26px] md:leading-8">{value.toLocaleString("id-ID")}</div>
     </div>
   );
 }

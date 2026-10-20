@@ -12,11 +12,11 @@ import { discardRejected, enqueue, offlineDb, retryRejected, type OutboxItem } f
 type Status = "hadir" | "terlambat" | "izin" | "sakit" | "alpa";
 
 const OPTIONS: { value: Status; short: string; label: string; active: string }[] = [
-  { value: "hadir", short: "H", label: "Hadir", active: "bg-emerald-600 text-white border-emerald-600" },
-  { value: "terlambat", short: "T", label: "Terlambat", active: "bg-amber-500 text-white border-amber-500" },
-  { value: "izin", short: "I", label: "Izin", active: "bg-sky-600 text-white border-sky-600" },
-  { value: "sakit", short: "S", label: "Sakit", active: "bg-violet-600 text-white border-violet-600" },
-  { value: "alpa", short: "A", label: "Alpa", active: "bg-red-600 text-white border-red-600" },
+  { value: "hadir", short: "H", label: "Hadir", active: "bg-status-hadir text-white border-status-hadir" },
+  { value: "terlambat", short: "T", label: "Terlambat", active: "bg-status-terlambat text-white border-status-terlambat" },
+  { value: "izin", short: "I", label: "Izin", active: "bg-status-izin text-white border-status-izin" },
+  { value: "sakit", short: "S", label: "Sakit", active: "bg-status-sakit text-white border-status-sakit" },
+  { value: "alpa", short: "A", label: "Alpa", active: "bg-status-alpa text-white border-status-alpa" },
 ];
 
 export interface ChecklistRow {
@@ -70,7 +70,7 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
-        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari nama" aria-label="Cari nama peserta" className="max-w-xs" />
+        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari nama" aria-label="Cari nama peserta" className="max-w-xs rounded-full" />
         {writable.some((r) => !current(r)) && (
           <Button type="button" variant="outline" size="sm" onClick={markUnrecordedPresent}>
             Hadirkan semua yang belum diisi
@@ -99,18 +99,18 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
       <div className="flex flex-col gap-4">
         {groups.map(([group, items]) => (
           <section key={group} className="flex flex-col gap-1">
-            {group && <h3 className="text-sm font-medium text-muted-foreground">{group}</h3>}
-            <ul className="flex flex-col divide-y rounded-lg border">
+            {group && <h3 className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{group}</h3>}
+            <ul className="flex flex-col divide-y divide-muted overflow-hidden rounded-2xl bg-card shadow-card">
               {items.map((r) => {
                 const value = current(r);
                 const q = queuedMap.get(r.generusId);
                 return (
-                  <li key={r.generusId} className="flex flex-wrap items-center gap-2 px-3 py-2">
+                  <li key={r.generusId} className="flex flex-wrap items-center gap-2 px-3 py-2.5 md:px-4">
                     <span className="min-w-0 flex-1 text-sm">
                       {r.name} <span className="text-xs text-muted-foreground">({r.gender})</span>
                       {q && (
                         <span
-                          className={`ml-2 inline-block size-2 rounded-full align-middle ${q.error ? "bg-red-500" : "bg-amber-500"}`}
+                          className={`ml-2 inline-block size-2 rounded-full align-middle ${q.error ? "bg-status-alpa" : "bg-status-terlambat"}`}
                           title={q.error ? `Ditolak: ${q.error}` : "Tersimpan di perangkat, menunggu dikirim"}
                           aria-label={q.error ? "Ditolak server" : "Menunggu dikirim"}
                         />
@@ -127,8 +127,8 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
                           title={o.label}
                           disabled={!r.canWrite}
                           onClick={() => value !== o.value && record([{ generusId: r.generusId, status: o.value }])}
-                          className={`size-8 rounded-md border text-xs font-semibold transition-colors disabled:cursor-not-allowed ${
-                            value === o.value ? o.active : "bg-background text-muted-foreground hover:bg-muted"
+                          className={`size-9 rounded-[10px] border text-[13px] font-bold transition-colors disabled:cursor-not-allowed min-[400px]:size-10 md:size-9 ${
+                            value === o.value ? o.active : "border-border bg-card text-muted-foreground hover:bg-muted"
                           } ${!r.canWrite && value !== o.value ? "opacity-40" : ""}`}
                         >
                           {o.short}
@@ -145,9 +145,9 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
       </div>
 
       {writable.length > 0 && (
-        <div className="sticky bottom-0 -mx-4 flex items-center gap-2 border-t bg-background/95 px-4 py-3 text-sm backdrop-blur">
+        <div className="sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] -mx-4 flex items-center gap-2 border-t border-border bg-background/95 px-4 py-3 text-sm backdrop-blur md:bottom-0 md:mx-0 md:rounded-2xl md:border-0 md:bg-card md:shadow-card lg:bottom-4">
           <span
-            className={`inline-block size-2.5 rounded-full ${waiting === 0 ? "bg-emerald-500" : offline ? "bg-amber-500" : "bg-sky-500 animate-pulse"}`}
+            className={`inline-block size-2.5 rounded-full ${waiting === 0 ? "bg-status-hadir" : offline ? "bg-status-terlambat" : "bg-status-izin animate-pulse"}`}
             aria-hidden
           />
           <span role="status" className="text-muted-foreground">

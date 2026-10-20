@@ -5,6 +5,7 @@ PWA untuk presensi pengajian, target materi bulanan, dan progres kitab di tingka
 - Kebutuhan produk: [docs/PRD.md](docs/PRD.md)
 - Arsitektur & model data: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - Rencana fase: [docs/PLAN.md](docs/PLAN.md)
+- Sistem desain UI/UX: [docs/DESIGN.md](docs/DESIGN.md)
 - Template pengumpulan data: [public/templates/Template_Data_Generus.xlsx](public/templates/Template_Data_Generus.xlsx)
 
 ## Stack
