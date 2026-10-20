@@ -15,12 +15,14 @@
     "db:seed": "tsx scripts/seed/index.ts",
     "db:check": "tsx scripts/db-check.ts",
     "seed:xlsx": "tsx scripts/seed/export-xlsx.ts",
-    "db:cron": "tsx scripts/db-cron.ts"
+    "db:cron": "tsx scripts/db-cron.ts",
+    "vendor:zxing": "node scripts/vendor-zxing.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
+    "barcode-detector": "^3.2.2",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.5.0",
     "dexie": "^4.4.6",
@@ -29,6 +31,7 @@
     "lucide-react": "^1.59.0",
     "next": "16.4.2",
     "postgres": "^3.4.9",
+    "qrcode": "^1.5.4",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "server-only": "^0.0.1",
@@ -42,6 +45,7 @@
     "@faker-js/faker": "^10.6.0",
     "@tailwindcss/turbopack": "^4",
     "@types/node": "^20",
+    "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "dotenv": "^18.0.8",

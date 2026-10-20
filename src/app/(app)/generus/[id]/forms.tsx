@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { UnitOption } from "@/lib/generus";
-import { changeStatus, deleteGenerus, mutateGenerus, type GenerusFormState } from "../actions";
+import { changeStatus, deleteGenerus, mutateGenerus, reissueCard, type GenerusFormState } from "../actions";
 import { KelompokSelect } from "../generus-form";
 
 function Message({ state }: { state: GenerusFormState }) {
@@ -122,6 +122,25 @@ export function DeleteForm({ id, name }: { id: string; name: string }) {
       <input type="hidden" name="id" value={id} />
       <Button type="submit" variant="destructive" disabled={pending} className="w-fit">
         Hapus data
+      </Button>
+    </form>
+  );
+}
+
+export function ReissueCardForm({ id }: { id: string }) {
+  const [state, action, pending] = useActionState(reissueCard, {});
+  return (
+    <form
+      action={action}
+      className="flex flex-col gap-3"
+      onSubmit={(e) => {
+        if (!confirm("Terbitkan kartu baru? Kartu lama langsung tidak bisa dipakai.")) e.preventDefault();
+      }}
+    >
+      <Message state={state} />
+      <input type="hidden" name="id" value={id} />
+      <Button type="submit" variant="outline" size="sm" disabled={pending} className="w-fit">
+        Terbitkan ulang kartu (kartu hilang)
       </Button>
     </form>
   );

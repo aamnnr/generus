@@ -1,13 +1,13 @@
 /* Service worker Generus — Fase 1 (PWA dasar).
  *
- * - Aset build Next (/_next/static, berhash & immutable) dan ikon: cache-first.
+ * - Aset build Next (/_next/static, berhash & immutable), ikon, WASM pembaca QR: cache-first.
  * - Navigasi halaman: selalu ke jaringan; bila offline tampilkan /offline.html.
- * - Halaman & data berisi data pribadi TIDAK disimpan di cache perangkat.
- *
- * Penyimpanan offline untuk presensi (roster + antrian) dibangun di Fase 2.
+ * - Pengecualian: /pindai (kerangka pemindai tanpa data pribadi) disimpan agar
+ *   bisa dibuka offline; data peserta ada di IndexedDB, bukan di cache ini.
+ * - Halaman lain yang berisi data pribadi TIDAK disimpan di cache perangkat.
  * Naikkan VERSION bila isi file ini berubah agar cache lama dibersihkan.
  */
-const VERSION = "v2";
+const VERSION = "v4";
 const STATIC_CACHE = `generus-static-${VERSION}`;
 const PRECACHE = ["/offline.html", "/icons/icon-192.png", "/icons/icon-512.png"];
 
@@ -30,13 +30,32 @@ self.addEventListener("activate", (event) => {
 });
 
 function isStaticAsset(url) {
-  return url.origin === self.location.origin && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/"));
+  return url.origin === self.location.origin && (url.pathname.startsWith("/_next/static/") || url.pathname.startsWith("/icons/") || url.pathname.startsWith("/vendor/"));
 }
 
 self.addEventListener("fetch", (event) => {
   const { request } = event;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+
+  // Kerangka pemindai: dari navigasi langsung, atau "dipanaskan" oleh halaman
+  // pemindai sendiri (navigasi di dalam aplikasi tidak melewati service worker).
+  const warm = request.headers.get("x-generus-warm") === "1";
+  if (url.pathname === "/pindai" && (request.mode === "navigate" || warm)) {
+    event.respondWith(
+      fetch(request)
+        .then(async (response) => {
+          // Simpan hanya kerangka asli (bukan redirect ke /login).
+          if (response.ok && !response.redirected) {
+            const cache = await caches.open(STATIC_CACHE);
+            await cache.put("/pindai", response.clone());
+          }
+          return response;
+        })
+        .catch(async () => (await caches.match("/pindai")) ?? caches.match("/offline.html")),
+    );
+    return;
+  }
 
   if (request.mode === "navigate") {
     event.respondWith(fetch(request).catch(() => caches.match("/offline.html")));

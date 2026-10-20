@@ -9,7 +9,7 @@ export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex flex-1 flex-col">
       <OutboxSync />
-      <header className="border-b bg-background">
+      <header className="border-b bg-background print:hidden">
         <div className="mx-auto flex w-full max-w-5xl flex-wrap items-center gap-x-4 gap-y-2 px-4 py-3">
           <Link href="/beranda" className="font-semibold">
             Generus

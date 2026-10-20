@@ -77,6 +77,8 @@ export interface AgendaDetail extends AgendaListItem {
   recurrenceId: string | null;
   /** User adalah pengelola (admin di unit agenda atau di atasnya). */
   canManage: boolean;
+  /** User adalah petugas scan aktif untuk agenda ini. */
+  isScanner: boolean;
 }
 
 export async function getAgenda(claims: JwtClaims, id: string): Promise<AgendaDetail | null> {
@@ -92,6 +94,7 @@ export async function getAgenda(claims: JwtClaims, id: string): Promise<AgendaDe
         targetGender: agendas.targetGender,
         recurrenceId: agendas.recurrenceId,
         canManage: sql<boolean>`(SELECT app.scope_paths(ARRAY['superadmin','admin']::app_role[])) @> ${agendas.unitPath}`,
+        isScanner: sql<boolean>`app.is_agenda_scanner(${agendas.id})`,
       })
       .from(agendas)
       .innerJoin(units, eq(units.id, agendas.unitId))
@@ -228,3 +231,45 @@ export async function listAgendaUnits(claims: JwtClaims) {
   });
 }
 
+
+export interface ScannerRow {
+  userId: string;
+  name: string;
+  email: string | null;
+  expiresAt: Date;
+}
+
+/** Petugas scan sebuah agenda (hanya terlihat oleh pengelola). */
+export async function listScanners(claims: JwtClaims, agendaId: string): Promise<ScannerRow[]> {
+  return withRls(claims, async (tx) => {
+    const rows = await tx.execute<{ user_id: string; name: string; email: string | null; expires_at: string }>(sql`
+      SELECT s.user_id, p.name, p.email, s.expires_at
+      FROM agenda_scanners s JOIN profiles p ON p.id = s.user_id
+      WHERE s.agenda_id = ${agendaId}
+      ORDER BY p.name`);
+    return rows.map((r) => ({ userId: r.user_id, name: r.name, email: r.email, expiresAt: new Date(r.expires_at) }));
+  });
+}
+
+/** Akun yang bisa dijadikan petugas: akun aktif yang terlihat oleh pengelola. */
+export async function listScannerCandidates(claims: JwtClaims): Promise<{ id: string; name: string; email: string | null }[]> {
+  return withRls(claims, async (tx) => {
+    const rows = await tx.execute<{ id: string; name: string; email: string | null }>(sql`
+      SELECT id, name, email FROM profiles WHERE active AND id <> auth.uid() ORDER BY name`);
+    return [...rows];
+  });
+}
+
+/** Agenda di mana user menjadi petugas scan aktif (untuk beranda). */
+export async function listMyScanTasks(claims: JwtClaims) {
+  return withRls(claims, async (tx) => {
+    const rows = await tx.execute<{ id: string; title: string; starts_at: string; unit_name: string; locked_at: string | null }>(sql`
+      SELECT a.id, a.title, a.starts_at, u.name AS unit_name, a.locked_at
+      FROM agenda_scanners s
+      JOIN agendas a ON a.id = s.agenda_id
+      JOIN units u ON u.id = a.unit_id
+      WHERE s.user_id = auth.uid() AND s.expires_at > now() AND a.cancelled_at IS NULL AND a.locked_at IS NULL
+      ORDER BY a.starts_at`);
+    return rows.map((r) => ({ id: r.id, title: r.title, startsAt: new Date(r.starts_at), unitName: r.unit_name }));
+  });
+}

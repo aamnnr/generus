@@ -70,6 +70,9 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
         <h1 className="text-2xl font-semibold">Generus</h1>
         {canWriteGenerus(me) && (
           <div className="flex flex-wrap gap-2">
+            <Link href="/generus/kartu" className={buttonVariants({ variant: "outline" })}>
+              Cetak kartu QR
+            </Link>
             <Link href="/generus/kenaikan" className={buttonVariants({ variant: "outline" })}>
               Kenaikan jenjang
             </Link>

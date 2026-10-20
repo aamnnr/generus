@@ -68,4 +68,5 @@ Migrasi hanya dikelola Drizzle (`drizzle/`). Folder `supabase/` berisi konfigura
 | `pnpm db:seed` | Isi data contoh |
 | `pnpm seed:xlsx [n] [--with-errors]` | Buat file template berisi data contoh untuk menguji import |
 | `pnpm db:cron` | Jadwalkan penguncian presensi otomatis tiap 15 menit (pg_cron di Supabase) |
+| `pnpm vendor:zxing` | Salin WASM pembaca QR ke `public/vendor` (jalankan setelah memperbarui `barcode-detector`; ada tes penjaga) |
 | `pnpm db:check` | Ringkasan database + jumlah generus yang terlihat tiap akun (cek RLS) |

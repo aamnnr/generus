@@ -128,3 +128,37 @@
     @apply font-sans;
   }
 }
+/* Kartu QR generus: ukuran KTP 85,6 × 54 mm, 2 × 5 per A4. */
+.kartu-sheet {
+  display: grid;
+  grid-template-columns: repeat(2, 85.6mm);
+  grid-auto-rows: 54mm;
+  gap: 4mm 6mm;
+  justify-content: center;
+}
+.kartu {
+  display: flex;
+  gap: 4mm;
+  align-items: center;
+  padding: 4mm;
+  border: 0.3mm dashed #a3a3a3;
+  border-radius: 3mm;
+  background: #fff;
+  color: #171717;
+  break-inside: avoid;
+  overflow: hidden;
+}
+.kartu-qr { width: 36mm; height: 36mm; flex-shrink: 0; }
+.kartu-qr svg { width: 100%; height: 100%; }
+.kartu-info { display: flex; flex-direction: column; gap: 1mm; min-width: 0; font-size: 2.6mm; line-height: 1.25; }
+.kartu-brand { font-weight: 700; letter-spacing: 0.4mm; color: #0f766e; font-size: 2.6mm; }
+.kartu-name { font-weight: 700; font-size: 3.6mm; overflow-wrap: anywhere; }
+.kartu-meta { color: #404040; }
+.kartu-hint { margin-top: 1.5mm; color: #737373; font-size: 2.1mm; }
+
+@media print {
+  @page { size: A4; margin: 10mm 8mm; }
+  body { background: #fff !important; }
+  .kartu-sheet { gap: 3mm 6mm; }
+  .kartu:nth-child(10n) { break-after: page; }
+}

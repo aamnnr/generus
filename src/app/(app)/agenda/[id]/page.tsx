@@ -5,15 +5,16 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ATTENDANCE_LABEL, ATTENDANCE_STATUSES, getAgenda, getRoster, lockDueAgendas, summarize } from "@/lib/agenda";
+import { ATTENDANCE_LABEL, ATTENDANCE_STATUSES, getAgenda, getRoster, listScannerCandidates, listScanners, lockDueAgendas, summarize } from "@/lib/agenda";
 import { targetLabel } from "@/lib/agenda-target";
 import { requireGenerusReader } from "@/lib/auth";
 import { listJenjang } from "@/lib/generus";
 import { formatDateLong, formatDateTime, formatTime, zoneLabel } from "@/lib/time";
 import { AttendanceChecklist } from "./checklist";
-import { CancelForm, LockForm } from "./manage-forms";
+import { removeScanner } from "../actions";
+import { AddScannerForm, CancelForm, LockForm } from "./manage-forms";
 
 export const metadata: Metadata = { title: "Agenda · Generus" };
 
@@ -43,7 +44,12 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
   await lockDueAgendas(me.claims);
   const [a, jenjang] = await Promise.all([getAgenda(me.claims, id), listJenjang(me.claims)]);
   if (!a) notFound();
-  const roster = await getRoster(me.claims, id);
+  const [roster, scanners, candidates] = await Promise.all([
+    getRoster(me.claims, id),
+    a.canManage ? listScanners(me.claims, id) : Promise.resolve([]),
+    a.canManage ? listScannerCandidates(me.claims) : Promise.resolve([]),
+  ]);
+  const scanOpen = !a.lockedAt && !a.cancelledAt && (a.canManage || a.isScanner);
   const sum = summarize(roster);
   const now = new Date();
   const started = now >= a.startsAt;
@@ -80,6 +86,11 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
           {formatDateLong(a.startsAt)} · {formatTime(a.startsAt)}–{formatTime(a.endsAt)} {zoneLabel()}
           {a.location ? ` · ${a.location}` : ""}
         </p>
+        {scanOpen && (
+          <Link href={`/pindai?agenda=${a.id}`} className={`${buttonVariants({ size: "lg" })} mt-2 w-fit`}>
+            Buka pemindai QR
+          </Link>
+        )}
         <p className="text-sm text-muted-foreground">Sasaran: {targetLabel({ jenjangIds: a.targetJenjangIds, kategoriIds: a.targetKategoriIds, gender: a.targetGender }, jenjang)}</p>
       </div>
 
@@ -138,6 +149,33 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
                     </li>
                   ))}
                 </ul>
+              </CardContent>
+            </Card>
+          )}
+
+          {a.canManage && scanOpen && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Petugas scan</CardTitle>
+                <CardDescription>Akses pemindai sementara untuk agenda ini, sampai {formatDateTime(a.delegateUntil)}.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                {scanners.length === 0 && <p className="text-sm text-muted-foreground">Belum ada petugas. Pengelola agenda selalu bisa memindai.</p>}
+                <ul className="flex flex-col gap-1 text-sm">
+                  {scanners.map((s) => (
+                    <li key={s.userId} className="flex items-center justify-between gap-2">
+                      <span className={s.expiresAt < now ? "text-muted-foreground line-through" : ""}>{s.name}</span>
+                      <form action={removeScanner}>
+                        <input type="hidden" name="agendaId" value={a.id} />
+                        <input type="hidden" name="userId" value={s.userId} />
+                        <Button type="submit" variant="ghost" size="xs">
+                          Cabut
+                        </Button>
+                      </form>
+                    </li>
+                  ))}
+                </ul>
+                <AddScannerForm agendaId={a.id} candidates={candidates.filter((c) => !scanners.some((s) => s.userId === c.id))} />
               </CardContent>
             </Card>
           )}

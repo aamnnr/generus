@@ -38,11 +38,11 @@ Estimasi untuk 1–2 developer.
 **Uji internal 1:** simulasikan beberapa minggu agenda & presensi manual dengan akun uji per peran (data seed), termasuk mode offline.
 
 ## Fase 3 — Presensi QR untuk Desa/Daerah (±2 minggu)
-- [ ] Generate `qr_token` + cetak kartu QR massal (PDF A4).
-- [ ] Modul scanner: unduh roster, scan kamera, umpan balik suara/getar, offline outbox, sinkron idempoten.
-- [ ] Banyak petugas per agenda + akses "petugas scan" sementara.
-- [ ] Delegasi ke Admin Kelompok (izin/sakit/lupa kartu) sampai `delegate_until`.
-- [ ] Cadangan cari-nama.
+- [x] Kartu QR: cetak massal per desa/kelompok atau per generus (A4, 10 kartu ukuran KTP, cetak/simpan PDF dari browser); terbitkan ulang kartu hilang.
+- [x] Pemindai `/pindai`: unduh roster (hash SHA-256 isi QR, bukan token), kamera (BarcodeDetector bawaan / zxing-wasm lokal), bunyi & getar, hadir/terlambat otomatis, antrian offline, scan pertama menang. Bisa dibuka dari nol saat offline (kerangka di-cache service worker).
+- [x] Banyak petugas per agenda: pengelola menunjuk akun sebagai petugas scan sampai batas pelengkapan presensi; tugas tampil di beranda petugas.
+- [x] Delegasi ke Admin Kelompok (izin/sakit/lupa kartu) sampai `delegate_until` (dibangun di Fase 2).
+- [x] Cadangan cari-nama dan kolom kode untuk scanner QR USB/Bluetooth.
 - [ ] Uji lapangan: simulasi 200+ scan dengan 3 HP, sebagian offline.
 
 **Uji internal 2:** simulasi pengajian desa: cetak ±200 kartu QR dari data seed, 3 HP memindai bersamaan (sebagian offline). Ukur waktu check-in (target PRD G2).

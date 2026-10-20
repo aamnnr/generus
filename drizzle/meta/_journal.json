@@ -50,6 +50,20 @@
       "when": 1792485648633,
       "tag": "0006_agenda_rls",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792488333411,
+      "tag": "0007_scanners",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792488336041,
+      "tag": "0008_scanners_rls",
+      "breakpoints": true
     }
   ]
 }

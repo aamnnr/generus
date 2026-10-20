@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { and, eq, gte, isNull, sql } from "drizzle-orm";
 import { z } from "zod";
-import { agendas, attendance } from "@/db/schema";
+import { agendaScanners, agendas, attendance, units } from "@/db/schema";
 import { withRls } from "@/db/rls";
 import { segmentsToTarget } from "@/lib/agenda-target";
 import { getCurrentUser, requireGenerusWriter } from "@/lib/auth";
@@ -151,7 +151,14 @@ export async function cancelAgenda(_prev: AgendaFormState, fd: FormData): Promis
 const attendanceSchema = z.object({
   agendaId: z.string().uuid(),
   entries: z
-    .array(z.object({ generusId: z.string().uuid(), status: z.enum(["hadir", "terlambat", "izin", "sakit", "alpa"]) }))
+    .array(
+      z.object({
+        generusId: z.string().uuid(),
+        status: z.enum(["hadir", "terlambat", "izin", "sakit", "alpa"]),
+        // set = checklist (menimpa), scan/search = pemindai (scan pertama menang).
+        mode: z.enum(["set", "scan", "search"]).default("set"),
+      }),
+    )
     .min(1, "Belum ada perubahan untuk disimpan")
     .max(2000),
 });
@@ -161,31 +168,114 @@ export interface SaveAttendanceResult {
   saved?: number;
 }
 
-/** Simpan beberapa status presensi sekaligus (dipanggil dari checklist). */
+/** Simpan beberapa presensi sekaligus (checklist & pemindai, lewat antrian offline). */
 export async function saveAttendance(input: z.input<typeof attendanceSchema>): Promise<SaveAttendanceResult> {
-  const me = await getCurrentUser();
+  const me = await getCurrentUser({ allowPasswordChange: true });
   const parsed = attendanceSchema.safeParse(input);
   if (!parsed.success) return { error: parsed.error.issues[0].message };
   const { agendaId, entries } = parsed.data;
+  const sets = entries.filter((e) => e.mode === "set");
+  const scans = entries.filter((e) => e.mode !== "set");
   try {
     await withRls(me.claims, async (tx) => {
-      const [{ manage }] = await tx
-        .select({ manage: sql<boolean>`(SELECT app.scope_paths(ARRAY['superadmin','admin']::app_role[])) @> ${agendas.unitPath}` })
-        .from(agendas)
-        .where(eq(agendas.id, agendaId));
-      await tx
-        .insert(attendance)
-        .values(entries.map((e) => ({ agendaId, generusId: e.generusId, status: e.status, method: manage ? "manual" as const : "delegasi" as const })))
-        .onConflictDoUpdate({
-          target: [attendance.agendaId, attendance.generusId],
-          set: { status: sql`excluded.status`, method: sql`excluded.method` },
-        });
+      if (sets.length) {
+        const [{ manage }] = await tx
+          .select({ manage: sql<boolean>`app.can_manage_agenda(${agendas.id})` })
+          .from(agendas)
+          .where(eq(agendas.id, agendaId));
+        await tx
+          .insert(attendance)
+          .values(sets.map((e) => ({ agendaId, generusId: e.generusId, status: e.status, method: manage ? ("manual" as const) : ("delegasi" as const) })))
+          .onConflictDoUpdate({
+            target: [attendance.agendaId, attendance.generusId],
+            set: { status: sql`excluded.status`, method: sql`excluded.method` },
+          });
+      }
+      if (scans.length) {
+        // Beberapa petugas bisa memindai orang yang sama: catatan pertama dipertahankan.
+        await tx
+          .insert(attendance)
+          .values(scans.map((e) => ({ agendaId, generusId: e.generusId, status: e.status, method: e.mode === "scan" ? ("scan" as const) : ("search" as const) })))
+          .onConflictDoNothing({ target: [attendance.agendaId, attendance.generusId] });
+      }
     });
   } catch (err) {
     return { error: dbErrorMessage(err, "Gagal menyimpan presensi. Sebagian peserta mungkin di luar akses Anda atau batas waktu sudah lewat.") };
   }
   revalidatePath(`/agenda/${agendaId}`);
   return { saved: entries.length };
+}
+
+export interface RosterDownload {
+  error?: string;
+  agenda?: {
+    id: string;
+    title: string;
+    unitName: string;
+    level: "daerah" | "desa" | "kelompok";
+    startsAt: string;
+    endsAt: string;
+    lateAfter: string;
+    lockedAt: string | null;
+    cancelledAt: string | null;
+  };
+  rows?: { generusId: string; name: string; gender: "L" | "P"; kelompok: string; desa: string; tokenHash: string | null; status: string | null }[];
+}
+
+/** Daftar peserta untuk pemindai (disimpan di perangkat agar bisa dipakai offline). */
+export async function downloadRoster(agendaId: string): Promise<RosterDownload> {
+  const me = await getCurrentUser({ allowPasswordChange: true });
+  if (!z.string().uuid().safeParse(agendaId).success) return { error: "Agenda tidak valid." };
+  try {
+    return await withRls(me.claims, async (tx) => {
+      const [a] = await tx
+        .select({
+          id: agendas.id,
+          title: agendas.title,
+          unitName: units.name,
+          level: units.level,
+          startsAt: agendas.startsAt,
+          endsAt: agendas.endsAt,
+          lateAfter: agendas.lateAfter,
+          lockedAt: agendas.lockedAt,
+          cancelledAt: agendas.cancelledAt,
+        })
+        .from(agendas)
+        .innerJoin(units, eq(units.id, agendas.unitId))
+        .where(eq(agendas.id, agendaId));
+      if (!a) return { error: "Agenda tidak ditemukan atau Anda tidak punya akses." };
+      const rows = await tx.execute<{
+        generus_id: string;
+        name: string;
+        gender: "L" | "P";
+        kelompok: string;
+        desa: string;
+        token_hash: string | null;
+        status: string | null;
+      }>(sql`SELECT * FROM app.agenda_roster(${agendaId})`);
+      return {
+        agenda: {
+          ...a,
+          startsAt: a.startsAt.toISOString(),
+          endsAt: a.endsAt.toISOString(),
+          lateAfter: a.lateAfter.toISOString(),
+          lockedAt: a.lockedAt?.toISOString() ?? null,
+          cancelledAt: a.cancelledAt?.toISOString() ?? null,
+        },
+        rows: rows.map((r) => ({
+          generusId: r.generus_id,
+          name: r.name,
+          gender: r.gender,
+          kelompok: r.kelompok,
+          desa: r.desa,
+          tokenHash: r.token_hash,
+          status: r.status,
+        })),
+      };
+    });
+  } catch (err) {
+    return { error: dbErrorMessage(err, "Gagal mengunduh daftar peserta.") };
+  }
 }
 
 export async function lockAgenda(_prev: AgendaFormState, fd: FormData): Promise<AgendaFormState> {
@@ -198,4 +288,36 @@ export async function lockAgenda(_prev: AgendaFormState, fd: FormData): Promise<
   }
   revalidatePath(`/agenda/${id}`);
   return { ok: "Presensi dikunci. Peserta yang belum tercatat menjadi alpa." };
+}
+
+export async function addScanner(_prev: AgendaFormState, fd: FormData): Promise<AgendaFormState> {
+  const me = await requireGenerusWriter();
+  const parsed = z.object({ agendaId: z.string().uuid(), userId: z.string().uuid("Pilih akun") }).safeParse(Object.fromEntries(fd));
+  if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { agendaId, userId } = parsed.data;
+  try {
+    await withRls(me.claims, async (tx) => {
+      const [a] = await tx.select({ delegateUntil: agendas.delegateUntil }).from(agendas).where(eq(agendas.id, agendaId));
+      if (!a) throw new Error("Agenda tidak ditemukan");
+      // Akses berlaku sampai batas pelengkapan presensi agenda.
+      await tx
+        .insert(agendaScanners)
+        .values({ agendaId, userId, expiresAt: a.delegateUntil, grantedBy: me.id })
+        .onConflictDoUpdate({ target: [agendaScanners.agendaId, agendaScanners.userId], set: { expiresAt: a.delegateUntil } });
+    });
+  } catch (err) {
+    return { error: dbErrorMessage(err, "Gagal menambah petugas. Hanya pengelola agenda yang bisa menambah petugas.") };
+  }
+  revalidatePath(`/agenda/${agendaId}`);
+  return { ok: "Petugas scan ditambahkan." };
+}
+
+export async function removeScanner(fd: FormData) {
+  const me = await requireGenerusWriter();
+  const agendaId = z.string().uuid().parse(fd.get("agendaId"));
+  const userId = z.string().uuid().parse(fd.get("userId"));
+  await withRls(me.claims, (tx) =>
+    tx.delete(agendaScanners).where(and(eq(agendaScanners.agendaId, agendaId), eq(agendaScanners.userId, userId))),
+  );
+  revalidatePath(`/agenda/${agendaId}`);
 }

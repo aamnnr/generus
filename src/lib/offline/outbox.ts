@@ -6,12 +6,15 @@ import Dexie, { type EntityTable } from "dexie";
 // dan pengiriman ulang idempoten (server melakukan upsert).
 
 export type AttendanceStatus = "hadir" | "terlambat" | "izin" | "sakit" | "alpa";
+/** set = checklist (menimpa di server), scan/search = pemindai (catatan pertama menang). */
+export type OutboxMode = "set" | "scan" | "search";
 
 export interface OutboxItem {
   key: string; // `${agendaId}:${generusId}`
   agendaId: string;
   generusId: string;
   status: AttendanceStatus;
+  mode?: OutboxMode;
   /** ms epoch; dipakai untuk tidak menghapus ketukan yang lebih baru dari yang terkirim. */
   updatedAt: number;
   attempts: number;
@@ -19,11 +22,44 @@ export interface OutboxItem {
   error?: string;
 }
 
+/** Peserta agenda yang diunduh pemindai. tokenHash = SHA-256 isi QR (bukan token). */
+export interface RosterItem {
+  agendaId: string;
+  generusId: string;
+  name: string;
+  gender: "L" | "P";
+  kelompok: string;
+  desa: string;
+  tokenHash: string | null;
+  /** Status dari server saat diunduh. Status terbaru = antrian ?? status ini. */
+  status: AttendanceStatus | null;
+}
+
+export interface ScanAgenda {
+  id: string;
+  title: string;
+  unitName: string;
+  level: "daerah" | "desa" | "kelompok";
+  startsAt: string;
+  endsAt: string;
+  lateAfter: string;
+  lockedAt: string | null;
+  cancelledAt: string | null;
+  downloadedAt: number;
+}
+
 class OfflineDb extends Dexie {
   outbox!: EntityTable<OutboxItem, "key">;
+  roster!: Dexie.Table<RosterItem, [string, string]>;
+  scanAgendas!: EntityTable<ScanAgenda, "id">;
   constructor(name = "generus") {
     super(name);
     this.version(1).stores({ outbox: "key, agendaId, updatedAt" });
+    this.version(2).stores({
+      outbox: "key, agendaId, updatedAt",
+      roster: "[agendaId+generusId], agendaId, [agendaId+tokenHash]",
+      scanAgendas: "id",
+    });
   }
 }
 
@@ -35,7 +71,7 @@ export function offlineDb(): OfflineDb {
 
 export const outboxKey = (agendaId: string, generusId: string) => `${agendaId}:${generusId}`;
 
-export async function enqueue(entries: { agendaId: string; generusId: string; status: AttendanceStatus }[]) {
+export async function enqueue(entries: { agendaId: string; generusId: string; status: AttendanceStatus; mode?: OutboxMode }[]) {
   const now = Date.now();
   await offlineDb().outbox.bulkPut(
     entries.map((e) => ({ ...e, key: outboxKey(e.agendaId, e.generusId), updatedAt: now, attempts: 0 })),
@@ -44,7 +80,7 @@ export async function enqueue(entries: { agendaId: string; generusId: string; st
 
 export type Sender = (input: {
   agendaId: string;
-  entries: { generusId: string; status: AttendanceStatus }[];
+  entries: { generusId: string; status: AttendanceStatus; mode: OutboxMode }[];
 }) => Promise<{ error?: string; saved?: number }>;
 
 export interface FlushResult {
@@ -81,7 +117,7 @@ async function doFlush(send: Sender): Promise<FlushResult> {
       const batch = items.slice(i, i + BATCH);
       let res: Awaited<ReturnType<Sender>>;
       try {
-        res = await send({ agendaId, entries: batch.map((b) => ({ generusId: b.generusId, status: b.status })) });
+        res = await send({ agendaId, entries: batch.map((b) => ({ generusId: b.generusId, status: b.status, mode: b.mode ?? "set" })) });
         // Hanya respons yang jelas (saved berupa angka, atau error dari server) yang
         // dianggap final. Respons lain diperlakukan seperti gagal jaringan.
         if (!res || (typeof res.saved !== "number" && typeof res.error !== "string")) throw new Error("Respons tidak dikenal");
@@ -118,4 +154,14 @@ export async function retryRejected() {
   const table = offlineDb().outbox;
   const rejected = (await table.toArray()).filter((i) => i.error);
   await table.bulkPut(rejected.map((i) => ({ ...i, error: undefined, attempts: 0 })));
+}
+
+/** Simpan daftar peserta hasil unduhan, menggantikan unduhan sebelumnya untuk agenda itu. */
+export async function saveRoster(agenda: Omit<ScanAgenda, "downloadedAt">, rows: Omit<RosterItem, "agendaId">[]) {
+  const db = offlineDb();
+  await db.transaction("rw", db.roster, db.scanAgendas, async () => {
+    await db.roster.where("agendaId").equals(agenda.id).delete();
+    await db.roster.bulkPut(rows.map((r) => ({ ...r, agendaId: agenda.id })));
+    await db.scanAgendas.put({ ...agenda, downloadedAt: Date.now() });
+  });
 }

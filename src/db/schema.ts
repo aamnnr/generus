@@ -8,6 +8,7 @@ import {
   jsonb,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -245,6 +246,23 @@ export const attendance = pgTable(
     unique("attendance_agenda_generus_unique").on(t.agendaId, t.generusId),
     index("attendance_generus_idx").on(t.generusId),
   ],
+);
+
+/** Akses sementara "petugas scan" untuk satu agenda (Fase 3). */
+export const agendaScanners = pgTable(
+  "agenda_scanners",
+  {
+    agendaId: uuid("agenda_id")
+      .notNull()
+      .references(() => agendas.id, { onDelete: "cascade" }),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => profiles.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    grantedBy: uuid("granted_by"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.agendaId, t.userId] }), index("agenda_scanners_user_idx").on(t.userId)],
 );
 
 // ---------------------------------------------------------------------------

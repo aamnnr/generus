@@ -136,6 +136,8 @@ Tidak disimpan per baris; dihitung: generus `aktif` yang `kelompok.path <@ agend
 
 ## 5. Alur Presensi Offline (scan QR)
 
+> **Status (Fase 3, sudah dibangun):** roster berisi `token_hash` = SHA-256 dari isi QR `GNR1:<token>` (fungsi `app.agenda_roster`, hanya untuk pengelola & petugas scan), dicocokkan di perangkat. Halaman `/pindai` statis tanpa data pribadi sehingga di-cache service worker; data di IndexedDB (`roster`, `scanAgendas`, `outbox`). Scan dikirim dengan mode `scan`/`search` → `ON CONFLICT DO NOTHING` (catatan pertama menang). Detail di bawah adalah rancangan awal.
+
 1. **Persiapan (online)** — petugas membuka agenda → aplikasi mengunduh *roster*: `{qr_token → generus_id, nama, kelompok}` untuk sasaran agenda (5.000 generus ≈ < 500 KB) ke Dexie.
 2. **Scan (boleh offline)** — kamera membaca `qr_token` → dicocokkan ke roster lokal → tampil nama + bunyi/getar → simpan ke `outbox` dengan `id` UUID buatan klien, `recorded_at` waktu perangkat, `device_id`.
    - Token tidak ada di roster → tampil "bukan peserta sasaran / tidak dikenal" (bisa tetap dicatat sebagai tamu jika diizinkan).

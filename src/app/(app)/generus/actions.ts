@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { generus } from "@/db/schema";
 import { withRls } from "@/db/rls";
@@ -159,4 +159,24 @@ export async function deleteGenerus(_prev: GenerusFormState, formData: FormData)
   }
   revalidatePath("/generus");
   redirect("/generus?pesan=dihapus");
+}
+
+/** Terbitkan kartu baru: token QR diganti sehingga kartu lama tidak berlaku. */
+export async function reissueCard(_prev: GenerusFormState, formData: FormData): Promise<GenerusFormState> {
+  const me = await requireGenerusWriter();
+  const id = z.string().uuid().parse(formData.get("id"));
+  try {
+    const res = await withRls(me.claims, (tx) =>
+      tx
+        .update(generus)
+        .set({ qrToken: sql`upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 16))` })
+        .where(eq(generus.id, id))
+        .returning({ id: generus.id }),
+    );
+    if (res.length === 0) return { error: "Anda tidak punya akses untuk generus ini." };
+  } catch (err) {
+    return { error: dbErrorMessage(err) };
+  }
+  revalidatePath(`/generus/${id}`);
+  return { ok: "Kartu baru diterbitkan. Kartu lama tidak berlaku lagi; cetak kartu baru." };
 }

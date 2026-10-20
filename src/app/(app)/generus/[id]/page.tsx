@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ATTENDANCE_LABEL, getGenerusAttendance } from "@/lib/agenda";
 import { canMutateGenerus, canWriteGenerus, requireGenerusReader } from "@/lib/auth";
@@ -21,7 +22,7 @@ import {
 import { updateGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
 import { formatDateTime } from "@/lib/time";
-import { DeleteForm, MutateForm, ReactivateForm, StatusForm } from "./forms";
+import { DeleteForm, MutateForm, ReactivateForm, ReissueCardForm, StatusForm } from "./forms";
 
 export const metadata: Metadata = { title: "Detail Generus · Generus" };
 
@@ -138,6 +139,21 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
                 </CardDescription>
               </CardHeader>
               <CardContent>{g.status === "aktif" ? <StatusForm id={g.id} /> : <ReactivateForm id={g.id} />}</CardContent>
+            </Card>
+          )}
+
+          {writer && g.status === "aktif" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Kartu QR</CardTitle>
+                <CardDescription>Dipakai untuk presensi scan di pengajian desa/daerah.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col gap-3">
+                <Link href={`/generus/kartu?id=${g.id}`} className={`${buttonVariants({ variant: "outline", size: "sm" })} w-fit`}>
+                  Cetak kartu
+                </Link>
+                <ReissueCardForm id={g.id} />
+              </CardContent>
             </Card>
           )}
 
