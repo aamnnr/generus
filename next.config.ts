@@ -7,6 +7,10 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "6mb" },
     // Navigasi & Server Action yang gagal karena offline ditahan lalu diulang otomatis.
     useOffline: true,
+    // Halaman yang baru dikunjungi (mis. tab/kategori lain) dipakai ulang dari cache
+    // browser selama 30 detik, jadi bolak-balik tab terasa seketika. Setiap aksi simpan
+    // memanggil revalidatePath sehingga data yang baru diubah tetap segar.
+    staleTimes: { dynamic: 30 },
   },
   async headers() {
     return [

@@ -25,6 +25,7 @@ import {
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
 import { TAB_TRANSITION } from "@/lib/transitions";
+import { ChipNav } from "@/components/segment-nav";
 
 export const metadata: Metadata = { title: "Generus · Generus" };
 
@@ -132,25 +133,11 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
               </Button>
           </FilterDisclosure>
         </QueryForm>
-        <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden" role="group" aria-label="Jenjang">
-          {chips.map((c) => {
-            const on = p.jenjang === c.key;
-            return (
-              <Link
-                key={c.label}
-                href={href({ jenjang: c.key, page: undefined })}
-                scroll={false}
-                transitionTypes={[TAB_TRANSITION]}
-                aria-current={on ? "true" : undefined}
-                className={`flex h-9 shrink-0 items-center rounded-full px-4 text-sm whitespace-nowrap ${
-                  on ? "bg-primary font-semibold text-primary-foreground" : "bg-tile text-foreground hover:bg-secondary"
-                }`}
-              >
-                {c.label}
-              </Link>
-            );
-          })}
-        </div>
+        <ChipNav
+          label="Jenjang"
+          className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0 [&::-webkit-scrollbar]:hidden"
+          items={chips.map((c) => ({ label: c.label, href: href({ jenjang: c.key, page: undefined }), active: p.jenjang === c.key }))}
+        />
       </div>
 
       {rows.length === 0 && (

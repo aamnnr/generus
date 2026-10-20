@@ -1,8 +1,9 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useState, useTransition } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
+import { useReportPending } from "@/components/nav/pending-store";
 import { TAB_TRANSITION } from "@/lib/transitions";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -48,6 +49,8 @@ export function QuerySelect({
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const [pending, startTransition] = useTransition();
+  useReportPending(pending);
   return (
     <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-xs">
       <Label htmlFor={`q-${name}`} className="text-xs text-muted-foreground">
@@ -59,7 +62,7 @@ export function QuerySelect({
         onChange={(e) => {
           const next = new URLSearchParams(params);
           next.set(name, e.target.value);
-          router.push(`${pathname}?${next}`, { scroll: false, transitionTypes: [TAB_TRANSITION] });
+          startTransition(() => router.push(`${pathname}?${next}`, { scroll: false, transitionTypes: [TAB_TRANSITION] }));
         }}
       >
         {options?.map((o) => (

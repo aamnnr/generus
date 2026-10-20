@@ -1,35 +1,27 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "@/components/app-link";
 import { ChevronRight, Plus, Search } from "lucide-react";
-import { EmptyState, PageHeader, Pill } from "@/components/page-header";
+import { EmptyState, Pill } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { requireCurriculumEditor } from "@/lib/auth";
 import { listMateri } from "@/lib/kurikulum";
 import { ASPEK_LABEL, ASPEK_ORDER, type Aspek } from "@/lib/kurikulum-format";
-import { KurikulumTabs } from "../shared";
-import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
 import { TAB_TRANSITION } from "@/lib/transitions";
+import { ChipNav } from "@/components/segment-nav";
 
 export const metadata: Metadata = { title: "Pustaka materi · Generus" };
 
 export default function MateriPage({ searchParams }: PageProps<"/kurikulum/materi">) {
   return (
     <>
-      <PageHeader
-        title="Kurikulum"
-        description="Materi yang bisa dipakai ulang di setiap periode: hafalan, dalil, doa, akhlaq, dan lainnya."
-        actions={
-          <Link href="/kurikulum/materi/baru" className={buttonVariants()}>
-            <Plus aria-hidden /> Tambah materi
-          </Link>
-        }
-      />
-      <KurikulumTabs active="materi" />
-      <Suspense fallback={<PageLoading />}>
-        <MateriList searchParams={searchParams} />
-      </Suspense>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Materi yang bisa dipakai ulang di setiap periode: hafalan, dalil, doa, akhlaq, dan lainnya.</p>
+        <Link href="/kurikulum/materi/baru" className={buttonVariants()}>
+          <Plus aria-hidden /> Tambah materi
+        </Link>
+      </div>
+      <MateriList searchParams={searchParams} />
     </>
   );
 }
@@ -87,8 +79,14 @@ async function MateriList({ searchParams }: Pick<PageProps<"/kurikulum/materi">,
           </label>
         </QueryForm>
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:mx-0 md:px-0">
-          {chip("Semua", !aspek, href({ aspek: undefined }))}
-          {ASPEK_ORDER.map((a) => chip(ASPEK_LABEL[a], aspek === a, href({ aspek: a })))}
+          <ChipNav
+            label="Aspek"
+            className="flex gap-2"
+            items={[
+              { label: "Semua", href: href({ aspek: undefined }), active: !aspek },
+              ...ASPEK_ORDER.map((a) => ({ label: ASPEK_LABEL[a], href: href({ aspek: a }), active: aspek === a })),
+            ]}
+          />
           {chip(archived ? "Arsip ✓" : "Arsip", archived, href({ arsip: archived ? undefined : "1" }))}
         </div>
       </div>

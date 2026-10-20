@@ -331,7 +331,10 @@ Tetap 85,6 × 54 mm. Strip kiri `green-800` 6 mm dengan siluet kubah putih, nama
 - **Penerapan** (`globals.css` bagian "Gerak", `(app)/layout.tsx`):
   - Perpindahan halaman: link dalam aplikasi memakai `@/components/app-link` (bukan `next/link`) yang menandai navigasi `page`; konten utama crossfade bersamaan ±220 ms (konten baru naik 6 px), tanpa jeda kosong. Sidebar & tab bawah diam. Aksi/simpan form tidak memicu crossfade.
   - Ganti kategori/tab/filter/halaman daftar di halaman yang sama: tandai `transitionTypes={[TAB_TRANSITION]}` (sudah otomatis di `SegmentNav`, `QueryForm`, `QuerySelect`) + `scroll={false}`. Memakai crossfade bawaan browser 180 ms, sehingga judul/tab/filter yang sama tetap diam dan hanya data yang berubah memudar.
-  - Tab segmen (`SegmentNav`): pil aktif meluncur ke tab baru.
+  - Tab segmen (`SegmentNav`) & chip kategori (`ChipNav`): status aktif berpindah **seketika saat diklik** (optimistik, `useOptimisticNav`); pil meluncur dengan transisi CSS, data menyusul di latar.
+  - Bilah progres tipis (kuningan) di atas halaman muncul selama navigasi berjalan (link, tab, filter) — tanda klik sudah diterima.
+  - Bagian berjenis tab yang beda halaman (Kurikulum: Periode/Pustaka/Kitab) memakai **layout bersama** (`kurikulum/(tabs)/layout.tsx`) agar judul & tab tidak dibuat ulang; Suspense di layout menjaga isi lama tetap tampil sampai isi baru siap.
+  - Cache klien 30 detik (`staleTimes.dynamic`): kembali ke tab/halaman yang baru dibuka terasa seketika; aksi simpan tetap menyegarkan data (revalidatePath).
   - Konten yang selesai dimuat & elemen baru di halaman: fade 220 ms. Pemuatan memakai kerangka (`PageLoading`), bukan teks.
   - Panel yang dibuka (filter, pengaturan, konfirmasi, form ubah): kelas `animate-enter` (fade + naik 6 px, 200 ms).
   - Hover/tekan pada link & tombol: transisi warna 150 ms.

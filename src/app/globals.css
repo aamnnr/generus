@@ -282,8 +282,8 @@
 ::view-transition-group(app-tabs), ::view-transition-group(app-sidebar) { animation: none; z-index: 100; }
 ::view-transition-old(app-tabs), ::view-transition-old(app-sidebar) { display: none; }
 ::view-transition-new(app-tabs), ::view-transition-new(app-sidebar) { animation: none; }
-/* Pil tab segmen meluncur ke posisi barunya. */
-::view-transition-group(*.segment-pill) { animation-duration: 260ms; animation-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1); }
+/* Pil tab segmen meluncur ke tab yang diklik (seketika, tanpa menunggu server). */
+.segment-pill-ready { transition: transform 280ms cubic-bezier(0.2, 0.7, 0.2, 1), width 280ms cubic-bezier(0.2, 0.7, 0.2, 1); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0s !important; animation-delay: 0s !important; transition-duration: 0s !important; }
@@ -292,3 +292,8 @@
 @media print {
   .page-body > *, .animate-enter { animation: none !important; }
 }
+
+/* Bilah progres navigasi: muncul setelah 120 ms (navigasi cepat tidak berkedip). */
+.nav-progress { width: 0; opacity: 0; transition: opacity 200ms ease-out; }
+.nav-progress.is-active { opacity: 1; animation: nav-progress 2.4s cubic-bezier(0.1, 0.6, 0.2, 1) 120ms both; }
+@keyframes nav-progress { from { width: 0; } to { width: 88%; } }

@@ -1,7 +1,8 @@
 "use client";
 
-import type { ComponentProps } from "react";
+import { useTransition, type ComponentProps } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useReportPending } from "@/components/nav/pending-store";
 import { TAB_TRANSITION } from "@/lib/transitions";
 
 /**
@@ -12,9 +13,12 @@ export function QueryForm({ action, onSubmit, ...props }: Omit<ComponentProps<"f
   const router = useRouter();
   const pathname = usePathname();
   const target = action ?? pathname;
+  const [pending, startTransition] = useTransition();
+  useReportPending(pending);
   return (
     <form
       {...props}
+      aria-busy={pending || undefined}
       action={target}
       method="get"
       onSubmit={(e) => {
@@ -26,7 +30,7 @@ export function QueryForm({ action, onSubmit, ...props }: Omit<ComponentProps<"f
           if (typeof v === "string" && v !== "") params.append(k, v);
         }
         const qs = params.toString();
-        router.push(qs ? `${target}?${qs}` : target, { scroll: false, transitionTypes: [TAB_TRANSITION] });
+        startTransition(() => router.push(qs ? `${target}?${qs}` : target, { scroll: false, transitionTypes: [TAB_TRANSITION] }));
       }}
     />
   );

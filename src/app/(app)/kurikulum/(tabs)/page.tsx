@@ -1,25 +1,16 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "@/components/app-link";
 import { ChevronRight, Plus } from "lucide-react";
-import { EmptyState, PageHeader } from "@/components/page-header";
+import { EmptyState } from "@/components/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { canEditCurriculum, getCurrentUser } from "@/lib/auth";
 import { listPeriods } from "@/lib/kurikulum";
-import { dateRange, KurikulumTabs, PeriodPills, todayIso } from "./shared";
-import { PageLoading } from "@/components/page-loading";
+import { dateRange, PeriodPills, todayIso } from "@/app/(app)/kurikulum/shared";
 
 export const metadata: Metadata = { title: "Kurikulum · Generus" };
 
-export default function KurikulumPage() {
-  return (
-    <Suspense fallback={<PageLoading />}>
-      <PeriodList />
-    </Suspense>
-  );
-}
-
-async function PeriodList() {
+// Judul, tab, dan Suspense ada di (tabs)/layout.tsx.
+export default async function KurikulumPage() {
   const me = await getCurrentUser();
   const editor = canEditCurriculum(me);
   const periods = await listPeriods(me.claims);
@@ -27,18 +18,14 @@ async function PeriodList() {
 
   return (
     <>
-      <PageHeader
-        title="Kurikulum"
-        description="Target materi pembelajaran per periode dari Tim Kurikulum PPG."
-        actions={
-          editor && (
-            <Link href="/kurikulum/periode/baru" className={buttonVariants()}>
-              <Plus aria-hidden /> Buat periode
-            </Link>
-          )
-        }
-      />
-      {editor && <KurikulumTabs active="periode" />}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-muted-foreground">Target materi pembelajaran per periode dari Tim Kurikulum PPG.</p>
+        {editor && (
+          <Link href="/kurikulum/periode/baru" className={buttonVariants()}>
+            <Plus aria-hidden /> Buat periode
+          </Link>
+        )}
+      </div>
 
       {periods.length === 0 && (
         <EmptyState

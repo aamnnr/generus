@@ -1,20 +1,6 @@
 import { Pill } from "@/components/page-header";
-import { SegmentNav } from "@/components/segment-nav";
 import { formatRange, juzLabel } from "@/lib/kurikulum-format";
 import type { PeriodListItem, TargetRow } from "@/lib/kurikulum";
-
-export function KurikulumTabs({ active }: { active: "periode" | "materi" | "kitab" }) {
-  return (
-    <SegmentNav
-      label="Bagian kurikulum"
-      items={[
-        { href: "/kurikulum", label: "Periode target", active: active === "periode" },
-        { href: "/kurikulum/materi", label: "Pustaka materi", active: active === "materi" },
-        { href: "/kurikulum/kitab", label: "Kitab", active: active === "kitab" },
-      ]}
-    />
-  );
-}
 
 const fmt = (iso: string, withYear: boolean) =>
   new Date(`${iso}T00:00:00`).toLocaleDateString("id-ID", { day: "numeric", month: "short", ...(withYear ? { year: "numeric" } : {}) });

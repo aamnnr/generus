@@ -1,29 +1,22 @@
-import { Suspense } from "react";
 import type { Metadata } from "next";
-import { PageHeader, Pill } from "@/components/page-header";
+import { Pill } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { requireCurriculumEditor } from "@/lib/auth";
 import { listKitab } from "@/lib/kurikulum";
 import { formatPosition, KITAB_UNIT_LABEL } from "@/lib/kurikulum-format";
-import { setKitabArchived } from "../actions";
-import { KitabEditToggle, KitabForm } from "../forms";
-import { KurikulumTabs } from "../shared";
-import { PageLoading } from "@/components/page-loading";
+import { setKitabArchived } from "@/app/(app)/kurikulum/actions";
+import { KitabEditToggle, KitabForm } from "@/app/(app)/kurikulum/forms";
 
 export const metadata: Metadata = { title: "Kitab · Generus" };
 
 export default function KitabPage() {
   return (
     <>
-      <PageHeader
-        title="Kurikulum"
-        description="Lintasan progres berurutan. Al-Qur'an memakai posisi surat:ayat; kitab lain memakai halaman atau bab."
-      />
-      <KurikulumTabs active="kitab" />
-      <Suspense fallback={<PageLoading />}>
-        <KitabList />
-      </Suspense>
+      <p className="text-sm text-muted-foreground">
+        Lintasan progres berurutan. Al-Qur&apos;an memakai posisi surat:ayat; kitab lain memakai halaman atau bab.
+      </p>
+      <KitabList />
     </>
   );
 }

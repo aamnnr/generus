@@ -1,5 +1,6 @@
 import { Suspense, ViewTransition } from "react";
 import { PAGE_TRANSITION, TAB_TRANSITION } from "@/lib/transitions";
+import { NavProgress } from "@/components/nav/nav-progress";
 import { OutboxSync } from "@/components/outbox-sync";
 import { BottomNav, Sidebar } from "@/components/shell/app-nav";
 import { buildNav } from "@/components/shell/nav";
@@ -9,6 +10,7 @@ import { getCurrentUser } from "@/lib/auth";
 export default function AppLayout({ children }: LayoutProps<"/">) {
   return (
     <div className="flex flex-1">
+      <NavProgress />
       <OutboxSync />
       <Suspense fallback={<div className="hidden w-64 shrink-0 border-r border-sidebar-border bg-sidebar lg:block" />}>
         <ShellNav part="sidebar" />
