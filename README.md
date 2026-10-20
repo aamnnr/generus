@@ -53,6 +53,8 @@ templates/            template Excel untuk admin
 2. Fungsi, trigger, dan kebijakan RLS ditulis manual: `pnpm db:generate --custom --name=<nama>` lalu isi file SQL-nya.
 3. Tambah/ubah tes di `tests/db/` — setiap aturan akses harus punya tes.
 
+Migrasi hanya dikelola Drizzle (`drizzle/`). Folder `supabase/` berisi konfigurasi Supabase CLI (link project); jangan pakai `supabase db push` / `supabase/migrations`.
+
 ## Perintah
 
 | Perintah | Fungsi |
@@ -64,3 +66,4 @@ templates/            template Excel untuk admin
 | `pnpm db:generate` | Buat migrasi dari perubahan skema |
 | `pnpm db:migrate` | Terapkan migrasi ke `DATABASE_URL` |
 | `pnpm db:seed` | Isi data contoh |
+| `pnpm db:check` | Ringkasan database + jumlah generus yang terlihat tiap akun (cek RLS) |

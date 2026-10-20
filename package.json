@@ -12,7 +12,8 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx scripts/seed/index.ts"
+    "db:seed": "tsx scripts/seed/index.ts",
+    "db:check": "tsx scripts/db-check.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

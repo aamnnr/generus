@@ -9,7 +9,8 @@ Estimasi untuk 1–2 developer. Setiap fase diakhiri rilis yang bisa dipakai pen
 - [ ] Kumpulkan data awal memakai [templates/Template_Data_Generus.xlsx](../templates/Template_Data_Generus.xlsx) (sheet Wilayah + Generus; format ini juga menjadi format import di Fase 1).
 - [ ] Pilih 1 desa (± 4–6 kelompok) sebagai **pilot**.
 - [x] Setup repo: Next.js + TypeScript + Tailwind, Drizzle, Vitest + PGlite, CI (lint, typecheck, test, build), script data contoh.
-- [ ] Buat project Supabase (dev & staging), isi `.env`, jalankan `pnpm db:migrate` dan `pnpm db:seed`.
+- [x] Project Supabase development: migrasi + seed diterapkan, RLS terverifikasi (`pnpm db:check`).
+- [ ] Project Supabase staging (menjelang pilot).
 - [ ] shadcn/ui dipasang saat mulai membuat UI (Fase 1).
 
 ## Fase 1 — Fondasi (±2–3 minggu)
