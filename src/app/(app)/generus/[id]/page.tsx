@@ -28,6 +28,7 @@ import { GenerusForm } from "../generus-form";
 import { formatDateTime } from "@/lib/time";
 import { DeleteForm, MutateForm, ReactivateForm, ReissueCardForm, StatusForm } from "./forms";
 import { PageLoading } from "@/components/page-loading";
+import { kurikulumEnabled } from "@/lib/features";
 
 export const metadata: Metadata = { title: "Detail Generus · Generus" };
 
@@ -54,7 +55,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
     writer ? listJenjang(me.claims) : Promise.resolve([]),
     mutator && g.status === "aktif" ? listScopeUnits(me.claims, "mutate") : Promise.resolve([]),
     getGenerusAttendance(me.claims, g.id, 10),
-    listPublishedPeriods(me.claims),
+    kurikulumEnabled() ? listPublishedPeriods(me.claims) : Promise.resolve([]),
   ]);
   const period = pickActivePeriod(periods);
   const capaian = period ? await getGenerusCapaian(me.claims, g.id, period.id) : [];

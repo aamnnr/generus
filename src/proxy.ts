@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { KURIKULUM_PATHS, kurikulumEnabled } from "@/lib/features";
 
 // Memperbarui cookie sesi Supabase di setiap request dan mengarahkan
 // pengunjung yang belum login ke /login. Otorisasi sebenarnya tetap
@@ -32,6 +33,10 @@ export async function proxy(request: NextRequest) {
   const isPublic = PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   if (pathname === "/") return redirectWithCookies(request, response, loggedIn ? "/beranda" : "/login");
+  // Modul yang dimatikan di server ini (Tahap 1) → beranda.
+  if (!kurikulumEnabled() && KURIKULUM_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`))) {
+    return redirectWithCookies(request, response, "/beranda");
+  }
   if (!loggedIn && !isPublic) return redirectWithCookies(request, response, "/login");
   return response;
 }

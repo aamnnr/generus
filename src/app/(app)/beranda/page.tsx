@@ -16,6 +16,7 @@ import { isPromotionSeason } from "@/lib/kenaikan-rules";
 import type { PeriodListItem } from "@/lib/kurikulum";
 import { dateRange } from "../kurikulum/shared";
 import { formatDateLong, formatDateTime, formatTime, zoneLabel } from "@/lib/time";
+import { kurikulumEnabled } from "@/lib/features";
 
 export const metadata: Metadata = { title: "Beranda · Generus" };
 
@@ -35,7 +36,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
   const writer = canWriteGenerus(user);
   const [scanTasks, periods, summary, counts] = await Promise.all([
     listMyScanTasks(user.claims),
-    listPublishedPeriods(user.claims),
+    kurikulumEnabled() ? listPublishedPeriods(user.claims) : Promise.resolve([]),
     reader ? getBerandaSummary(user.claims) : Promise.resolve(null),
     reader
       ? withRls(user.claims, async (tx) => {

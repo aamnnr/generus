@@ -30,6 +30,7 @@ import { QuerySelect } from "../capaian/forms";
 import { ProgressBar } from "../capaian/shared";
 import { PageLoading } from "@/components/page-loading";
 import { TAB_TRANSITION } from "@/lib/transitions";
+import { kurikulumEnabled } from "@/lib/features";
 
 export const metadata: Metadata = { title: "Laporan · Generus" };
 
@@ -51,12 +52,16 @@ function unitLabel(u: { level: keyof typeof LEVEL_LABEL; name: string }) {
 async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchParams">) {
   const [me, sp] = await Promise.all([getCurrentUser(), searchParams]);
   const root = laporanRootUnit(me);
-  if (!root) redirect(rekapRootUnit(me) ? "/capaian/rekap" : "/beranda");
+  const modul = kurikulumEnabled();
+  if (!root) redirect(modul && rekapRootUnit(me) ? "/capaian/rekap" : "/beranda");
 
   const month = isMonth(one(sp.bulan)) ? one(sp.bulan)! : currentMonth();
   const range = monthRange(month);
   const months = recentMonths(12);
-  const [tree, periods] = await Promise.all([getUnitWithChildren(me.claims, one(sp.unit) ?? root.unitId), listPublishedPeriods(me.claims)]);
+  const [tree, periods] = await Promise.all([
+    getUnitWithChildren(me.claims, one(sp.unit) ?? root.unitId),
+    modul ? listPublishedPeriods(me.claims) : Promise.resolve([]),
+  ]);
   if (!tree) redirect("/laporan");
   const unit = tree.unit;
   const isKelompok = unit.level === "kelompok";
@@ -127,19 +132,19 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
         <QuerySelect name="bulan" label="Bulan" value={month} options={months.map((m) => ({ value: m, label: monthLabel(m) }))} />
       </div>
 
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+      <div className={`grid grid-cols-2 gap-3 ${modul ? "lg:grid-cols-4" : "lg:grid-cols-3"}`}>
         <Stat label="Kehadiran" value={hadirRate(total) === null ? "–" : `${hadirRate(total)}%`} sub={`${(total.hadir + total.terlambat).toLocaleString("id-ID")} dari ${total.total.toLocaleString("id-ID")} presensi`}>
           <ProgressBar done={total.hadir} proses={total.terlambat} total={total.total} />
         </Stat>
         <Stat label="Agenda terkunci" value={String(total.agendas)} sub={`${total.generus.toLocaleString("id-ID")} generus aktif`} />
         <Stat label="Alpa" value={total.alpa.toLocaleString("id-ID")} sub={`izin ${total.izin} · sakit ${total.sakit}`} />
-        <Stat
+        {modul && <Stat
           label="Capaian target"
           value={unitCap && unitCap.slots ? `${percent(unitCap.tuntas, unitCap.slots)}%` : "–"}
           sub={period ? `Periode ${period.name}` : "Tidak ada periode target"}
         >
           {unitCap && <ProgressBar done={unitCap.tuntas} proses={unitCap.proses} total={unitCap.slots} />}
-        </Stat>
+        </Stat>}
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
@@ -172,7 +177,7 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
             <CardTitle className="flex items-center gap-2">
               <AlertTriangle className="size-5 text-status-alpa" aria-hidden /> Peringatan
             </CardTitle>
-            <CardDescription>Alpa 3× berturut-turut & kelompok yang belum mengisi capaian.</CardDescription>
+            <CardDescription>{modul ? "Alpa 3× berturut-turut & kelompok yang belum mengisi capaian." : "Generus yang alpa 3× berturut-turut."}</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <section className="flex flex-col gap-2">
@@ -243,7 +248,7 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
                       <TableHead className="text-right">Hadir</TableHead>
                       <TableHead className="text-right">Izin/Sakit</TableHead>
                       <TableHead className="text-right">Alpa</TableHead>
-                      <TableHead className="text-right">Capaian</TableHead>
+                      {modul && <TableHead className="text-right">Capaian</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -264,7 +269,7 @@ async function Laporan({ searchParams }: Pick<PageProps<"/laporan">, "searchPara
                         </TableCell>
                         <TableCell className="text-right tabular-nums">{g.izin + g.sakit}</TableCell>
                         <TableCell className={`text-right tabular-nums ${g.alpa ? "font-semibold text-status-alpa" : ""}`}>{g.alpa}</TableCell>
-                        <TableCell className="text-right tabular-nums">{g.capSlots ? `${g.capTuntas}/${g.capSlots}` : "–"}</TableCell>
+                        {modul && <TableCell className="text-right tabular-nums">{g.capSlots ? `${g.capTuntas}/${g.capSlots}` : "–"}</TableCell>}
                       </TableRow>
                     ))}
                   </TableBody>

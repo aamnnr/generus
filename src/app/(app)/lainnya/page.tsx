@@ -7,6 +7,7 @@ import { initials } from "@/components/shell/nav";
 import { MosqueSilhouette } from "@/components/shell/ornament";
 import { canEditCurriculum, canReadGenerus, canWriteGenerus, getCurrentUser, rekapRootUnit, roleLabel } from "@/lib/auth";
 import { PageLoading } from "@/components/page-loading";
+import { kurikulumEnabled } from "@/lib/features";
 
 export const metadata: Metadata = { title: "Lainnya · Generus" };
 
@@ -38,16 +39,13 @@ async function Menu() {
         { href: "/generus/import", label: "Import dari Excel", icon: Upload },
       ]
     : [];
+  const modul = kurikulumEnabled();
   const kurikulum: Item[] = [
-    ...(canReadGenerus(me)
-      ? [
-          { href: "/laporan", label: "Laporan bulanan", icon: FileBarChart },
-          { href: "/capaian", label: "Capaian", icon: ChartNoAxesColumn },
-        ]
-      : []),
-    ...(rekapRootUnit(me) ? [{ href: "/capaian/rekap", label: "Rekap capaian", icon: ChartNoAxesColumn }] : []),
-    { href: "/kurikulum", label: "Target periode", icon: BookOpenText },
-    ...(canEditCurriculum(me)
+    ...(canReadGenerus(me) ? [{ href: "/laporan", label: "Laporan bulanan", icon: FileBarChart }] : []),
+    ...(modul && canReadGenerus(me) ? [{ href: "/capaian", label: "Capaian", icon: ChartNoAxesColumn }] : []),
+    ...(modul && rekapRootUnit(me) ? [{ href: "/capaian/rekap", label: "Rekap capaian", icon: ChartNoAxesColumn }] : []),
+    ...(modul ? [{ href: "/kurikulum", label: "Target periode", icon: BookOpenText }] : []),
+    ...(modul && canEditCurriculum(me)
       ? [
           { href: "/kurikulum/materi", label: "Pustaka materi", icon: Library },
           { href: "/kurikulum/kitab", label: "Kitab", icon: ScrollText },
@@ -80,7 +78,7 @@ async function Menu() {
       </Link>
 
       {data.length > 0 && <Group title="DATA GENERUS" items={data} />}
-      <Group title="LAPORAN & KURIKULUM" items={kurikulum} />
+      {kurikulum.length > 0 && <Group title={modul ? "LAPORAN & KURIKULUM" : "LAPORAN"} items={kurikulum} />}
       {admin.length > 0 && <Group title="ADMINISTRASI" items={admin} />}
 
       <section className="flex flex-col gap-2">

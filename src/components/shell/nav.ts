@@ -1,5 +1,6 @@
 import type { CurrentUser } from "@/lib/auth";
 import { canReadGenerus, canWriteGenerus, rekapRootUnit, roleLabel } from "@/lib/auth";
+import { kurikulumEnabled } from "@/lib/features";
 
 // Struktur navigasi per peran (DESIGN.md §6.3). Dibangun di server, dirender
 // oleh komponen klien yang hanya menandai item aktif.
@@ -36,9 +37,11 @@ export function buildNav(user: CurrentUser): ShellNav {
     main.push({ href: "/agenda", label: "Agenda", icon: "agenda" }, { href: "/generus", label: "Generus", icon: "generus" });
   }
   if (canWriteGenerus(user)) main.push({ href: "/generus/kartu", label: "Kartu QR", icon: "kartu" });
-  if (read) main.push({ href: "/capaian", label: "Capaian", icon: "capaian" });
-  else if (rekapRootUnit(user)) main.push({ href: "/capaian/rekap", label: "Rekap capaian", icon: "capaian" });
-  main.push({ href: "/kurikulum", label: "Kurikulum", icon: "kurikulum" });
+  if (kurikulumEnabled()) {
+    if (read) main.push({ href: "/capaian", label: "Capaian", icon: "capaian" });
+    else if (rekapRootUnit(user)) main.push({ href: "/capaian/rekap", label: "Rekap capaian", icon: "capaian" });
+    main.push({ href: "/kurikulum", label: "Kurikulum", icon: "kurikulum" });
+  }
   if (read) main.push({ href: "/laporan", label: "Laporan", icon: "laporan" });
 
   const admin: NavItem[] = user.isSuperadmin

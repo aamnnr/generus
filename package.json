@@ -16,6 +16,10 @@
     "db:seed:kurikulum": "tsx scripts/seed/kurikulum-cli.ts",
     "db:seed:presensi": "tsx scripts/seed/presensi-cli.ts",
     "db:check": "tsx scripts/db-check.ts",
+    "resmi:migrate": "node scripts/with-env.mjs .env.resmi drizzle-kit migrate",
+    "resmi:setup": "node scripts/with-env.mjs .env.resmi tsx scripts/setup-resmi.ts",
+    "resmi:cron": "node scripts/with-env.mjs .env.resmi tsx scripts/db-cron.ts",
+    "resmi:check": "node scripts/with-env.mjs .env.resmi tsx scripts/db-check.ts",
     "seed:xlsx": "tsx scripts/seed/export-xlsx.ts",
     "db:cron": "tsx scripts/db-cron.ts",
     "vendor:zxing": "node scripts/vendor-zxing.mjs"

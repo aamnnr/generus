@@ -2,6 +2,7 @@ import * as XLSX from "xlsx";
 import { getCurrentUser, LEVEL_LABEL } from "@/lib/auth";
 import { getRekapUnits, getUnitWithChildren, listPublishedPeriods } from "@/lib/capaian";
 import { currentMonth, getKehadiranUnits, getLaporanGenerus, getPeringatanAlpa, hadirRate, isMonth, laporanRootUnit, monthRange } from "@/lib/laporan";
+import { kurikulumEnabled } from "@/lib/features";
 
 // Unduhan laporan bulanan (.xlsx): ringkasan per unit, rincian per generus, peringatan.
 
@@ -22,7 +23,8 @@ export async function GET(request: Request) {
     listPublishedPeriods(me.claims),
   ]);
   if (!tree) return new Response("Unit tidak ditemukan.", { status: 404 });
-  const period = periods.find((p) => p.startsOn <= range.endIso && p.endsOn >= range.startIso) ?? null;
+  const modul = kurikulumEnabled();
+  const period = !modul ? null : periods.find((p) => p.startsOn <= range.endIso && p.endsOn >= range.startIso) ?? null;
   const units = [tree.unit, ...tree.children];
   const ids = units.map((u) => u.id);
 
@@ -78,6 +80,16 @@ export async function GET(request: Request) {
     "Capaian dinilai": g.capSlots || null,
     "Alpa 3× berturut": g.alpaStreak ? "Ya" : "",
   }));
+
+  // Modul kurikulum mati (Tahap 1): buang baris periode & kolom capaian.
+  if (!modul) {
+    ringkasan.splice(3, 1);
+    for (let i = 5; i < ringkasan.length; i++) ringkasan[i] = ringkasan[i].slice(0, 10);
+    for (const r of rincian) {
+      delete (r as Partial<typeof r>)["Capaian tuntas"];
+      delete (r as Partial<typeof r>)["Capaian dinilai"];
+    }
+  }
 
   const wb = XLSX.utils.book_new();
   const ws1 = XLSX.utils.aoa_to_sheet(ringkasan);
