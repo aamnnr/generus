@@ -1,4 +1,5 @@
 import { LOGO_COLORS, LogoGlyph } from "@/components/brand/logo";
+import { FitName } from "./fit-name";
 
 // Kartu identitas generus: ukuran KTP berdiri (54 × 85,6 mm), untuk lanyard.
 // Gaya ada di globals.css (.idc-*) memakai satuan mm agar cetak presisi.
@@ -37,7 +38,7 @@ export function IdCard({ c }: { c: IdCardData }) {
       </header>
 
       <div className="idc-body">
-        <div className="idc-name">{c.name}</div>
+        <FitName name={c.name} />
         <div className="idc-meta">
           Kelompok {c.kelompok} · Desa {c.desa}
         </div>

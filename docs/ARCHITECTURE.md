@@ -138,6 +138,13 @@ Tidak disimpan per baris; dihitung: generus `aktif` yang `kelompok.path <@ agend
 - **Operasi Auth admin** (buat akun, reset password, blokir) memakai service role key, hanya setelah `requireSuperadmin()`. Menonaktifkan akun = `profiles.active = false` (RLS) **dan** ban di Supabase Auth (tidak bisa login).
 - **Cache Components**: semua bagian yang membaca sesi berada di dalam `<Suspense>`; `getSession()` memanggil `connection()` karena klien auth Supabase memakai `Date.now()`.
 
+## 4b-2. Aplikasi Android (generus-mobile)
+
+- Proyek terpisah `../generus-mobile` (Kotlin + Jetpack Compose), memakai **project Supabase yang sama**: Supabase Auth + PostgREST langsung, tanpa backend baru. RLS & trigger tetap pengaman utama.
+- Query gabungan yang di PWA ada di `src/lib/*.ts` disediakan sebagai RPC `public.mobile_*` (SECURITY INVOKER) di `drizzle/0014_mobile_api.sql`; dites di `tests/db/mobile-api.test.ts`. Hasil yang bisa > 1.000 baris dikembalikan sebagai satu jsonb (batas baris PostgREST). **Mengubah logika query di `src/lib/*.ts` → periksa juga padanannya di migrasi ini.**
+- Operasi Auth admin (buat akun, reset password, blokir) lewat Edge Function `supabase/functions/admin-akun` (memegang service role key; pemanggil dicek superadmin via `mobile_is_superadmin()`).
+- Antrian presensi di Room + WorkManager (bisa terkirim walau aplikasi ditutup); scan memakai roster `token_hash` yang sama.
+
 ## 4c. Antrian presensi (Fase 2, sudah berjalan)
 
 - `src/lib/offline/outbox.ts`: tabel `outbox` di IndexedDB (Dexie), kunci `agenda:generus` sehingga ketukan terakhir menimpa yang lama.

@@ -100,3 +100,17 @@ pnpm resmi:migrate
 - [ ] Pengajian desa: tunjuk petugas pemindai, pindai beberapa kartu, cek presensi terkunci setelah batas waktu.
 - [ ] Pasang sebagai aplikasi (Add to Home Screen) di Android & iPhone.
 - [ ] Unduh Excel dari halaman Laporan (tanpa kolom capaian).
+
+## Aplikasi Android (generus-mobile)
+
+Aplikasi Android memakai database server yang sama. Setelah migrasi `0014_mobile_api` ikut
+diterapkan (`pnpm db:migrate` / `pnpm resmi:migrate` di atas sudah termasuk), pasang Edge Function
+untuk menu Akun:
+
+```bash
+supabase functions deploy admin-akun --project-ref <ref-project>
+```
+
+Kunci server untuk build APK diisi di `generus-mobile/secrets.properties` (URL + anon/publishable
+key saja). Flavor `uji` → server uji, `resmi` → server resmi. Lihat `generus-mobile/README.md`.
+
