@@ -111,6 +111,7 @@ audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb
 - Hak *tulis* lebih ketat dari *baca*: misalnya Admin Desa boleh **membaca** presensi agenda kelompok, tapi hanya **menulis** presensi agenda milik desanya; Admin Kelompok boleh menulis presensi agenda desa **hanya untuk generus kelompoknya** dan **sebelum `delegate_until`**.
 - Peran **kyai** tidak memiliki kebijakan tulis sama sekali (read-only di level RLS). Peran **kurikulum** hanya boleh menulis tabel `curriculum_periods`, `materi`, `kitab`, `period_targets`, dan membaca agregat capaian. Periode yang belum diterbitkan hanya terlihat oleh kurikulum & superadmin. Rekap lintas unit memakai fungsi agregat SECURITY DEFINER `app.capaian_rekap_units` / `app.capaian_rekap_targets` (cek akses `app.can_read_rekap`): Tim Kurikulum mendapat angka agregat tanpa akses ke baris generus.
 - Otorisasi dicek dua lapis: di server (pesan error ramah) dan di RLS (pengaman terakhir).
+- **Dua tingkat superadmin** (`drizzle/0016_superadmin_scope.sql`). *Superadmin sistem* (tabel `system_admins`, diisi lewat skrip) menambah daerah, mengubah jenjang, membaca audit log, dan dianggap superadmin di setiap daerah. *Superadmin daerah* (peran `superadmin` di sebuah daerah) mengelola desa/kelompok, akun, dan peran **hanya di daerahnya**: akun yang semua perannya di daerah itu (`app.can_manage_profile`), tidak termasuk superadmin sistem. Operasi Auth admin (service role) selalu didahului perubahan lewat RLS sebagai bukti akun itu dalam lingkup.
 
 ### Matriks akses ringkas
 

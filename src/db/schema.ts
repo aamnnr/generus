@@ -86,6 +86,15 @@ export const userRoles = pgTable(
   (t) => [unique("user_roles_unique").on(t.userId, t.unitId, t.role), index("user_roles_user_idx").on(t.userId)],
 );
 
+// Superadmin sistem: boleh menambah daerah dan mengelola semua daerah. Superadmin
+// biasa hanya berkuasa di daerah tempat perannya. Diisi lewat skrip, tidak dari aplikasi.
+export const systemAdmins = pgTable("system_admins", {
+  userId: uuid("user_id")
+    .primaryKey()
+    .references(() => profiles.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 // ---------------------------------------------------------------------------
 // Jenjang
 // ---------------------------------------------------------------------------

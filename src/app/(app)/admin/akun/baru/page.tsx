@@ -27,5 +27,5 @@ export default function BaruPage() {
 
 async function FormLoader() {
   const me = await requireSuperadmin();
-  return <CreateAccountForm unitGroups={await listUnitGroups(me.claims)} />;
+  return <CreateAccountForm unitGroups={await listUnitGroups(me)} />;
 }

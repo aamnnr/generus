@@ -11,12 +11,12 @@ function Message({ state }: { state: WilayahFormState }) {
   return null;
 }
 
-export function AddUnitForm({ parentId, level }: { parentId: string; level: "desa" | "kelompok" }) {
+export function AddUnitForm({ parentId, level }: { parentId?: string; level: "daerah" | "desa" | "kelompok" }) {
   const [state, action, pending] = useActionState<WilayahFormState, FormData>(addUnit, {});
-  const label = level === "desa" ? "desa" : "kelompok";
+  const label = level;
   return (
     <form action={action} className="flex flex-col gap-2">
-      <input type="hidden" name="parentId" value={parentId} />
+      {parentId && <input type="hidden" name="parentId" value={parentId} />}
       <input type="hidden" name="level" value={level} />
       <div className="flex gap-2">
         <Input name="name" placeholder={`Nama ${label} baru`} required minLength={2} aria-label={`Nama ${label} baru`} />

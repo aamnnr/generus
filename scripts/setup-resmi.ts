@@ -1,6 +1,6 @@
 /**
  * Menyiapkan server RESMI (Tahap 1: Database Generus & Presensi) yang masih kosong:
- * wilayah Daerah Klaten Timur 1 → Desa Samber → 13 kelompok, dan satu akun superadmin.
+ * wilayah Daerah Klaten Timur 1 → Desa Samber → 13 kelompok, dan satu akun superadmin sistem.
  *
  *   pnpm resmi:setup              # wilayah + superadmin
  *   pnpm resmi:setup --generus    # + 302 nama generus Samber (jenis kelamin/jenjang/
@@ -54,6 +54,8 @@ async function main() {
       userId = created.user.id;
     }
     await sql`INSERT INTO user_roles (user_id, unit_id, role) VALUES (${userId}, ${result.unitIds.daerah}, 'superadmin') ON CONFLICT DO NOTHING`;
+    // Pemilik sistem: boleh menambah daerah & mengelola semua daerah.
+    await sql`INSERT INTO system_admins (user_id) VALUES (${userId}) ON CONFLICT DO NOTHING`;
     console.log(`✓ Superadmin ${env.SETUP_ADMIN_EMAIL}`);
     console.log("Langkah berikutnya: pnpm resmi:cron, lalu buat akun pengurus dari menu Akun & peran.");
   } finally {

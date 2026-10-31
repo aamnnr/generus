@@ -12,7 +12,9 @@ import { generateTempPassword } from "@/lib/password";
 import { createSupabaseAdmin } from "@/lib/supabase/server";
 
 // Semua aksi di sini hanya untuk superadmin; diperiksa ulang di setiap aksi
-// (requireSuperadmin) dan sekali lagi oleh RLS di database.
+// (requireSuperadmin) dan sekali lagi oleh RLS di database. Superadmin daerah
+// hanya boleh mengelola akun yang semua perannya ada di daerahnya, jadi aksi yang
+// memakai Supabase Admin (melewati RLS) selalu didahului perubahan lewat RLS.
 
 export interface AccountFormState {
   error?: string;
@@ -68,8 +70,9 @@ export async function createAccount(_prev: AccountFormState, formData: FormData)
   const userId = data.user.id;
   try {
     await withRls(me.claims, async (tx) => {
-      await tx.update(profiles).set({ name, phone, mustChangePassword: true }).where(eq(profiles.id, userId));
+      // Peran dulu: profil baru hanya boleh diubah setelah akunnya masuk lingkup pemanggil.
       await tx.insert(userRoles).values({ userId, unitId, role });
+      await tx.update(profiles).set({ name, phone, mustChangePassword: true }).where(eq(profiles.id, userId));
     });
   } catch (err) {
     // Batalkan akun auth agar tidak ada akun tanpa peran yang valid.
@@ -141,7 +144,10 @@ export async function setActive(formData: FormData) {
   const active = formData.get("active") === "true";
   if (id === me.id) redirect(`/admin/akun/${id}`);
 
-  await withRls(me.claims, (tx) => tx.update(profiles).set({ active }).where(eq(profiles.id, id)));
+  const changed = await withRls(me.claims, (tx) =>
+    tx.update(profiles).set({ active }).where(eq(profiles.id, id)).returning({ id: profiles.id }),
+  );
+  if (changed.length === 0) redirect(`/admin/akun/${id}`);
   // Blokir juga di Auth agar tidak bisa login sama sekali selama nonaktif.
   await createSupabaseAdmin().auth.admin.updateUserById(id, { ban_duration: active ? "none" : "876000h" });
   revalidatePath(`/admin/akun/${id}`);
@@ -153,10 +159,14 @@ export async function resetPassword(_prev: AccountFormState, formData: FormData)
   const id = z.string().uuid().parse(formData.get("id"));
   if (id === me.id) return { error: "Untuk akun sendiri, gunakan menu Ganti password." };
 
+  // Lewat RLS dulu: gagal bila akun ini di luar lingkup pemanggil.
+  const allowed = await withRls(me.claims, (tx) =>
+    tx.update(profiles).set({ mustChangePassword: true }).where(eq(profiles.id, id)).returning({ id: profiles.id }),
+  );
+  if (allowed.length === 0) return { error: "Akun ini di luar wilayah Anda." };
   const tempPassword = generateTempPassword();
   const { error } = await createSupabaseAdmin().auth.admin.updateUserById(id, { password: tempPassword });
   if (error) return { error: "Gagal mereset password." };
-  await withRls(me.claims, (tx) => tx.update(profiles).set({ mustChangePassword: true }).where(eq(profiles.id, id)));
   revalidatePath(`/admin/akun/${id}`);
   return { ok: "Password direset.", tempPassword };
 }

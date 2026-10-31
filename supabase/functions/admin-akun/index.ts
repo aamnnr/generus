@@ -5,6 +5,8 @@
 // password, dan blokir login dilakukan di sini. Pemanggil harus superadmin
 // (dicek lewat RPC public.mobile_is_superadmin dengan token pemanggil); perubahan
 // tabel profiles/user_roles memakai token pemanggil sehingga RLS tetap berlaku.
+// Superadmin daerah hanya boleh mengelola akun di daerahnya, jadi operasi Auth
+// admin selalu didahului perubahan lewat RLS yang membuktikan akun itu dalam lingkup.
 //
 // Deploy: supabase functions deploy admin-akun --project-ref <ref>
 // Variabel SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY disediakan otomatis.
@@ -82,13 +84,14 @@ Deno.serve(async (req) => {
         return fail("Gagal membuat akun di Supabase Auth.");
       }
       const userId = data.user.id;
-      // Profil dibuat trigger handle_new_user; lengkapi lewat RLS superadmin.
-      const upd = await asUser.from("profiles").update({ name, phone, must_change_password: true }).eq("id", userId);
-      const ins = upd.error ? upd : await asUser.from("user_roles").insert({ user_id: userId, unit_id: unitId, role });
-      if (ins.error) {
+      // Profil dibuat trigger handle_new_user. Peran dulu: profil baru hanya boleh
+      // diubah setelah akunnya masuk lingkup pemanggil (RLS).
+      const ins = await asUser.from("user_roles").insert({ user_id: userId, unit_id: unitId, role });
+      const upd = ins.error ? ins : await asUser.from("profiles").update({ name, phone, must_change_password: true }).eq("id", userId);
+      if (upd.error) {
         // Batalkan akun auth agar tidak ada akun tanpa peran yang valid.
         await admin.auth.admin.deleteUser(userId);
-        return fail(ins.error.code === "P0001" ? ins.error.message : "Gagal menyimpan peran akun.");
+        return fail(upd.error.code === "P0001" ? upd.error.message : "Gagal menyimpan peran akun.");
       }
       return reply({ ok: true, user_id: userId, temp_password: password });
     }
@@ -97,10 +100,11 @@ Deno.serve(async (req) => {
       const userId = str("user_id");
       if (!UUID.test(userId)) return fail("Akun tidak valid.");
       if (userId === me.id) return fail("Untuk akun sendiri, gunakan menu Ganti password.");
+      const allowed = await asUser.from("profiles").update({ must_change_password: true }).eq("id", userId).select("id");
+      if (allowed.error || !allowed.data?.length) return fail("Akun ini di luar wilayah Anda.");
       const password = tempPassword();
       const { error } = await admin.auth.admin.updateUserById(userId, { password });
       if (error) return fail("Gagal mereset password.");
-      await asUser.from("profiles").update({ must_change_password: true }).eq("id", userId);
       return reply({ ok: true, temp_password: password });
     }
 
@@ -109,8 +113,9 @@ Deno.serve(async (req) => {
       const active = body.active === true;
       if (!UUID.test(userId)) return fail("Akun tidak valid.");
       if (userId === me.id) return fail("Anda tidak bisa menonaktifkan akun sendiri.");
-      const upd = await asUser.from("profiles").update({ active }).eq("id", userId);
+      const upd = await asUser.from("profiles").update({ active }).eq("id", userId).select("id");
       if (upd.error) return fail("Gagal mengubah status akun.");
+      if (!upd.data?.length) return fail("Akun ini di luar wilayah Anda.");
       // Blokir juga di Auth agar tidak bisa login sama sekali selama nonaktif.
       await admin.auth.admin.updateUserById(userId, { ban_duration: active ? "none" : "876000h" });
       return reply({ ok: true });

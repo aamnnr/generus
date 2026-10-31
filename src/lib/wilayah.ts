@@ -1,7 +1,8 @@
 import "server-only";
 import { asc, sql } from "drizzle-orm";
 import { generus, units } from "@/db/schema";
-import { withRls, type JwtClaims } from "@/db/rls";
+import { withRls } from "@/db/rls";
+import type { CurrentUser } from "@/lib/auth";
 
 export interface KelompokNode {
   id: string;
@@ -16,14 +17,21 @@ export interface DesaNode {
   kelompok: KelompokNode[];
 }
 
-export interface WilayahTree {
-  daerah: { id: string; name: string; generusAktif: number } | null;
+export interface DaerahNode {
+  id: string;
+  name: string;
+  generusAktif: number;
   desa: DesaNode[];
 }
 
-/** Pohon daerah → desa → kelompok beserta jumlah generus aktif. */
-export async function getWilayahTree(claims: JwtClaims): Promise<WilayahTree> {
-  return withRls(claims, async (tx) => {
+/**
+ * Daerah yang boleh dikelola user (superadmin sistem: semua; superadmin daerah:
+ * daerah tempat perannya) beserta desa → kelompok dan jumlah generus aktif.
+ * Nama unit terbaca semua akun, jadi penyaringan lingkup dilakukan di sini.
+ */
+export async function getWilayahTree(me: CurrentUser): Promise<DaerahNode[]> {
+  const own = new Set(me.roles.filter((r) => r.role === "superadmin").map((r) => r.unitId));
+  return withRls(me.claims, async (tx) => {
     const all = await tx
       .select({ id: units.id, name: units.name, level: units.level, parentId: units.parentId })
       .from(units)
@@ -35,18 +43,18 @@ export async function getWilayahTree(claims: JwtClaims): Promise<WilayahTree> {
       .groupBy(generus.kelompokId);
     const countOf = new Map(counts.map((c) => [c.kelompokId, c.n]));
 
-    const desa = all
-      .filter((u) => u.level === "desa")
+    return all
+      .filter((d) => d.level === "daerah" && (me.isSystemAdmin || own.has(d.id)))
       .map((d) => {
-        const kelompok = all
-          .filter((k) => k.parentId === d.id)
-          .map((k) => ({ id: k.id, name: k.name, generusAktif: countOf.get(k.id) ?? 0 }));
-        return { id: d.id, name: d.name, kelompok, generusAktif: kelompok.reduce((s, k) => s + k.generusAktif, 0) };
+        const desa = all
+          .filter((x) => x.parentId === d.id)
+          .map((x) => {
+            const kelompok = all
+              .filter((k) => k.parentId === x.id)
+              .map((k) => ({ id: k.id, name: k.name, generusAktif: countOf.get(k.id) ?? 0 }));
+            return { id: x.id, name: x.name, kelompok, generusAktif: kelompok.reduce((s, k) => s + k.generusAktif, 0) };
+          });
+        return { id: d.id, name: d.name, desa, generusAktif: desa.reduce((s, x) => s + x.generusAktif, 0) };
       });
-    const d = all.find((u) => u.level === "daerah");
-    return {
-      daerah: d ? { id: d.id, name: d.name, generusAktif: desa.reduce((s, x) => s + x.generusAktif, 0) } : null,
-      desa,
-    };
   });
 }

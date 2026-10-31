@@ -20,6 +20,7 @@
     "resmi:setup": "node scripts/with-env.mjs .env.resmi tsx scripts/setup-resmi.ts",
     "resmi:cron": "node scripts/with-env.mjs .env.resmi tsx scripts/db-cron.ts",
     "resmi:check": "node scripts/with-env.mjs .env.resmi tsx scripts/db-check.ts",
+    "resmi:system-admin": "node scripts/with-env.mjs .env.resmi tsx scripts/system-admin.ts",
     "seed:xlsx": "tsx scripts/seed/export-xlsx.ts",
     "db:cron": "tsx scripts/db-cron.ts",
     "vendor:zxing": "node scripts/vendor-zxing.mjs"

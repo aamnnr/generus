@@ -77,6 +77,8 @@ async function seedAccounts(q: Query, result: InsertResult) {
       `INSERT INTO user_roles (user_id, unit_id, role) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
       [userId, unitFor[acc.unit], acc.role],
     );
+    // Akun superadmin uji sekaligus superadmin sistem (boleh menambah daerah).
+    if (acc.role === "superadmin") await q(`INSERT INTO system_admins (user_id) VALUES ($1) ON CONFLICT DO NOTHING`, [userId]);
   }
   console.log(`✓ ${TEST_ACCOUNTS.length} akun uji (${TEST_ACCOUNTS.map((a) => a.email).join(", ")})`);
 }

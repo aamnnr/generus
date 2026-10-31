@@ -3,7 +3,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { connection } from "next/server";
 import { asc, eq } from "drizzle-orm";
-import { profiles, units, userRoles } from "@/db/schema";
+import { profiles, systemAdmins, units, userRoles } from "@/db/schema";
 import { withRls, type JwtClaims } from "@/db/rls";
 import { createSupabaseServer } from "@/lib/supabase/server";
 
@@ -26,6 +26,8 @@ export interface CurrentUser {
   mustChangePassword: boolean;
   roles: UserRole[];
   isSuperadmin: boolean;
+  /** Superadmin sistem: boleh menambah daerah & mengelola semua daerah. */
+  isSystemAdmin: boolean;
   claims: JwtClaims;
 }
 
@@ -49,13 +51,15 @@ const loadUser = cache(async (claims: JwtClaims): Promise<CurrentUser | null> =>
       .innerJoin(units, eq(units.id, userRoles.unitId))
       .where(eq(userRoles.userId, claims.sub))
       .orderBy(asc(units.path));
+    const [system] = await tx.select({ userId: systemAdmins.userId }).from(systemAdmins).where(eq(systemAdmins.userId, claims.sub));
     return {
       id: profile.id,
       name: profile.name,
       email: profile.email,
       mustChangePassword: profile.mustChangePassword,
       roles,
-      isSuperadmin: roles.some((r) => r.role === "superadmin"),
+      isSuperadmin: !!system || roles.some((r) => r.role === "superadmin"),
+      isSystemAdmin: !!system,
       claims,
     };
   });

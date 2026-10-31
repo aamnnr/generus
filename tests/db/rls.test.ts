@@ -43,6 +43,8 @@ beforeAll(async () => {
     u[key] = await createUser(db, key);
   }
   await grantRole(db, u.superadmin, unit.daerah, "superadmin");
+  // Superadmin di tes ini adalah superadmin sistem (lihat superadmin.test.ts untuk superadmin daerah).
+  await db.query(`INSERT INTO system_admins (user_id) VALUES ($1)`, [u.superadmin]);
   await grantRole(db, u.kurikulum, unit.daerah, "kurikulum");
   await grantRole(db, u.adminDesaA, unit.desaA, "admin");
   await grantRole(db, u.adminKelA1, unit.kelA1, "admin");

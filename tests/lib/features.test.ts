@@ -15,6 +15,7 @@ const user = (roles: { role: "superadmin" | "kurikulum" | "admin" | "kyai"; leve
     email: null,
     mustChangePassword: false,
     isSuperadmin: roles.some((r) => r.role === "superadmin"),
+    isSystemAdmin: false,
     claims: { sub: "u" },
     roles: roles.map((r) => ({ ...r, unitId: "x", unitName: "X" })),
   }) as User;

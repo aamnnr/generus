@@ -2,10 +2,10 @@ import "server-only";
 import { asc, eq, ilike, or } from "drizzle-orm";
 import { profiles, units, userRoles } from "@/db/schema";
 import { withRls, type JwtClaims } from "@/db/rls";
-import type { AppRole, UnitLevel, UserRole } from "@/lib/auth";
+import type { AppRole, CurrentUser, UnitLevel, UserRole } from "@/lib/auth";
 
-// Query data akun. Semua lewat RLS: yang memanggil harus superadmin agar
-// melihat seluruh akun.
+// Query data akun. Semua lewat RLS: superadmin sistem melihat seluruh akun,
+// superadmin daerah hanya akun yang berperan di daerahnya.
 
 export interface AccountRow {
   id: string;
@@ -97,21 +97,27 @@ export interface UnitGroup {
   options: UnitOption[];
 }
 
-/** Unit untuk pilihan peran: daerah, lalu tiap desa diikuti kelompok-kelompoknya. */
-export async function listUnitGroups(claims: JwtClaims): Promise<UnitGroup[]> {
-  const all = await withRls(claims, (tx) =>
+/**
+ * Unit untuk pilihan peran: daerah, lalu tiap desa diikuti kelompok-kelompoknya.
+ * Hanya daerah dalam lingkup pemanggil (superadmin sistem: semua).
+ */
+export async function listUnitGroups(me: CurrentUser): Promise<UnitGroup[]> {
+  const own = new Set(me.roles.filter((r) => r.role === "superadmin").map((r) => r.unitId));
+  const all = await withRls(me.claims, (tx) =>
     tx
       .select({ id: units.id, name: units.name, level: units.level, parentId: units.parentId })
       .from(units)
       .orderBy(asc(units.name)),
   );
-  const daerah = all.filter((u) => u.level === "daerah");
+  const daerah = all.filter((u) => u.level === "daerah" && (me.isSystemAdmin || own.has(u.id)));
   const groups: UnitGroup[] = [{ label: "Daerah", options: daerah }];
-  for (const desa of all.filter((u) => u.level === "desa")) {
-    groups.push({
-      label: `Desa ${desa.name}`,
-      options: [desa, ...all.filter((u) => u.parentId === desa.id)],
-    });
+  for (const d of daerah) {
+    for (const desa of all.filter((u) => u.parentId === d.id)) {
+      groups.push({
+        label: daerah.length > 1 ? `Desa ${desa.name} · ${d.name}` : `Desa ${desa.name}`,
+        options: [desa, ...all.filter((u) => u.parentId === desa.id)],
+      });
+    }
   }
   return groups;
 }

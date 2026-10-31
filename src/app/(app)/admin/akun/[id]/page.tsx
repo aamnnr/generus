@@ -28,7 +28,7 @@ export default function DetailPage({ params }: PageProps<"/admin/akun/[id]">) {
 async function Detail({ params }: Pick<PageProps<"/admin/akun/[id]">, "params">) {
   const [me, { id }] = await Promise.all([requireSuperadmin(), params]);
   if (!z.string().uuid().safeParse(id).success) notFound();
-  const [account, unitGroups] = await Promise.all([getAccount(me.claims, id), listUnitGroups(me.claims)]);
+  const [account, unitGroups] = await Promise.all([getAccount(me.claims, id), listUnitGroups(me)]);
   if (!account) notFound();
   const isSelf = account.id === me.id;
 
