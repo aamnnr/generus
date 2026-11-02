@@ -5,16 +5,10 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import type { Segment } from "@/lib/agenda-target";
+import { UnitPicker, type TreeUnit } from "@/components/unit-picker";
 import type { AgendaFormState } from "./actions";
-
-export interface AgendaUnitOption {
-  id: string;
-  name: string;
-  level: "daerah" | "desa" | "kelompok";
-  parentName: string | null;
-}
 
 export interface AgendaFormDefaults {
   id?: string;
@@ -30,8 +24,6 @@ export interface AgendaFormDefaults {
   segments?: string[];
 }
 
-const LEVEL = { daerah: "Daerah", desa: "Desa", kelompok: "Kelompok" } as const;
-
 export function AgendaForm({
   action,
   units,
@@ -42,7 +34,7 @@ export function AgendaForm({
   submitLabel,
 }: {
   action: (prev: AgendaFormState, fd: FormData) => Promise<AgendaFormState>;
-  units: AgendaUnitOption[];
+  units: TreeUnit[];
   segments: Segment[];
   defaults: AgendaFormDefaults;
   zone: string;
@@ -54,11 +46,6 @@ export function AgendaForm({
   const str = (x: unknown) => (typeof x === "string" ? x : undefined);
   const selectedSegments = new Set((v.segments as string[] | undefined) ?? segments.map((s) => s.key));
 
-  const groups = new Map<string, AgendaUnitOption[]>();
-  for (const u of units) {
-    const label = u.level === "kelompok" ? `Kelompok di Desa ${u.parentName}` : LEVEL[u.level];
-    groups.set(label, [...(groups.get(label) ?? []), u]);
-  }
 
   return (
     <form key={str(state.values?._n)} action={formAction} className="flex flex-col gap-5">
@@ -71,20 +58,7 @@ export function AgendaForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Penyelenggara" htmlFor="unitId" className="sm:col-span-2">
-          <NativeSelect id="unitId" name="unitId" required defaultValue={str(v.unitId) ?? (units.length === 1 ? units[0].id : "")}>
-            <NativeSelectOption value="" disabled>
-              Pilih daerah / desa / kelompok
-            </NativeSelectOption>
-            {[...groups].map(([label, opts]) => (
-              <NativeSelectOptGroup key={label} label={label}>
-                {opts.map((u) => (
-                  <NativeSelectOption key={u.id} value={u.id}>
-                    {LEVEL[u.level]} {u.name}
-                  </NativeSelectOption>
-                ))}
-              </NativeSelectOptGroup>
-            ))}
-          </NativeSelect>
+          <UnitPicker id="unitId" name="unitId" units={units} defaultValue={str(v.unitId)} required placeholder="Pilih daerah / desa / kelompok" />
         </Field>
         <Field label="Judul" htmlFor="title" className="sm:col-span-2">
           <Input id="title" name="title" required minLength={3} defaultValue={str(v.title)} placeholder="mis. Pengajian rutin remaja" />

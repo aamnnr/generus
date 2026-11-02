@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { BackLink, PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
-import { listUnitGroups } from "@/lib/accounts";
+import { listRoleUnitTree } from "@/lib/accounts";
 import { requireSuperadmin } from "@/lib/auth";
 import { CreateAccountForm } from "./create-form";
 import { PageLoading } from "@/components/page-loading";
@@ -27,5 +27,5 @@ export default function BaruPage() {
 
 async function FormLoader() {
   const me = await requireSuperadmin();
-  return <CreateAccountForm unitGroups={await listUnitGroups(me)} />;
+  return <CreateAccountForm units={await listRoleUnitTree(me)} />;
 }

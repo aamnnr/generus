@@ -4,7 +4,7 @@ import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { UnitGroup } from "@/lib/accounts";
+import type { TreeUnit } from "@/components/unit-picker";
 import { addRole, resetPassword, updateProfile, type AccountFormState } from "../actions";
 import { FormAlert, RoleUnitFields, TempPasswordNotice } from "../components";
 
@@ -29,13 +29,13 @@ export function ProfileForm({ id, name, phone }: { id: string; name: string; pho
   );
 }
 
-export function AddRoleForm({ userId, unitGroups }: { userId: string; unitGroups: UnitGroup[] }) {
+export function AddRoleForm({ userId, units }: { userId: string; units: TreeUnit[] }) {
   const [state, action, pending] = useActionState<AccountFormState, FormData>(addRole, {});
   return (
     <form action={action} className="flex flex-col gap-3 border-t pt-4">
       <FormAlert error={state.error} ok={state.ok} />
       <input type="hidden" name="userId" value={userId} />
-      <RoleUnitFields unitGroups={unitGroups} defaults={state.error ? state.values : undefined} />
+      <RoleUnitFields units={units} defaults={state.error ? state.values : undefined} />
       <Button type="submit" variant="outline" disabled={pending} className="w-fit">
         {pending ? "Menambahkan…" : "Tambah peran"}
       </Button>

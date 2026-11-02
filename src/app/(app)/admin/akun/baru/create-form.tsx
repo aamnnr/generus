@@ -5,17 +5,17 @@ import Link from "@/components/app-link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { UnitGroup } from "@/lib/accounts";
+import type { TreeUnit } from "@/components/unit-picker";
 import { createAccount, type AccountFormState } from "../actions";
 import { FormAlert, RoleUnitFields, TempPasswordNotice } from "../components";
 
-export function CreateAccountForm({ unitGroups }: { unitGroups: UnitGroup[] }) {
+export function CreateAccountForm({ units }: { units: TreeUnit[] }) {
   // Ganti key untuk memulai form baru yang kosong setelah akun dibuat.
   const [key, setKey] = useState(0);
-  return <Form key={key} unitGroups={unitGroups} onReset={() => setKey((k) => k + 1)} />;
+  return <Form key={key} units={units} onReset={() => setKey((k) => k + 1)} />;
 }
 
-function Form({ unitGroups, onReset }: { unitGroups: UnitGroup[]; onReset: () => void }) {
+function Form({ units, onReset }: { units: TreeUnit[]; onReset: () => void }) {
   const [state, action, pending] = useActionState<AccountFormState, FormData>(createAccount, {});
 
   if (state.tempPassword && state.accountId) {
@@ -52,7 +52,7 @@ function Form({ unitGroups, onReset }: { unitGroups: UnitGroup[]; onReset: () =>
           <Input id="phone" name="phone" type="tel" placeholder="08…" defaultValue={state.values?.phone} />
         </div>
       </div>
-      <RoleUnitFields unitGroups={unitGroups} defaults={state.values} />
+      <RoleUnitFields units={units} defaults={state.values} />
       <p className="text-xs text-muted-foreground">
         Peran tambahan (mis. Admin sekaligus Kyai) bisa ditambahkan di halaman detail akun setelah dibuat.
       </p>

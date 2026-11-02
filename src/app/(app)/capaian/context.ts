@@ -29,10 +29,3 @@ export async function resolveCapaianContext(me: CurrentUser, sp: Search) {
 
   return { writer, periods, period, kelompokList, kelompok, jenjang, current, query };
 }
-
-/** Kelompok dikelompokkan per desa untuk <select>. */
-export function kelompokGroups(list: { id: string; name: string; desaName: string }[]) {
-  const map = new Map<string, { value: string; label: string }[]>();
-  for (const k of list) map.set(k.desaName, [...(map.get(k.desaName) ?? []), { value: k.id, label: `Kelompok ${k.name}` }]);
-  return [...map].map(([desa, options]) => ({ label: `Desa ${desa}`, options }));
-}

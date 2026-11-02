@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { UnitPicker } from "@/components/unit-picker";
+import { buildUnitTree } from "@/lib/unit-tree";
 import Link from "@/components/app-link";
 import { ChevronRight, Plus, Search } from "lucide-react";
 import { FilterDisclosure } from "@/components/filter-disclosure";
@@ -8,7 +10,7 @@ import { MosqueSilhouette } from "@/components/shell/ornament";
 import { z } from "zod";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { canWriteGenerus, requireGenerusReader } from "@/lib/auth";
 import {
@@ -20,7 +22,6 @@ import {
   PAGE_SIZE,
   STATUS_LABEL,
   type GenerusFilters,
-  type UnitOption,
 } from "@/lib/generus";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
@@ -56,6 +57,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
   const page = p.page ?? 1;
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const singleKelompok = unitOptions.filter((u) => u.level === "kelompok").length <= 1;
+  const unitTree = singleKelompok ? [] : await buildUnitTree(me.claims, unitOptions.map((u) => u.id));
 
   const href = (o: Partial<Record<"q" | "unit" | "jenjang" | "status" | "page", string | undefined>>) => {
     const sp = new URLSearchParams();
@@ -119,7 +121,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
             />
           </label>
           <FilterDisclosure label={singleKelompok ? "Status" : "Wilayah & status"}>
-              {!singleKelompok && <UnitSelect options={unitOptions} value={p.unit} />}
+              {!singleKelompok && <UnitPicker units={unitTree} name="unit" defaultValue={p.unit} emptyLabel="Semua wilayah" aria-label="Wilayah" className="md:w-72" />}
               <NativeSelect name="status" defaultValue={p.status ?? "aktif"} aria-label="Status" className="md:w-44">
                 {Object.entries(STATUS_LABEL).map(([k, v]) => (
                   <NativeSelectOption key={k} value={k}>
@@ -259,24 +261,5 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
         </Link>
       )}
     </>
-  );
-}
-
-function UnitSelect({ options, value }: { options: UnitOption[]; value?: string }) {
-  const byDesa = new Map<string, UnitOption[]>();
-  for (const o of options) byDesa.set(o.desaName, [...(byDesa.get(o.desaName) ?? []), o]);
-  return (
-    <NativeSelect name="unit" defaultValue={value ?? ""} aria-label="Wilayah">
-      <NativeSelectOption value="">Semua wilayah</NativeSelectOption>
-      {[...byDesa].map(([desa, opts]) => (
-        <NativeSelectOptGroup key={desa} label={`Desa ${desa}`}>
-          {opts.map((o) => (
-            <NativeSelectOption key={o.id} value={o.id}>
-              {o.level === "desa" ? `Seluruh Desa ${o.name}` : `Kelompok ${o.name}`}
-            </NativeSelectOption>
-          ))}
-        </NativeSelectOptGroup>
-      ))}
-    </NativeSelect>
   );
 }

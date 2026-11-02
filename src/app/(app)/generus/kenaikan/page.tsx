@@ -4,9 +4,11 @@ import { BackLink, PageHeader } from "@/components/page-header";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { UnitPicker } from "@/components/unit-picker";
+import { buildUnitTree } from "@/lib/unit-tree";
 import { requireGenerusWriter } from "@/lib/auth";
-import { listPromotionCandidates, listScopeUnits, MAX_PROMOTION_ROWS, type UnitOption } from "@/lib/generus";
+import { listPromotionCandidates, listScopeUnits, MAX_PROMOTION_ROWS } from "@/lib/generus";
 import { academicYearStart, ageAt, isSuggested, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
 import { PromoteForm } from "./promote-form";
 import { PageLoading } from "@/components/page-loading";
@@ -36,6 +38,7 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
   const p = paramsSchema.parse(raw);
   const units = await listScopeUnits(me.claims, "read");
   const kelompokOnly = units.filter((u) => u.level === "kelompok");
+  const unitTree = kelompokOnly.length > 1 ? await buildUnitTree(me.claims, units.map((u) => u.id)) : [];
   // Admin satu kelompok tidak perlu memilih wilayah.
   const unitId = p.unit ?? (kelompokOnly.length === 1 ? kelompokOnly[0].id : undefined);
   const t = TRANSITIONS[p.t];
@@ -72,7 +75,7 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
                 <label htmlFor="unit" className="text-sm font-medium">
                   Wilayah
                 </label>
-                <UnitSelect options={units} value={unitId} />
+                <UnitPicker id="unit" units={unitTree} name="unit" defaultValue={unitId} required placeholder="Pilih desa / kelompok" />
               </div>
             ) : (
               <div />
@@ -105,26 +108,5 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
         </Card>
       )}
     </>
-  );
-}
-
-function UnitSelect({ options, value }: { options: UnitOption[]; value?: string }) {
-  const byDesa = new Map<string, UnitOption[]>();
-  for (const o of options) byDesa.set(o.desaName, [...(byDesa.get(o.desaName) ?? []), o]);
-  return (
-    <NativeSelect id="unit" name="unit" defaultValue={value ?? ""} required>
-      <NativeSelectOption value="" disabled>
-        Pilih desa / kelompok
-      </NativeSelectOption>
-      {[...byDesa].map(([desa, opts]) => (
-        <NativeSelectOptGroup key={desa} label={`Desa ${desa}`}>
-          {opts.map((o) => (
-            <NativeSelectOption key={o.id} value={o.id}>
-              {o.level === "desa" ? `Seluruh Desa ${o.name}` : `Kelompok ${o.name}`}
-            </NativeSelectOption>
-          ))}
-        </NativeSelectOptGroup>
-      ))}
-    </NativeSelect>
   );
 }

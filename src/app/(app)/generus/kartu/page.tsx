@@ -9,9 +9,10 @@ import { z } from "zod";
 import { generus, jenjang, jenjangKategori, units } from "@/db/schema";
 import { withRls } from "@/db/rls";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
 import { requireGenerusWriter } from "@/lib/auth";
-import { jenjangLabel, listScopeUnits, type UnitOption } from "@/lib/generus";
+import { jenjangLabel, listScopeUnits } from "@/lib/generus";
+import { buildUnitTree } from "@/lib/unit-tree";
+import { UnitPicker } from "@/components/unit-picker";
 import { qrPayload } from "@/lib/qr";
 import { IdCard } from "./id-card";
 import { PrintButton } from "./print-button";
@@ -44,6 +45,7 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
   const ids = p.id ? [p.id].flat() : [];
   const units_ = await listScopeUnits(me.claims, "write");
   const desaOptions = await listScopeUnits(me.claims, "read");
+  const unitTree = await buildUnitTree(me.claims, desaOptions.map((u) => u.id));
   const unitId = p.unit ?? (ids.length === 0 && units_.length === 1 ? units_[0].id : undefined);
 
   const rows =
@@ -105,7 +107,7 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
         <div className="flex flex-col gap-3 rounded-2xl bg-card p-4 shadow-card md:flex-row md:flex-wrap md:items-center">
           {ids.length === 0 && (
             <QueryForm className="flex flex-1 flex-wrap items-center gap-2">
-              <UnitSelect options={desaOptions} value={unitId} />
+              <UnitPicker units={unitTree} name="unit" defaultValue={unitId} required placeholder="Pilih desa / kelompok" aria-label="Wilayah" className="sm:w-80" />
               <Button type="submit" variant="outline">
                 Tampilkan
               </Button>
@@ -140,26 +142,5 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
         </div>
       )}
     </>
-  );
-}
-
-function UnitSelect({ options, value }: { options: UnitOption[]; value?: string }) {
-  const byDesa = new Map<string, UnitOption[]>();
-  for (const o of options) byDesa.set(o.desaName, [...(byDesa.get(o.desaName) ?? []), o]);
-  return (
-    <NativeSelect name="unit" defaultValue={value ?? ""} required aria-label="Wilayah" className="min-w-0 sm:min-w-72">
-      <NativeSelectOption value="" disabled>
-        Pilih desa / kelompok
-      </NativeSelectOption>
-      {[...byDesa].map(([desa, opts]) => (
-        <NativeSelectOptGroup key={desa} label={`Desa ${desa}`}>
-          {opts.map((o) => (
-            <NativeSelectOption key={o.id} value={o.id}>
-              {o.level === "desa" ? `Seluruh Desa ${o.name}` : `Kelompok ${o.name}`}
-            </NativeSelectOption>
-          ))}
-        </NativeSelectOptGroup>
-      ))}
-    </NativeSelect>
   );
 }

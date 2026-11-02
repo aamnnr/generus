@@ -3,6 +3,8 @@ import { asc, eq, ilike, or } from "drizzle-orm";
 import { profiles, units, userRoles } from "@/db/schema";
 import { withRls, type JwtClaims } from "@/db/rls";
 import type { AppRole, CurrentUser, UnitLevel, UserRole } from "@/lib/auth";
+import type { TreeUnit } from "@/components/unit-picker";
+import { buildUnitTree } from "@/lib/unit-tree";
 
 // Query data akun. Semua lewat RLS: superadmin sistem melihat seluruh akun,
 // superadmin daerah hanya akun yang berperan di daerahnya.
@@ -86,38 +88,14 @@ function groupAccounts(rows: FlatRow[]): AccountRow[] {
   return [...byId.values()];
 }
 
-export interface UnitOption {
-  id: string;
-  name: string;
-  level: UnitLevel;
-}
-
-export interface UnitGroup {
-  label: string;
-  options: UnitOption[];
-}
-
 /**
- * Unit untuk pilihan peran: daerah, lalu tiap desa diikuti kelompok-kelompoknya.
+ * Unit untuk pilihan peran, sebagai pohon daerah → desa → kelompok.
  * Hanya daerah dalam lingkup pemanggil (superadmin sistem: semua).
  */
-export async function listUnitGroups(me: CurrentUser): Promise<UnitGroup[]> {
+export async function listRoleUnitTree(me: CurrentUser): Promise<TreeUnit[]> {
   const own = new Set(me.roles.filter((r) => r.role === "superadmin").map((r) => r.unitId));
-  const all = await withRls(me.claims, (tx) =>
-    tx
-      .select({ id: units.id, name: units.name, level: units.level, parentId: units.parentId })
-      .from(units)
-      .orderBy(asc(units.name)),
-  );
-  const daerah = all.filter((u) => u.level === "daerah" && (me.isSystemAdmin || own.has(u.id)));
-  const groups: UnitGroup[] = [{ label: "Daerah", options: daerah }];
-  for (const d of daerah) {
-    for (const desa of all.filter((u) => u.parentId === d.id)) {
-      groups.push({
-        label: daerah.length > 1 ? `Desa ${desa.name} · ${d.name}` : `Desa ${desa.name}`,
-        options: [desa, ...all.filter((u) => u.parentId === desa.id)],
-      });
-    }
-  }
-  return groups;
+  const all = await withRls(me.claims, (tx) => tx.select({ id: units.id, path: units.path, parentId: units.parentId }).from(units));
+  const roots = all.filter((u) => u.parentId === null && (me.isSystemAdmin || own.has(u.id))).map((u) => `${u.path}`);
+  const ids = all.filter((u) => roots.some((r) => `${u.path}` === r || `${u.path}`.startsWith(`${r}.`))).map((u) => u.id);
+  return buildUnitTree(me.claims, ids);
 }

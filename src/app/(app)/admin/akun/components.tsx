@@ -4,16 +4,14 @@ import { useState } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
-import type { UnitGroup } from "@/lib/accounts";
-
-const LEVEL_PREFIX = { daerah: "Daerah", desa: "Desa", kelompok: "Kelompok" } as const;
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { UnitPicker, type TreeUnit } from "@/components/unit-picker";
 
 export function RoleUnitFields({
-  unitGroups,
+  units,
   defaults,
 }: {
-  unitGroups: UnitGroup[];
+  units: TreeUnit[];
   defaults?: Record<string, string>;
 }) {
   return (
@@ -33,20 +31,7 @@ export function RoleUnitFields({
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="unitId">Unit</Label>
-        <NativeSelect key={`unit-${defaults?._n}`} id="unitId" name="unitId" required defaultValue={defaults?.unitId ?? ""}>
-          <NativeSelectOption value="" disabled>
-            Pilih unit
-          </NativeSelectOption>
-          {unitGroups.map((g) => (
-            <NativeSelectOptGroup key={g.label} label={g.label}>
-              {g.options.map((u) => (
-                <NativeSelectOption key={u.id} value={u.id}>
-                  {LEVEL_PREFIX[u.level]} {u.name}
-                </NativeSelectOption>
-              ))}
-            </NativeSelectOptGroup>
-          ))}
-        </NativeSelect>
+        <UnitPicker key={`unit-${defaults?._n}`} id="unitId" name="unitId" units={units} defaultValue={defaults?.unitId} required placeholder="Pilih unit" />
       </div>
     </div>
   );

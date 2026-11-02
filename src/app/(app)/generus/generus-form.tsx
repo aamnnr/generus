@@ -5,8 +5,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
-import type { JenjangOption, UnitOption } from "@/lib/generus";
+import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import type { JenjangOption } from "@/lib/generus";
+import { UnitPicker, type TreeUnit } from "@/components/unit-picker";
 import type { GenerusFormState } from "./actions";
 
 export interface GenerusFormDefaults {
@@ -34,7 +35,7 @@ export function GenerusForm({
   defaults: GenerusFormDefaults;
   jenjang: JenjangOption[];
   /** Pilihan kelompok; kosongkan untuk form edit (kelompok diubah lewat mutasi). */
-  kelompok?: UnitOption[];
+  kelompok?: TreeUnit[];
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState(action, {});
@@ -57,7 +58,7 @@ export function GenerusForm({
       <div className="grid gap-4 sm:grid-cols-2">
         {kelompok && (
           <Field label="Kelompok" htmlFor="kelompokId" className="sm:col-span-2">
-            <KelompokSelect options={kelompok} value={v.kelompokId ?? undefined} />
+            <KelompokSelect units={kelompok} value={v.kelompokId ?? undefined} />
           </Field>
         )}
         <Field label="Nama lengkap" htmlFor="name" className="sm:col-span-2">
@@ -167,23 +168,6 @@ function JenjangFields({
   );
 }
 
-export function KelompokSelect({ options, value, name = "kelompokId" }: { options: UnitOption[]; value?: string; name?: string }) {
-  const byDesa = new Map<string, UnitOption[]>();
-  for (const o of options) byDesa.set(o.desaName, [...(byDesa.get(o.desaName) ?? []), o]);
-  return (
-    <NativeSelect id={name} name={name} defaultValue={value ?? (options.length === 1 ? options[0].id : "")} required>
-      <NativeSelectOption value="" disabled>
-        Pilih kelompok
-      </NativeSelectOption>
-      {[...byDesa].map(([desa, opts]) => (
-        <NativeSelectOptGroup key={desa} label={`Desa ${desa}`}>
-          {opts.map((o) => (
-            <NativeSelectOption key={o.id} value={o.id}>
-              {o.name}
-            </NativeSelectOption>
-          ))}
-        </NativeSelectOptGroup>
-      ))}
-    </NativeSelect>
-  );
+export function KelompokSelect({ units, value, name = "kelompokId" }: { units: TreeUnit[]; value?: string; name?: string }) {
+  return <UnitPicker id={name} name={name} units={units} defaultValue={value} required placeholder="Pilih kelompok" />;
 }

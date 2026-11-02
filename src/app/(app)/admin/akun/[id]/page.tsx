@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getAccount, listUnitGroups } from "@/lib/accounts";
+import { getAccount, listRoleUnitTree } from "@/lib/accounts";
 import { requireSuperadmin, roleLabel } from "@/lib/auth";
 import { removeRole, setActive } from "../actions";
 import { AddRoleForm, ProfileForm, ResetPasswordForm } from "./forms";
@@ -28,7 +28,7 @@ export default function DetailPage({ params }: PageProps<"/admin/akun/[id]">) {
 async function Detail({ params }: Pick<PageProps<"/admin/akun/[id]">, "params">) {
   const [me, { id }] = await Promise.all([requireSuperadmin(), params]);
   if (!z.string().uuid().safeParse(id).success) notFound();
-  const [account, unitGroups] = await Promise.all([getAccount(me.claims, id), listUnitGroups(me)]);
+  const [account, units] = await Promise.all([getAccount(me.claims, id), listRoleUnitTree(me)]);
   if (!account) notFound();
   const isSelf = account.id === me.id;
 
@@ -85,7 +85,7 @@ async function Detail({ params }: Pick<PageProps<"/admin/akun/[id]">, "params">)
                 </li>
               ))}
             </ul>
-            <AddRoleForm userId={account.id} unitGroups={unitGroups} />
+            <AddRoleForm userId={account.id} units={units} />
           </CardContent>
         </Card>
 

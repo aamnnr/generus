@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
-import type { UnitOption } from "@/lib/generus";
+import type { TreeUnit } from "@/components/unit-picker";
 import { changeStatus, deleteGenerus, mutateGenerus, reissueCard, type GenerusFormState } from "../actions";
 import { KelompokSelect } from "../generus-form";
 
@@ -90,16 +90,16 @@ export function ReactivateForm({ id }: { id: string }) {
   );
 }
 
-export function MutateForm({ id, options, currentKelompokId }: { id: string; options: UnitOption[]; currentKelompokId: string }) {
+export function MutateForm({ id, units }: { id: string; units: TreeUnit[] }) {
   const [state, action, pending] = useActionState(mutateGenerus, {});
-  const targets = options.filter((o) => o.id !== currentKelompokId);
+  const targets = units.filter((u) => u.selectable);
   return (
     <form action={action} className="flex flex-col gap-3">
       <Message state={state} />
       <input type="hidden" name="id" value={id} />
       <div className="flex flex-col gap-2">
-        <Label htmlFor="mutasi-kelompok">Kelompok tujuan</Label>
-        <KelompokSelect options={targets} name="kelompokId" />
+        <Label htmlFor="kelompokId">Kelompok tujuan</Label>
+        <KelompokSelect units={units} name="kelompokId" />
       </div>
       <Button type="submit" variant="outline" disabled={pending || targets.length === 0} className="w-fit">
         Pindahkan

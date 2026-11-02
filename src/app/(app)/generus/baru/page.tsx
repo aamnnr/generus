@@ -4,6 +4,7 @@ import { BackLink, PageHeader } from "@/components/page-header";
 import { Card, CardContent } from "@/components/ui/card";
 import { requireGenerusWriter } from "@/lib/auth";
 import { listJenjang, listScopeUnits } from "@/lib/generus";
+import { buildUnitTree } from "@/lib/unit-tree";
 import { createGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
 import { PageLoading } from "@/components/page-loading";
@@ -28,6 +29,7 @@ export default function BaruPage() {
 
 async function FormLoader() {
   const me = await requireGenerusWriter();
-  const [jenjang, kelompok] = await Promise.all([listJenjang(me.claims), listScopeUnits(me.claims, "write")]);
+  const [jenjang, options] = await Promise.all([listJenjang(me.claims), listScopeUnits(me.claims, "write")]);
+  const kelompok = await buildUnitTree(me.claims, options.map((u) => u.id));
   return <GenerusForm action={createGenerus} defaults={{}} jenjang={jenjang} kelompok={kelompok} submitLabel="Simpan generus" />;
 }

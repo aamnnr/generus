@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Check } from "lucide-react";
 import { useReportPending } from "@/components/nav/pending-store";
 import { TAB_TRANSITION } from "@/lib/transitions";
+import { UnitPicker, type TreeUnit } from "@/components/unit-picker";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -80,6 +81,32 @@ export function QuerySelect({
           </NativeSelectOptGroup>
         ))}
       </NativeSelect>
+    </div>
+  );
+}
+
+/** Pilihan kelompok berjenjang yang mengubah query string. */
+export function QueryUnitPicker({ name, label, value, units }: { name: string; label: string; value: string; units: TreeUnit[] }) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const params = useSearchParams();
+  const [pending, startTransition] = useTransition();
+  useReportPending(pending);
+  return (
+    <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:max-w-xs">
+      <Label htmlFor={`q-${name}`} className="text-xs text-muted-foreground">
+        {label}
+      </Label>
+      <UnitPicker
+        id={`q-${name}`}
+        units={units}
+        value={value}
+        onValueChange={(id) => {
+          const next = new URLSearchParams(params);
+          next.set(name, id);
+          startTransition(() => router.push(`${pathname}?${next}`, { scroll: false, transitionTypes: [TAB_TRANSITION] }));
+        }}
+      />
     </div>
   );
 }

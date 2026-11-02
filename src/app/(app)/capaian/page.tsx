@@ -12,8 +12,9 @@ import { getKelompokSummary, todayIso, type TargetSummary } from "@/lib/capaian"
 import { groupTargets } from "@/lib/kurikulum";
 import { ASPEK_LABEL, formatRange, percent } from "@/lib/kurikulum-format";
 import { dateRange } from "../kurikulum/shared";
-import { kelompokGroups, resolveCapaianContext } from "./context";
-import { DeliveryToggle, QuerySelect } from "./forms";
+import { resolveCapaianContext } from "./context";
+import { buildUnitTree } from "@/lib/unit-tree";
+import { DeliveryToggle, QuerySelect, QueryUnitPicker } from "./forms";
 import { ProgressBar } from "./shared";
 import { PageLoading } from "@/components/page-loading";
 
@@ -32,6 +33,7 @@ async function Capaian({ searchParams }: Pick<PageProps<"/capaian">, "searchPara
   if (!canReadGenerus(me)) redirect("/kurikulum");
   const ctx = await resolveCapaianContext(me, sp);
   const { period, kelompok, current, writer } = ctx;
+  const kelompokTree = ctx.kelompokList.length > 1 ? await buildUnitTree(me.claims, ctx.kelompokList.map((k) => k.id)) : [];
 
   if (!period || !kelompok) {
     return (
@@ -69,7 +71,7 @@ async function Capaian({ searchParams }: Pick<PageProps<"/capaian">, "searchPara
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <QuerySelect name="periode" label="Periode" value={period.id} options={ctx.periods.map((p) => ({ value: p.id, label: `Periode ${p.name}` }))} />
-        {ctx.kelompokList.length > 1 && <QuerySelect name="kelompok" label="Kelompok" value={kelompok.id} groups={kelompokGroups(ctx.kelompokList)} />}
+        {ctx.kelompokList.length > 1 && <QueryUnitPicker name="kelompok" label="Kelompok" value={kelompok.id} units={kelompokTree} />}
       </div>
 
       <SegmentNav

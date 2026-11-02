@@ -2,6 +2,8 @@ import "server-only";
 import { and, asc, desc, eq, gte, isNull, lt, sql } from "drizzle-orm";
 import { agendas, attendance, units } from "@/db/schema";
 import { withRls, type JwtClaims } from "@/db/rls";
+import type { TreeUnit } from "@/components/unit-picker";
+import { buildUnitTree } from "@/lib/unit-tree";
 
 // Query agenda & presensi. Semua lewat RLS.
 
@@ -219,16 +221,14 @@ export async function getGenerusAttendance(claims: JwtClaims, generusId: string,
   });
 }
 
-/** Unit tempat user boleh membuat agenda (admin/superadmin), urut hierarki. */
-export async function listAgendaUnits(claims: JwtClaims) {
-  return withRls(claims, async (tx) => {
-    const res = await tx.execute<{ id: string; name: string; level: "daerah" | "desa" | "kelompok"; parent_name: string | null }>(sql`
-      SELECT u.id, u.name, u.level, p.name AS parent_name
-      FROM units u LEFT JOIN units p ON p.id = u.parent_id
-      WHERE u.path <@ (SELECT app.scope_paths(ARRAY['superadmin','admin']::app_role[]))
-      ORDER BY u.level, coalesce(p.name, ''), u.name`);
-    return res.map((r) => ({ id: r.id, name: r.name, level: r.level, parentName: r.parent_name }));
-  });
+/** Unit tempat user boleh membuat agenda (admin/superadmin), sebagai pohon untuk UnitPicker. */
+export async function listAgendaUnits(claims: JwtClaims): Promise<TreeUnit[]> {
+  const res = await withRls(claims, (tx) =>
+    tx.execute<{ id: string }>(sql`
+      SELECT u.id FROM units u
+      WHERE u.path <@ (SELECT app.scope_paths(ARRAY['superadmin','admin']::app_role[]))`),
+  );
+  return buildUnitTree(claims, res.map((r) => r.id));
 }
 
 

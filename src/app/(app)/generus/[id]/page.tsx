@@ -25,6 +25,7 @@ import {
 } from "@/lib/generus";
 import { updateGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
+import { buildUnitTree } from "@/lib/unit-tree";
 import { formatDateTime } from "@/lib/time";
 import { DeleteForm, MutateForm, ReactivateForm, ReissueCardForm, StatusForm } from "./forms";
 import { PageLoading } from "@/components/page-loading";
@@ -57,6 +58,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
     getGenerusAttendance(me.claims, g.id, 10),
     kurikulumEnabled() ? listPublishedPeriods(me.claims) : Promise.resolve([]),
   ]);
+  const mutateTree = await buildUnitTree(me.claims, mutateTargets.filter((u) => u.id !== g.kelompokId).map((u) => u.id));
   const period = pickActivePeriod(periods);
   const capaian = period ? await getGenerusCapaian(me.claims, g.id, period.id) : [];
   const dinilai = capaian.filter((t) => !t.optional && (t.kitab || t.materi?.assessment === "generus"));
@@ -189,7 +191,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
                 <CardDescription>Mutasi di dalam daerah. Riwayat kehadiran tetap tersimpan.</CardDescription>
               </CardHeader>
               <CardContent>
-                <MutateForm id={g.id} options={mutateTargets} currentKelompokId={g.kelompokId} />
+                <MutateForm id={g.id} units={mutateTree} />
               </CardContent>
             </Card>
           )}
