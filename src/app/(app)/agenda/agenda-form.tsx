@@ -9,6 +9,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { Segment } from "@/lib/agenda-target";
 import { UnitPicker, type TreeUnit } from "@/components/unit-picker";
 import type { AgendaFormState } from "./actions";
+import { DateInput, TimeInput } from "@/components/ui/date-input";
 
 export interface AgendaFormDefaults {
   id?: string;
@@ -67,14 +68,14 @@ export function AgendaForm({
           <Input id="location" name="location" defaultValue={str(v.location)} placeholder="mis. Masjid Al-Ikhlas" />
         </Field>
         <Field label="Tanggal" htmlFor="date">
-          <Input id="date" name="date" type="date" required defaultValue={str(v.date)} />
+          <DateInput id="date" name="date" required defaultValue={str(v.date)} />
         </Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label={`Mulai (${zone})`} htmlFor="startTime">
-            <Input id="startTime" name="startTime" type="time" required defaultValue={str(v.startTime) ?? "19:30"} />
+            <TimeInput id="startTime" name="startTime" required defaultValue={str(v.startTime) ?? "19:30"} />
           </Field>
           <Field label={`Selesai (${zone})`} htmlFor="endTime">
-            <Input id="endTime" name="endTime" type="time" required defaultValue={str(v.endTime) ?? "21:00"} />
+            <TimeInput id="endTime" name="endTime" required defaultValue={str(v.endTime) ?? "21:00"} />
           </Field>
         </div>
         <Field label="Terlambat bila datang lewat (menit)" htmlFor="lateMinutes">

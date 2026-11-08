@@ -9,6 +9,7 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { JenjangOption } from "@/lib/generus";
 import { UnitPicker, type TreeUnit } from "@/components/unit-picker";
 import type { GenerusFormState } from "./actions";
+import { DateInput } from "@/components/ui/date-input";
 
 export interface GenerusFormDefaults {
   id?: string;
@@ -74,7 +75,7 @@ export function GenerusForm({
           </NativeSelect>
         </Field>
         <Field label="Tanggal lahir" htmlFor="birthDate">
-          <Input id="birthDate" name="birthDate" type="date" defaultValue={v.birthDate ?? ""} required />
+          <DateInput id="birthDate" name="birthDate" defaultValue={v.birthDate ?? ""} required />
         </Field>
         <JenjangFields jenjang={jenjang} jenjangId={v.jenjangId ?? undefined} kategoriId={v.kategoriId ?? undefined} />
         <Field label="Sekolah / kelas (opsional)" htmlFor="school" className="sm:col-span-2">

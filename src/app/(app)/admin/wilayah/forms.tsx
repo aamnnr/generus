@@ -4,6 +4,7 @@ import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { addUnit, deleteUnit, renameUnit, type WilayahFormState } from "./actions";
+import { confirmSubmit } from "@/components/confirm";
 
 function Message({ state }: { state: WilayahFormState }) {
   if (state.error) return <p className="text-sm text-destructive">{state.error}</p>;
@@ -87,9 +88,7 @@ export function UnitRow({
           {deletable && (
             <form
               action={remove}
-              onSubmit={(e) => {
-                if (!confirm(`Hapus ${label.toLowerCase()} ${name}?`)) e.preventDefault();
-              }}
+              onSubmit={confirmSubmit({ title: `Hapus ${label.toLowerCase()} ${name}?`, description: "Unit yang dihapus tidak bisa dikembalikan.", confirmLabel: "Hapus", destructive: true })}
             >
               <input type="hidden" name="id" value={id} />
               <Button type="submit" size="xs" variant="ghost" className="text-destructive" disabled={deleting}>

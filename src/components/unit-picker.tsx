@@ -168,9 +168,9 @@ export function UnitPicker({
   }
 
   return (
-    <div className={cn("relative w-full min-w-0", className)}>
+    <div data-field-anchor className={cn("relative w-full min-w-0", className)}>
       {name && (
-        // Satu input: membawa nilai ke form sekaligus memicu validasi `required` bawaan browser.
+        // Satu input: membawa nilai ke form sekaligus memicu validasi `required` (pesannya oleh FormValidation).
         <input
           name={name}
           value={value}
@@ -178,6 +178,8 @@ export function UnitPicker({
           onChange={() => {}}
           tabIndex={-1}
           aria-hidden
+          data-kind="pilihan"
+          data-required-message={`${placeholder}.`}
           className="pointer-events-none absolute inset-x-0 bottom-0 h-px opacity-0"
         />
       )}
@@ -185,7 +187,7 @@ export function UnitPicker({
         <Popover.Trigger
           id={id}
           aria-label={ariaLabel}
-          className="flex h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-input bg-card py-1 pr-9 pl-3.5 text-left text-base outline-none transition-colors focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:h-10 md:text-sm dark:bg-input/30"
+          className="flex h-11 w-full min-w-0 items-center gap-2 rounded-xl border border-input bg-card py-1 pr-9 pl-3.5 text-left text-base outline-none transition-colors hover:border-ring/40 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-popup-open:border-ring md:h-10 md:text-sm dark:bg-input/30"
         >
           {selected ? (
             <span className="flex min-w-0 items-baseline gap-1.5">

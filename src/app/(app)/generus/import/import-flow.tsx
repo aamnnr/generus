@@ -5,7 +5,8 @@ import Link from "@/components/app-link";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { FileSpreadsheetIcon, UploadIcon } from "lucide-react";
+import { cn } from "cn";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { ImportRow } from "@/lib/import/generus-import";
 import { commitImport, previewImport, type ImportState } from "./actions";
@@ -18,6 +19,7 @@ export function ImportFlow() {
   const [result, runCommit, committing] = useActionState<ImportState, FormData>(commitImport, { step: "upload" });
   const [, startTransition] = useTransition();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
   const busy = previewing || committing;
 
   const send = (action: (fd: FormData) => void) => {
@@ -67,13 +69,48 @@ export function ImportFlow() {
           send(runPreview);
         }}
       >
-        <Input
-          ref={inputRef}
-          type="file"
-          accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-          aria-label="File Excel"
-        />
+        <label
+          onDragOver={(e) => {
+            e.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDragging(false);
+            const f = e.dataTransfer.files?.[0];
+            if (f && f.name.toLowerCase().endsWith(".xlsx")) setFile(f);
+          }}
+          className={cn(
+            "tap flex min-h-14 flex-1 cursor-pointer items-center gap-3 rounded-2xl border-2 border-dashed px-4 py-3 transition-colors focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50",
+            dragging ? "border-primary bg-secondary" : file ? "border-primary/40 bg-card" : "border-border bg-card hover:border-primary/40 hover:bg-secondary/40",
+          )}
+        >
+          <input
+            ref={inputRef}
+            type="file"
+            accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+            aria-label="File Excel"
+            className="sr-only"
+          />
+          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-tile text-primary">
+            {file ? <FileSpreadsheetIcon className="size-5" aria-hidden /> : <UploadIcon className="size-5" aria-hidden />}
+          </span>
+          <span className="flex min-w-0 flex-col leading-snug">
+            {file ? (
+              <>
+                <span className="truncate text-sm font-semibold">{file.name}</span>
+                <span className="text-xs text-muted-foreground">{(file.size / 1024).toLocaleString("id-ID", { maximumFractionDigits: 0 })} KB · klik untuk ganti file</span>
+              </>
+            ) : (
+              <>
+                <span className="text-sm font-semibold">Pilih file Excel (.xlsx)</span>
+                <span className="text-xs text-muted-foreground">Klik di sini, atau seret file ke kotak ini</span>
+              </>
+            )}
+          </span>
+        </label>
         <Button type="submit" variant="outline" disabled={!file || busy}>
           {previewing ? "Memeriksa…" : "Periksa file"}
         </Button>

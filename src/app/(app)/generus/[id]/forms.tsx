@@ -9,6 +9,8 @@ import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select"
 import type { TreeUnit } from "@/components/unit-picker";
 import { changeStatus, deleteGenerus, mutateGenerus, reissueCard, type GenerusFormState } from "../actions";
 import { KelompokSelect } from "../generus-form";
+import { confirmSubmit } from "@/components/confirm";
+import { DateInput } from "@/components/ui/date-input";
 
 function Message({ state }: { state: GenerusFormState }) {
   if (state.error)
@@ -40,10 +42,11 @@ export function StatusForm({ id }: { id: string }) {
       key={state.values?._n}
       action={action}
       className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        if (!confirm("Generus ini tidak akan dihitung lagi di agenda & target, dan kartu QR-nya nonaktif. Lanjutkan?"))
-          e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({
+        title: "Ubah status generus?",
+        description: "Generus ini tidak akan dihitung lagi di agenda & target, dan kartu QR-nya nonaktif.",
+        confirmLabel: "Ubah status",
+      })}
     >
       <Message state={state} />
       <input type="hidden" name="id" value={id} />
@@ -60,7 +63,7 @@ export function StatusForm({ id }: { id: string }) {
         </div>
         <div className="flex flex-col gap-2">
           <Label htmlFor="statusDate">Tanggal</Label>
-          <Input id="statusDate" name="statusDate" type="date" max={today} defaultValue={state.values?.statusDate ?? today} required />
+          <DateInput id="statusDate" name="statusDate" max={today} defaultValue={state.values?.statusDate ?? today} required />
         </div>
         <div className="flex flex-col gap-2 sm:col-span-2">
           <Label htmlFor="statusNote">Keterangan (opsional)</Label>
@@ -114,9 +117,7 @@ export function DeleteForm({ id, name }: { id: string; name: string }) {
     <form
       action={action}
       className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        if (!confirm(`Hapus permanen data ${name}? Gunakan hanya untuk data yang salah input.`)) e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({ title: `Hapus permanen data ${name}?`, description: "Gunakan hanya untuk data yang salah input. Riwayat presensi & capaiannya ikut terhapus.", confirmLabel: "Hapus permanen", destructive: true })}
     >
       <Message state={state} />
       <input type="hidden" name="id" value={id} />
@@ -133,9 +134,7 @@ export function ReissueCardForm({ id }: { id: string }) {
     <form
       action={action}
       className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        if (!confirm("Terbitkan kartu baru? Kartu lama langsung tidak bisa dipakai.")) e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({ title: "Terbitkan kartu baru?", description: "Kartu lama langsung tidak bisa dipakai untuk presensi.", confirmLabel: "Terbitkan kartu" })}
     >
       <Message state={state} />
       <input type="hidden" name="id" value={id} />

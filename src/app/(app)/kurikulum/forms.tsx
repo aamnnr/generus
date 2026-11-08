@@ -28,6 +28,8 @@ import {
   saveTarget,
   type KurikulumFormState,
 } from "./actions";
+import { DateInput } from "@/components/ui/date-input";
+import { SuggestInput } from "@/components/ui/suggest-input";
 
 // ---------------------------------------------------------------------------
 // Bagian umum
@@ -96,24 +98,16 @@ function Chips<T extends string>({
 const ASPEK_OPTIONS = ASPEK_ORDER.map((a) => [a, ASPEK_LABEL[a]] as [Aspek, string]);
 
 function MapelInput({ aspek, suggestions, value, onChange, defaultValue }: { aspek: Aspek; suggestions: Record<Aspek, string[]>; value?: string; onChange?: (v: string) => void; defaultValue?: string }) {
-  const listId = `mapel-${aspek}`;
   return (
-    <>
-      <Input
-        id="mapel"
-        name="mapel"
-        list={listId}
-        required
-        minLength={2}
-        placeholder="mis. Hafalan, Tata Krama"
-        {...(value !== undefined ? { value, onChange: (e) => onChange?.(e.target.value) } : { defaultValue })}
-      />
-      <datalist id={listId}>
-        {suggestions[aspek].map((m) => (
-          <option key={m} value={m} />
-        ))}
-      </datalist>
-    </>
+    <SuggestInput
+      id="mapel"
+      name="mapel"
+      required
+      minLength={2}
+      placeholder="mis. Hafalan, Tata Krama"
+      suggestions={suggestions[aspek]}
+      {...(value !== undefined ? { value, onValueChange: onChange } : { defaultValue })}
+    />
   );
 }
 
@@ -282,10 +276,10 @@ export function PeriodForm({ defaults, copyOptions }: { defaults: PeriodDefaults
           <Input id="semester" name="semester" defaultValue={v.semester ?? ""} required placeholder="mis. 1 - 2026" />
         </Field>
         <Field label="Mulai" htmlFor="startsOn">
-          <Input id="startsOn" name="startsOn" type="date" defaultValue={v.startsOn ?? ""} required />
+          <DateInput id="startsOn" name="startsOn" defaultValue={v.startsOn ?? ""} required />
         </Field>
         <Field label="Selesai" htmlFor="endsOn">
-          <Input id="endsOn" name="endsOn" type="date" defaultValue={v.endsOn ?? ""} required />
+          <DateInput id="endsOn" name="endsOn" defaultValue={v.endsOn ?? ""} required />
         </Field>
         {copyOptions && (
           <Field label="Salin target dari" htmlFor="copyFrom" className="sm:col-span-2" hint="Semua target (semua jenjang) disalin; ubah yang berbeda sebelum diterbitkan.">

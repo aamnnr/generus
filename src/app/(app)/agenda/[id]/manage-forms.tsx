@@ -5,6 +5,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
 import { addScanner, cancelAgenda, lockAgenda, type AgendaFormState } from "../actions";
+import { confirmSubmit } from "@/components/confirm";
 
 function Message({ state }: { state: AgendaFormState }) {
   if (state.error)
@@ -28,10 +29,12 @@ export function LockForm({ id }: { id: string }) {
     <form
       action={action}
       className="flex flex-col gap-2"
-      onSubmit={(e) => {
-        if (!confirm("Kunci presensi sekarang? Peserta yang belum diisi menjadi alpa dan admin kelompok tidak bisa melengkapi lagi."))
-          e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({
+        title: "Kunci presensi sekarang?",
+        description: "Peserta yang belum diisi menjadi alpa dan admin kelompok tidak bisa melengkapi lagi.",
+        confirmLabel: "Kunci presensi",
+        destructive: true,
+      })}
     >
       <Message state={state} />
       <input type="hidden" name="id" value={id} />
@@ -48,9 +51,7 @@ export function CancelForm({ id, recurring }: { id: string; recurring: boolean }
     <form
       action={action}
       className="flex flex-col gap-2"
-      onSubmit={(e) => {
-        if (!confirm("Batalkan agenda ini?")) e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({ title: "Batalkan agenda ini?", confirmLabel: "Batalkan agenda", cancelLabel: "Kembali", destructive: true })}
     >
       <Message state={state} />
       <input type="hidden" name="id" value={id} />

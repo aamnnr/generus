@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { NativeSelect, NativeSelectOptGroup, NativeSelectOption } from "@/components/ui/native-select";
 import { CAPAIAN_LABEL, formatPosition, kitabStatus, parsePosition, type CapaianStatus, type KitabUnit } from "@/lib/kurikulum-format";
 import { saveAchievements, saveKitabProgress, setDelivery, type CapaianState } from "./actions";
+import { DateInput } from "@/components/ui/date-input";
 
 function Status({ state }: { state: CapaianState }) {
   if (state.error)
@@ -240,7 +241,7 @@ export function DeliveryToggle({ targetId, kelompokId, deliveredOn, today }: { t
       <input type="hidden" name="targetId" value={targetId} />
       <input type="hidden" name="kelompokId" value={kelompokId} />
       <input type="hidden" name="delivered" value="1" />
-      <Input type="date" name="deliveredOn" value={date} max={today} onChange={(e) => setDate(e.target.value)} aria-label="Tanggal disampaikan" className="h-9 w-40 md:h-9" />
+      <DateInput name="deliveredOn" value={date} max={today} required onChange={(e) => setDate(e.target.value)} aria-label="Tanggal disampaikan" className="w-56" />
       <Button type="submit" size="sm" variant="outline" disabled={pending}>
         {pending ? "Menyimpan…" : "Tandai disampaikan"}
       </Button>
@@ -357,7 +358,7 @@ export function KitabBulkForm({
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="recordedOn">Tanggal</Label>
-            <Input id="recordedOn" name="recordedOn" type="date" defaultValue={today} max={today} />
+            <DateInput id="recordedOn" name="recordedOn" defaultValue={today} max={today} />
           </div>
         </div>
         <Button type="submit" disabled={pending || selected.size === 0 || !parsed}>

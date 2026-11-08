@@ -106,7 +106,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
         {!a.lockedAt && !a.cancelledAt && ` · admin kelompok bisa melengkapi sampai ${formatDateTime(a.delegateUntil)}`}
       </p>
 
-      <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {/* HP: tanpa kartu luar agar baris checklist selebar layar (DESIGN.md §6.4). */}
         <Card className="max-md:overflow-visible max-md:bg-transparent max-md:shadow-none max-md:[--card-spacing:0px]">
           <CardHeader>

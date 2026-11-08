@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import type { TransitionKey } from "@/lib/kenaikan-rules";
 import { promoteGenerus, type PromoteState } from "./actions";
+import { confirmSubmit } from "@/components/confirm";
 
 export interface PromoteRow {
   id: string;
@@ -73,9 +74,7 @@ function Checklist({
     <form
       action={action}
       className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        if (!confirm(`Naikkan ${checked.size} generus ke ${targetLabel}?`)) e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({ title: `Naikkan ${checked.size} generus ke ${targetLabel}?`, description: "Jenjang generus yang dicentang akan diperbarui.", confirmLabel: "Naikkan jenjang" })}
     >
       <input type="hidden" name="transition" value={transition} />
       <div className="flex flex-wrap items-center gap-2 text-sm">

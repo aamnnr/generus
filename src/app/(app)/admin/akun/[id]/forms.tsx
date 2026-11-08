@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import type { TreeUnit } from "@/components/unit-picker";
 import { addRole, resetPassword, updateProfile, type AccountFormState } from "../actions";
 import { FormAlert, RoleUnitFields, TempPasswordNotice } from "../components";
+import { confirmSubmit } from "@/components/confirm";
 
 export function ProfileForm({ id, name, phone }: { id: string; name: string; phone: string | null }) {
   const [state, action, pending] = useActionState<AccountFormState, FormData>(updateProfile, {});
@@ -49,9 +50,7 @@ export function ResetPasswordForm({ id, email }: { id: string; email: string | n
     <form
       action={action}
       className="flex flex-col gap-3"
-      onSubmit={(e) => {
-        if (!confirm("Reset password akun ini? Password lama tidak bisa dipakai lagi.")) e.preventDefault();
-      }}
+      onSubmit={confirmSubmit({ title: "Reset password akun ini?", description: "Password lama tidak bisa dipakai lagi. Sistem membuat password sementara baru.", confirmLabel: "Reset password", destructive: true })}
     >
       <FormAlert error={state.error} />
       {state.tempPassword && <TempPasswordNotice email={email} password={state.tempPassword} />}

@@ -13,7 +13,7 @@ export default function ImportPage() {
     <>
       <BackLink href="/generus">Kembali ke daftar generus</BackLink>
       <PageHeader title="Import dari Excel" description="Tambahkan banyak generus sekaligus dari template. File diperiksa dulu sebelum disimpan." />
-      <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader>
             <CardTitle>Unggah file</CardTitle>

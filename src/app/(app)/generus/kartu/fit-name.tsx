@@ -41,7 +41,7 @@ export function FitName({ name }: { name: string }) {
   }, [name]);
 
   return (
-    <div ref={ref} className="idc-name" title={name}>
+    <div ref={ref} className="idc-name">
       {text}
     </div>
   );

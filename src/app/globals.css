@@ -182,6 +182,42 @@
     outline-offset: 2px;
     border-radius: 0.75rem;
   }
+  /* Checkbox & radio bergaya aplikasi (bukan tampilan bawaan OS). Yang sr-only dipakai
+     di balik chip/tombol dan tidak terpengaruh. */
+  input[type="checkbox"]:not(.sr-only),
+  input[type="radio"]:not(.sr-only) {
+    appearance: none;
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 1.5px solid var(--input);
+    background: var(--card) center / 0.85rem no-repeat;
+    transition: background-color 150ms, border-color 150ms, box-shadow 150ms, transform 150ms;
+  }
+  input[type="checkbox"]:not(.sr-only) { border-radius: 0.375rem; }
+  input[type="radio"]:not(.sr-only) { border-radius: 9999px; }
+  input[type="checkbox"]:not(.sr-only):hover:not(:disabled),
+  input[type="radio"]:not(.sr-only):hover:not(:disabled) { border-color: var(--primary); }
+  input[type="checkbox"]:not(.sr-only):active:not(:disabled),
+  input[type="radio"]:not(.sr-only):active:not(:disabled) { transform: scale(0.88); }
+  input[type="checkbox"]:not(.sr-only):checked {
+    border-color: var(--primary);
+    background-color: var(--primary);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 6 9 17l-5-5'/%3E%3C/svg%3E");
+  }
+  input[type="radio"]:not(.sr-only):checked {
+    border-color: var(--primary);
+    box-shadow: inset 0 0 0 4px var(--card);
+    background-color: var(--primary);
+  }
+  input[type="checkbox"]:not(.sr-only):focus-visible,
+  input[type="radio"]:not(.sr-only):focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+  input[type="checkbox"]:not(.sr-only):disabled,
+  input[type="radio"]:not(.sr-only):disabled { opacity: 0.5; cursor: not-allowed; }
+  /* Tanpa panah naik-turun bawaan pada kolom angka. */
+  input[type="number"] { appearance: textfield; -moz-appearance: textfield; }
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   body {
     @apply bg-background text-foreground;
   }
@@ -216,6 +252,37 @@
   }
   &:active { background-color: color-mix(in srgb, transparent, var(--secondary) 70%); }
 }
+
+/* Tooltip milik aplikasi (pengganti atribut title bawaan): <button data-tip="Hadir">.
+   Muncul saat disorot mouse atau difokus keyboard; tidak mengganggu sentuhan. */
+[data-tip] { position: relative; }
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  z-index: 60;
+  width: max-content;
+  max-width: 16rem;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0.5rem;
+  background: var(--foreground);
+  color: var(--background);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.3;
+  white-space: normal;
+  text-align: center;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, 3px);
+  transition: opacity 120ms, transform 120ms;
+}
+@media (hover: hover) {
+  [data-tip]:hover::after { opacity: 1; transform: translate(-50%, 0); transition-delay: 350ms; }
+}
+[data-tip]:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+@media print { [data-tip]::after { display: none; } }
 
 /* Kartu identitas generus: ukuran KTP berdiri 54 × 85,6 mm (lanyard), 3 × 3 per A4.
    Garis putus-putus = garis potong; lubang tali ditandai di bagian atas. */

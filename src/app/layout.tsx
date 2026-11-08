@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Amiri, Geist_Mono, Lora, Plus_Jakarta_Sans } from "next/font/google";
+import { ConfirmHost } from "@/components/confirm";
+import { FormValidation } from "@/components/form-validation";
 import { Pwa } from "@/components/pwa";
 import { APP_NAME, BRAND_COLOR } from "@/lib/app-icon";
 import "./globals.css";
@@ -35,6 +37,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <Pwa />
         {children}
+        <ConfirmHost />
+        <FormValidation />
       </body>
     </html>
   );

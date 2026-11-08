@@ -100,18 +100,18 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
         {groups.map(([group, items]) => (
           <section key={group} className="flex flex-col gap-1">
             {group && <h3 className="px-1 text-xs font-semibold tracking-wide text-muted-foreground uppercase">{group}</h3>}
-            <ul className="flex flex-col divide-y divide-muted overflow-hidden rounded-2xl bg-card shadow-card">
+            <ul className="flex flex-col divide-y divide-muted rounded-2xl bg-card shadow-card">
               {items.map((r) => {
                 const value = current(r);
                 const q = queuedMap.get(r.generusId);
                 return (
-                  <li key={r.generusId} className="flex flex-wrap items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/40 md:px-4">
+                  <li key={r.generusId} className="flex flex-wrap items-center gap-2 px-3 py-2.5 transition-colors first:rounded-t-2xl last:rounded-b-2xl hover:bg-muted/40 md:px-4">
                     <span className="min-w-0 flex-1 text-sm">
                       {r.name} <span className="text-xs text-muted-foreground">({r.gender})</span>
                       {q && (
                         <span
                           className={`ml-2 inline-block size-2 rounded-full align-middle ${q.error ? "bg-status-alpa" : "bg-status-terlambat"}`}
-                          title={q.error ? `Ditolak: ${q.error}` : "Tersimpan di perangkat, menunggu dikirim"}
+                          data-tip={q.error ? `Ditolak: ${q.error}` : "Tersimpan di perangkat, menunggu dikirim"}
                           aria-label={q.error ? "Ditolak server" : "Menunggu dikirim"}
                         />
                       )}
@@ -124,7 +124,7 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
                           role="radio"
                           aria-checked={value === o.value}
                           aria-label={o.label}
-                          title={o.label}
+                          data-tip={o.label}
                           disabled={!r.canWrite}
                           onClick={() => value !== o.value && record([{ generusId: r.generusId, status: o.value }])}
                           className={`size-9 rounded-[10px] border text-[13px] font-bold transition-[color,background-color,border-color,transform] duration-150 enabled:active:scale-90 disabled:cursor-not-allowed min-[400px]:size-10 md:size-9 ${
