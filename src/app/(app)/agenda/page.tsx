@@ -76,7 +76,7 @@ async function AgendaList({ searchParams }: Pick<PageProps<"/agenda">, "searchPa
                 const ongoing = !a.cancelledAt && a.startsAt <= now && now < a.endsAt;
                 return (
                   <li key={a.id}>
-                    <Link href={`/agenda/${a.id}`} className="flex items-center gap-3 rounded-2xl bg-card p-3.5 shadow-card hover:bg-secondary/40 md:gap-4 md:px-5">
+                    <Link href={`/agenda/${a.id}`} className="flex items-center gap-3 rounded-2xl bg-card p-3.5 shadow-card tap-card md:gap-4 md:px-5">
                       <span className="flex w-14 shrink-0 flex-col items-center rounded-xl bg-tile py-1.5 text-center leading-tight md:w-16">
                         <span className="text-sm font-bold tabular-nums">{formatTime(a.startsAt)}</span>
                         <span className="text-[11px] text-muted-foreground tabular-nums">{formatTime(a.endsAt)}</span>

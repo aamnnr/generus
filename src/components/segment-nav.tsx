@@ -82,7 +82,7 @@ export function ChipNav({
             scroll={false}
             onClick={onClick(i.href)}
             aria-current={on ? "true" : undefined}
-            className={`flex h-9 shrink-0 items-center rounded-full border px-4 text-sm whitespace-nowrap transition-colors duration-200 ${
+            className={`tap flex h-9 shrink-0 items-center rounded-full border px-4 text-sm whitespace-nowrap transition-colors duration-200 ${
               on ? "border-primary bg-primary font-semibold text-primary-foreground" : "border-transparent bg-tile text-foreground hover:bg-secondary"
             }`}
           >

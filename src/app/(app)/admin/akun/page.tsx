@@ -67,7 +67,7 @@ async function AccountList({ searchParams }: Pick<PageProps<"/admin/akun">, "sea
       <ul className="flex flex-col gap-2 md:hidden">
         {accounts.map((a) => (
           <li key={a.id}>
-            <Link href={`/admin/akun/${a.id}`} className="flex items-start gap-3 rounded-2xl bg-card p-3.5 shadow-card">
+            <Link href={`/admin/akun/${a.id}`} className="tap-card flex items-start gap-3 rounded-2xl bg-card p-3.5 shadow-card">
               <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground">
                 {initials(a.name)}
               </span>

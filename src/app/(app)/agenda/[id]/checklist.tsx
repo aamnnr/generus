@@ -105,7 +105,7 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
                 const value = current(r);
                 const q = queuedMap.get(r.generusId);
                 return (
-                  <li key={r.generusId} className="flex flex-wrap items-center gap-2 px-3 py-2.5 md:px-4">
+                  <li key={r.generusId} className="flex flex-wrap items-center gap-2 px-3 py-2.5 transition-colors hover:bg-muted/40 md:px-4">
                     <span className="min-w-0 flex-1 text-sm">
                       {r.name} <span className="text-xs text-muted-foreground">({r.gender})</span>
                       {q && (
@@ -127,8 +127,8 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
                           title={o.label}
                           disabled={!r.canWrite}
                           onClick={() => value !== o.value && record([{ generusId: r.generusId, status: o.value }])}
-                          className={`size-9 rounded-[10px] border text-[13px] font-bold transition-colors disabled:cursor-not-allowed min-[400px]:size-10 md:size-9 ${
-                            value === o.value ? o.active : "border-border bg-card text-muted-foreground hover:bg-muted"
+                          className={`size-9 rounded-[10px] border text-[13px] font-bold transition-[color,background-color,border-color,transform] duration-150 enabled:active:scale-90 disabled:cursor-not-allowed min-[400px]:size-10 md:size-9 ${
+                            value === o.value ? o.active : "border-border bg-card text-muted-foreground enabled:hover:border-ring/40 enabled:hover:bg-muted enabled:hover:text-foreground"
                           } ${!r.canWrite && value !== o.value ? "opacity-40" : ""}`}
                         >
                           {o.short}

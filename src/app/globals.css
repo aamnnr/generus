@@ -162,6 +162,26 @@
     transition-duration: 150ms;
     transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
   }
+  /* Tailwind v4 mengembalikan kursor tombol ke default; kembalikan tanda "bisa diklik". */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="option"],
+  [role="tab"],
+  [role="menuitem"],
+  summary,
+  select:not(:disabled),
+  label:has(> input[type="checkbox"], > input[type="radio"]),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled),
+  input[type="file"]:not(:disabled)::file-selector-button {
+    cursor: pointer;
+  }
+  /* Cincin fokus keyboard yang konsisten untuk tautan & ringkasan tanpa gaya fokus sendiri. */
+  :where(a, summary, [role="button"]):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 0.75rem;
+  }
   body {
     @apply bg-background text-foreground;
   }
@@ -169,6 +189,34 @@
     @apply font-sans;
   }
 }
+/* Umpan balik interaksi (DESIGN.md §9).
+   - tap       : sedikit mengecil saat ditekan — tombol pil, ikon, chip.
+   - tap-card  : kartu/baris yang seluruhnya bisa diklik — terangkat saat hover (hanya
+                 perangkat dengan mouse), menekan saat disentuh.
+   - tap-row   : baris daftar di dalam kartu — latar menyala saat hover/tekan. */
+@utility tap {
+  &:active { transform: scale(0.97); }
+}
+@utility tap-card {
+  transition-property: background-color, box-shadow, transform;
+  transition-duration: 180ms;
+  transition-timing-function: cubic-bezier(0.2, 0.7, 0.2, 1);
+  @media (hover: hover) {
+    &:hover {
+      background-color: color-mix(in srgb, var(--card), var(--secondary) 35%);
+      box-shadow: 0 2px 4px oklch(0.26 0.04 167 / 0.08), 0 10px 28px oklch(0.26 0.04 167 / 0.12);
+      transform: translateY(-1px);
+    }
+  }
+  &:active { transform: scale(0.99); }
+}
+@utility tap-row {
+  @media (hover: hover) {
+    &:hover { background-color: color-mix(in srgb, transparent, var(--secondary) 45%); }
+  }
+  &:active { background-color: color-mix(in srgb, transparent, var(--secondary) 70%); }
+}
+
 /* Kartu identitas generus: ukuran KTP berdiri 54 × 85,6 mm (lanyard), 3 × 3 per A4.
    Garis putus-putus = garis potong; lubang tali ditandai di bagian atas. */
 .kartu-sheet {

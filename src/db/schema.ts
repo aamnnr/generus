@@ -83,7 +83,7 @@ export const userRoles = pgTable(
     role: appRole("role").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [unique("user_roles_unique").on(t.userId, t.unitId, t.role), index("user_roles_user_idx").on(t.userId)],
+  (t) => [unique("user_roles_unique").on(t.userId, t.unitId, t.role), index("user_roles_user_idx").on(t.userId), index("user_roles_unit_idx").on(t.unitId)],
 );
 
 // Superadmin sistem: boleh menambah daerah dan mengelola semua daerah. Superadmin
@@ -159,38 +159,47 @@ export const generus = pgTable(
   (t) => [
     index("generus_unit_path_gist").using("gist", t.unitPath),
     index("generus_kelompok_idx").on(t.kelompokId),
+    index("generus_jenjang_idx").on(t.jenjangId),
   ],
 );
 
 /** Pindah kelompok di dalam daerah. Diisi trigger. */
-export const generusMutations = pgTable("generus_mutations", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  generusId: uuid("generus_id")
-    .notNull()
-    .references(() => generus.id, { onDelete: "cascade" }),
-  fromUnitId: uuid("from_unit_id")
-    .notNull()
-    .references(() => units.id),
-  toUnitId: uuid("to_unit_id")
-    .notNull()
-    .references(() => units.id),
-  mutatedAt: timestamp("mutated_at", { withTimezone: true }).notNull().defaultNow(),
-  mutatedBy: uuid("mutated_by"),
-});
+export const generusMutations = pgTable(
+  "generus_mutations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    generusId: uuid("generus_id")
+      .notNull()
+      .references(() => generus.id, { onDelete: "cascade" }),
+    fromUnitId: uuid("from_unit_id")
+      .notNull()
+      .references(() => units.id),
+    toUnitId: uuid("to_unit_id")
+      .notNull()
+      .references(() => units.id),
+    mutatedAt: timestamp("mutated_at", { withTimezone: true }).notNull().defaultNow(),
+    mutatedBy: uuid("mutated_by"),
+  },
+  (t) => [index("generus_mutations_generus_idx").on(t.generusId, t.mutatedAt)],
+);
 
 /** Riwayat perubahan status (aktif ↔ menikah / pindah sambung). Diisi trigger. */
-export const generusStatusHistory = pgTable("generus_status_history", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  generusId: uuid("generus_id")
-    .notNull()
-    .references(() => generus.id, { onDelete: "cascade" }),
-  fromStatus: generusStatus("from_status").notNull(),
-  toStatus: generusStatus("to_status").notNull(),
-  statusDate: date("status_date").notNull(),
-  note: text("note"),
-  changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
-  changedBy: uuid("changed_by"),
-});
+export const generusStatusHistory = pgTable(
+  "generus_status_history",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    generusId: uuid("generus_id")
+      .notNull()
+      .references(() => generus.id, { onDelete: "cascade" }),
+    fromStatus: generusStatus("from_status").notNull(),
+    toStatus: generusStatus("to_status").notNull(),
+    statusDate: date("status_date").notNull(),
+    note: text("note"),
+    changedAt: timestamp("changed_at", { withTimezone: true }).notNull().defaultNow(),
+    changedBy: uuid("changed_by"),
+  },
+  (t) => [index("generus_status_history_generus_idx").on(t.generusId, t.changedAt)],
+);
 
 // ---------------------------------------------------------------------------
 // Agenda & presensi (Fase 2)
@@ -228,6 +237,7 @@ export const agendas = pgTable(
     index("agendas_unit_path_gist").using("gist", t.unitPath),
     index("agendas_starts_at_idx").on(t.startsAt),
     index("agendas_recurrence_idx").on(t.recurrenceId),
+    index("agendas_unit_idx").on(t.unitId),
   ],
 );
 
@@ -430,7 +440,7 @@ export const kitabProgress = pgTable(
     recordedBy: uuid("recorded_by"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [index("kitab_progress_latest_idx").on(t.generusId, t.kitabId, t.recordedOn, t.createdAt)],
+  (t) => [index("kitab_progress_latest_idx").on(t.generusId, t.kitabId, t.recordedOn, t.createdAt), index("kitab_progress_kitab_idx").on(t.kitabId)],
 );
 
 // ---------------------------------------------------------------------------

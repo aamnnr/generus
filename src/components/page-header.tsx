@@ -8,7 +8,7 @@ export function BackLink({ href, children }: { href: string; children: React.Rea
   return (
     <Link
       href={href}
-      className="-my-2 -ml-2 flex h-11 w-fit items-center gap-1 rounded-xl pr-3 pl-1 text-sm font-medium text-muted-foreground hover:text-foreground print:hidden"
+      className="-my-2 -ml-2 flex h-11 w-fit items-center gap-1 rounded-xl pr-3 pl-1 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground print:hidden"
     >
       <ChevronLeft className="size-5" aria-hidden />
       {children}

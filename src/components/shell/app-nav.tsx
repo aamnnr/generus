@@ -39,7 +39,7 @@ export function Sidebar({ nav }: { nav: ShellNav }) {
         key={item.href}
         href={item.href}
         aria-current={on ? "page" : undefined}
-        className={`flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] transition-colors ${
+        className={`tap flex h-11 items-center gap-3 rounded-xl px-3 text-[15px] ${
           on ? "bg-secondary font-bold text-secondary-foreground" : "font-medium text-foreground hover:bg-secondary/60"
         }`}
       >
@@ -68,7 +68,7 @@ export function Sidebar({ nav }: { nav: ShellNav }) {
         </>
       )}
       <div className="mt-auto flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card">
-        <Link href="/akun/password" className="flex min-w-0 flex-1 items-center gap-3" aria-label="Akun saya">
+        <Link href="/akun/password" className="-m-1 flex min-w-0 flex-1 items-center gap-3 rounded-xl p-1 hover:bg-muted" aria-label="Akun saya">
           <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground">
             {nav.user.initials}
           </span>
@@ -105,7 +105,7 @@ export function BottomNav({ nav }: { nav: ShellNav }) {
               key={item.href}
               href={item.href}
               aria-current={on ? "page" : undefined}
-              className={`relative flex flex-col items-center justify-center gap-0.5 text-xs ${on ? "font-bold text-primary" : "font-medium text-muted-foreground"}`}
+              className={`tap relative flex flex-col items-center justify-center gap-0.5 text-xs ${on ? "font-bold text-primary" : "font-medium text-muted-foreground hover:text-foreground"}`}
             >
               {on && <span className="absolute top-0 h-[3px] w-8 rounded-b bg-primary" aria-hidden />}
               <Icon className="size-6" strokeWidth={1.75} fill={on ? "var(--secondary)" : "none"} aria-hidden />

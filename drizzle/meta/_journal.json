@@ -120,6 +120,13 @@
       "when": 1793432531996,
       "tag": "0016_superadmin_scope",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1794114548498,
+      "tag": "0017_indeks_fk",
+      "breakpoints": true
     }
   ]
 }

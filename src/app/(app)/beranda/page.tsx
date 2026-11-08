@@ -92,7 +92,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
         <Link
           href="/lainnya"
           aria-label="Akun saya"
-          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary font-bold text-secondary-foreground lg:hidden"
+          className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary font-bold text-secondary-foreground tap hover:bg-secondary/70 lg:hidden"
         >
           {initials(user.name)}
         </Link>
@@ -125,7 +125,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
                     {t.unitName} · {formatDateTime(t.startsAt)}
                   </span>
                 </span>
-                <Link href={`/pindai?agenda=${t.id}`} className="flex h-11 items-center gap-2 rounded-full bg-primary px-4 font-semibold text-primary-foreground">
+                <Link href={`/pindai?agenda=${t.id}`} className="tap flex h-11 items-center gap-2 rounded-full bg-primary px-4 font-semibold text-primary-foreground hover:bg-primary/90">
                   <ScanLine className="size-5" aria-hidden /> Buka pemindai
                 </Link>
               </li>
@@ -146,7 +146,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
                 <h2 className="flex-1 text-lg font-bold">
                   {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
                 </h2>
-                <Link href="/agenda?tab=selesai" className="text-sm font-semibold text-primary">
+                <Link href="/agenda?tab=selesai" className="text-sm font-semibold text-primary underline-offset-4 hover:underline">
                   Lihat agenda
                 </Link>
               </div>
@@ -175,9 +175,9 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
                 <Link
                   key={t.label}
                   href={t.href}
-                  className="flex flex-col items-center gap-1.5 rounded-2xl py-1 text-center md:bg-card md:py-4 md:shadow-card"
+                  className="group tap flex flex-col items-center gap-1.5 rounded-2xl py-1 text-center md:bg-card md:py-4 md:shadow-card md:tap-card"
                 >
-                  <span className="flex size-14 items-center justify-center rounded-2xl bg-tile text-primary md:size-12">
+                  <span className="flex size-14 items-center justify-center rounded-2xl bg-tile text-primary transition-[background-color,transform] duration-200 group-hover:scale-105 group-hover:bg-secondary md:size-12">
                     <t.icon className="size-6" strokeWidth={1.75} aria-hidden />
                   </span>
                   <span className="text-[13px] font-medium md:text-sm md:font-semibold">{t.label}</span>
@@ -220,7 +220,7 @@ function HeroCard({ hero, writer }: { hero: HeroAgenda | null; writer: boolean }
         <span className="text-[11px] font-semibold tracking-[0.06em] text-white/80">AGENDA</span>
         <p className="text-lg font-bold">Belum ada agenda mendatang.</p>
         {writer && (
-          <Link href="/agenda/baru" className="flex h-11 w-fit items-center gap-2 rounded-full bg-white px-5 font-bold text-hero">
+          <Link href="/agenda/baru" className="tap flex h-11 w-fit items-center gap-2 rounded-full bg-white px-5 font-bold text-hero hover:bg-white/90">
             Buat agenda <ArrowRight className="size-[18px]" aria-hidden />
           </Link>
         )}
@@ -262,11 +262,11 @@ function HeroCard({ hero, writer }: { hero: HeroAgenda | null; writer: boolean }
         </p>
       )}
       <div className="flex flex-wrap gap-2 pt-1">
-        <Link href={`/agenda/${hero.id}`} className="flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 font-bold text-hero sm:flex-none">
+        <Link href={`/agenda/${hero.id}`} className="tap flex h-11 flex-1 items-center justify-center gap-2 rounded-full bg-white px-5 font-bold text-hero hover:bg-white/90 sm:flex-none">
           {hero.ongoing ? "Buka presensi" : "Lihat agenda"} <ArrowRight className="size-[18px]" aria-hidden />
         </Link>
         {scan && (
-          <Link href={`/pindai?agenda=${hero.id}`} className="flex h-11 items-center gap-2 rounded-full border border-white/50 px-4 font-semibold">
+          <Link href={`/pindai?agenda=${hero.id}`} className="tap flex h-11 items-center gap-2 rounded-full border border-white/50 px-4 font-semibold hover:bg-white/10">
             <ScanLine className="size-[18px]" aria-hidden /> Scan QR
           </Link>
         )}
@@ -341,7 +341,7 @@ function PeriodCard({
         </p>
       </div>
       {rekap && rekap.slots + rekap.deliverable > 0 && (
-        <Link href={`${rekapHref}?periode=${period.id}`} className="grid w-full grid-cols-2 gap-3 rounded-xl bg-background p-3">
+        <Link href={`${rekapHref}?periode=${period.id}`} className="tap grid w-full grid-cols-2 gap-3 rounded-xl bg-background p-3 hover:bg-muted">
           <span className="flex flex-col gap-1.5">
             <span className="text-xs text-muted-foreground">Capaian per generus</span>
             <span className="text-xl leading-none font-bold tabular-nums">{pct(rekap.tuntas, rekap.slots)}%</span>
@@ -359,11 +359,11 @@ function PeriodCard({
         </Link>
       )}
       <div className="flex w-full gap-2 sm:w-auto">
-        <Link href={`/kurikulum/periode/${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold sm:flex-none">
+        <Link href={`/kurikulum/periode/${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full border border-border px-4 text-sm font-semibold tap hover:bg-muted sm:flex-none">
           Lihat target
         </Link>
         {reader && (
-          <Link href={`/capaian?periode=${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground sm:flex-none">
+          <Link href={`/capaian?periode=${period.id}`} className="flex h-11 flex-1 items-center justify-center rounded-full bg-primary px-4 text-sm font-semibold text-primary-foreground tap hover:bg-primary/90 sm:flex-none">
             {writer ? "Isi capaian" : "Lihat capaian"}
           </Link>
         )}

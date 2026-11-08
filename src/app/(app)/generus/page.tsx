@@ -146,7 +146,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
         <div className="flex flex-col items-center gap-2 rounded-2xl bg-card px-6 py-10 text-center shadow-card">
           <MosqueSilhouette className="w-24 text-brass opacity-40" />
           <p className="font-bold">Tidak ada generus yang cocok</p>
-          <Link href="/generus" className="text-sm font-semibold text-primary">
+          <Link href="/generus" className="text-sm font-semibold text-primary underline-offset-4 hover:underline">
             Hapus filter
           </Link>
         </div>
@@ -157,7 +157,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
         <ul className="flex flex-col gap-2 md:hidden">
           {rows.map((g) => (
             <li key={g.id}>
-              <Link href={`/generus/${g.id}`} className="flex items-center gap-3 rounded-2xl bg-card px-3.5 py-3 shadow-card">
+              <Link href={`/generus/${g.id}`} className="tap-card flex items-center gap-3 rounded-2xl bg-card px-3.5 py-3 shadow-card">
                 <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-secondary-foreground">
                   {initials(g.name)}
                 </span>
@@ -255,7 +255,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
         <Link
           href="/generus/baru"
           aria-label="Tambah generus"
-          className="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-float md:hidden"
+          className="fixed right-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-30 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-float tap hover:bg-primary/90 md:hidden"
         >
           <Plus className="size-6" aria-hidden />
         </Link>

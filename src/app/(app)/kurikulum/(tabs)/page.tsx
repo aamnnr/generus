@@ -37,7 +37,7 @@ export default async function KurikulumPage() {
       <ul className="flex flex-col gap-2">
         {periods.map((p) => (
           <li key={p.id}>
-            <Link href={`/kurikulum/periode/${p.id}`} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card hover:bg-secondary/40">
+            <Link href={`/kurikulum/periode/${p.id}`} className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card tap-card">
               <span className="flex size-12 shrink-0 flex-col items-center justify-center rounded-xl bg-tile text-primary">
                 <span className="text-[10px] font-semibold tracking-wide uppercase">
                   {new Date(`${p.startsOn}T00:00:00`).toLocaleDateString("id-ID", { month: "short" })}

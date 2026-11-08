@@ -47,8 +47,8 @@ async function MateriList({ searchParams }: Pick<PageProps<"/kurikulum/materi">,
       key={label}
       href={to}
       aria-current={active ? "true" : undefined}
-      className={`flex h-9 items-center rounded-full border px-4 text-sm font-medium whitespace-nowrap ${
-        active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card"
+      className={`tap flex h-9 items-center rounded-full border px-4 text-sm font-medium whitespace-nowrap ${
+        active ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted"
       }`}
     >
       {label}

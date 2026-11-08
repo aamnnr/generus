@@ -61,7 +61,7 @@ async function Menu() {
 
   return (
     <div className="flex flex-col gap-4">
-      <Link href="/akun/password" className="flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card">
+      <Link href="/akun/password" className="tap-card flex items-center gap-3 rounded-2xl bg-card p-4 shadow-card">
         <span className="flex size-13 items-center justify-center rounded-full bg-secondary text-base font-bold text-secondary-foreground">
           {initials(me.name)}
         </span>
@@ -89,7 +89,7 @@ async function Menu() {
           </li>
           <li>
             <form action={logout}>
-              <button type="submit" className="flex h-14 w-full items-center gap-3 px-4 font-semibold text-destructive">
+              <button type="submit" className="tap-row flex h-14 w-full items-center gap-3 px-4 font-semibold text-destructive">
                 <span className="flex size-9 items-center justify-center rounded-xl bg-status-alpa-soft">
                   <LogOut className="size-5" strokeWidth={1.75} aria-hidden />
                 </span>
@@ -128,13 +128,13 @@ function Group({ title, items }: { title: string; items: Item[] }) {
 
 function Row({ href, label, icon: Icon, tag }: Item) {
   return (
-    <Link href={href} className="flex h-14 items-center gap-3 px-4 hover:bg-secondary/40">
+    <Link href={href} className="tap-row group flex h-14 items-center gap-3 px-4">
       <span className="flex size-9 items-center justify-center rounded-xl bg-tile text-primary">
         <Icon className="size-5" strokeWidth={1.75} aria-hidden />
       </span>
       <span className="flex-1 font-medium">{label}</span>
       {tag && <span className="text-xs font-semibold text-accent-foreground">{tag}</span>}
-      <ChevronRight className="size-5 text-muted-foreground" aria-hidden />
+      <ChevronRight className="size-5 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
     </Link>
   );
 }

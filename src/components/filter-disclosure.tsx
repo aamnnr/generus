@@ -12,7 +12,7 @@ export function FilterDisclosure({ label, children }: { label: string; children:
         type="button"
         aria-expanded={open}
         onClick={() => setOpen((o) => !o)}
-        className="flex h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold text-primary md:hidden"
+        className="tap flex h-11 items-center gap-2 rounded-full border border-border bg-card px-4 text-sm font-semibold text-primary hover:bg-muted aria-expanded:bg-secondary md:hidden"
       >
         <SlidersHorizontal className="size-[18px]" aria-hidden /> {label}
       </button>

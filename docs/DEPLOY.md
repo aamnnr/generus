@@ -1,5 +1,7 @@
 # Deploy: Server Resmi & Server Uji
 
+> Memasang di VPS milik klien (tanpa Vercel/Supabase Cloud)? Lihat [DEPLOY-VPS.md](DEPLOY-VPS.md).
+
 Penerapan bertahap memakai **satu kode, dua server**:
 
 | | Server **RESMI** | Server **UJI** |
