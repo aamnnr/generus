@@ -43,17 +43,70 @@ export function isPromotionSeason(today: Date): boolean {
   return today.getMonth() === 6 || today.getMonth() === 7;
 }
 
+export interface Suggestion {
+  suggested: boolean;
+  /** Alasan singkat yang ditampilkan ke admin, mis. "usia 15 per 1 Juli". */
+  reason: string;
+}
+
+const ROMAN: Record<string, number> = { vii: 7, viii: 8, ix: 9, x: 10, xi: 11, xii: 12 };
+
 /**
- * Apakah generus disarankan naik untuk transisi ini.
- * - Pra Remaja → Remaja: usia ≥ 15 pada awal tahun ajaran, atau tercatat kelas 9.
- *   Saran dipakai untuk kedua tujuan (Pelajar/Mandiri); admin memilih tujuannya.
- * - Pelajar → Mandiri: usia ≥ 23, atau tercatat lulus/kuliah semester akhir.
+ * Kelas yang tercatat di kolom sekolah, bila ada: "kelas 9", "kls 8", "Kelas IX",
+ * "9A", "IX B". Angka/romawi tanpa kata "kelas" hanya dikenali bila diikuti huruf
+ * rombel (A–H) agar "SMP N 9" tidak dianggap kelas 9.
  */
-export function isSuggested(key: TransitionKey, g: { birthDate: string; school: string | null }, today: Date): boolean {
+export function gradeFromSchool(school: string | null): number | null {
+  if (!school) return null;
+  const withWord = school.match(/\b(?:kelas|kls|kl)\.?\s*(vii|viii|ix|xii|xi|x|\d{1,2})\b/i);
+  const bare = school.match(/\b(VII|VIII|IX|XII|XI|X|7|8|9|10|11|12)\s*[A-H]\b/);
+  const raw = (withWord?.[1] ?? bare?.[1])?.toLowerCase();
+  if (!raw) return null;
+  const n = ROMAN[raw] ?? Number(raw);
+  return n >= 1 && n <= 12 ? n : null;
+}
+
+/** Kolom sekolah menunjukkan jenjang SLTA ke atas (SMA/SMK/MA, kuliah). */
+export function isUpperSchool(school: string | null): boolean {
+  if (!school) return false;
+  return /\b(sma|smk|sman|smkn|stm|slta|madrasah aliyah|man|kuliah|universitas|univ|politeknik|poltek|institut|stikes|uin|iain)\b/i.test(school) && !/\bsmp\b|\bmts\b/i.test(school);
+}
+
+/**
+ * Saran kenaikan untuk satu generus. Sistem hanya menyarankan; admin yang memutuskan.
+ *
+ * Pra Remaja → Remaja (Pelajar/Mandiri), urutan pertimbangan:
+ * 1. Tercatat SMA/SMK/MA/kuliah atau kelas 10–12 → disarankan (data sekolah sudah naik).
+ * 2. Tercatat kelas 7 atau 8 → TIDAK disarankan, berapa pun usianya.
+ * 3. Tercatat kelas 9 → disarankan hanya di awal tahun ajaran (Juli–Agustus), saat kelas 9
+ *    berarti baru lulus. Di luar itu ia masih duduk di kelas 9.
+ * 4. Tanpa keterangan kelas → usia ≥ 15 per 1 Juli tahun ajaran berjalan.
+ *
+ * Pelajar → Mandiri: tercatat lulus / semester akhir, atau usia ≥ 23; masih SMA (kelas
+ * 10–12) tidak disarankan.
+ */
+export function suggestPromotion(key: TransitionKey, g: { birthDate: string; school: string | null }, today: Date): Suggestion {
   const age = ageAt(g.birthDate, academicYearStart(today));
-  const school = (g.school ?? "").toLowerCase();
+  const school = g.school ?? "";
+  const grade = gradeFromSchool(school);
+  const ageText = `usia ${age} per 1 Juli`;
+
   if (key === "pelajar-ke-mandiri") {
-    return age >= 23 || /\blulus\b/.test(school) || /semester\s*(8|9|1[0-4])\b/.test(school);
+    if (/\blulus\b/i.test(school)) return { suggested: true, reason: "tercatat lulus" };
+    if (/semester\s*(8|9|1[0-4])\b/i.test(school)) return { suggested: true, reason: "kuliah semester akhir" };
+    if (grade !== null && grade >= 10) return { suggested: false, reason: `masih kelas ${grade}` };
+    if (age >= 23) return { suggested: true, reason: ageText };
+    return { suggested: false, reason: ageText };
   }
-  return age >= 15 || /kelas\s*9\b/.test(school) || /\bix\b/.test(school);
+
+  if (isUpperSchool(school) || (grade !== null && grade >= 10)) {
+    return { suggested: true, reason: grade !== null && grade >= 10 ? `tercatat kelas ${grade}` : "sekolah tercatat SLTA/kuliah" };
+  }
+  if (grade === 7 || grade === 8) return { suggested: false, reason: `tercatat kelas ${grade}` };
+  if (grade === 9) {
+    return isPromotionSeason(today)
+      ? { suggested: true, reason: "tercatat kelas 9, awal tahun ajaran" }
+      : { suggested: false, reason: "masih kelas 9 (naik Juli)" };
+  }
+  return { suggested: age >= 15, reason: ageText };
 }

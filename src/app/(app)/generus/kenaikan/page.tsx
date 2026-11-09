@@ -9,7 +9,7 @@ import { UnitPicker } from "@/components/unit-picker";
 import { buildUnitTree } from "@/lib/unit-tree";
 import { requireGenerusWriter } from "@/lib/auth";
 import { listPromotionCandidates, listScopeUnits, MAX_PROMOTION_ROWS } from "@/lib/generus";
-import { academicYearStart, ageAt, isSuggested, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
+import { academicYearStart, ageAt, isPromotionSeason, suggestPromotion, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
 import { PromoteForm } from "./promote-form";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
@@ -50,8 +50,9 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
     candidates?.rows.map((g) => ({
       ...g,
       age: ageAt(g.birthDate, refDate),
-      suggested: isSuggested(p.t, g, today),
+      ...suggestPromotion(p.t, g, today),
     })) ?? [];
+  const fromPra = t.from.jenjang === "Pra Remaja";
 
   return (
     <>
@@ -94,7 +95,12 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
           <CardHeader>
             <CardTitle>{t.label}</CardTitle>
             <CardDescription>
-              {t.hint} Usia dihitung per 1 Juli {refDate.getFullYear()}.
+              {t.hint} Centang hanya yang benar-benar naik; yang tidak dicentang tetap di jenjangnya. Usia dihitung per 1 Juli {refDate.getFullYear()}.
+              {fromPra &&
+                (isPromotionSeason(today)
+                  ? " Generus yang tercatat kelas 9 dianggap baru lulus; kelas 7–8 tidak disarankan."
+                  : " Di luar Juli–Agustus, generus yang tercatat kelas 9 dianggap masih duduk di kelas 9 dan tidak disarankan.")}
+              {fromPra && " Tulis kelas di kolom Sekolah (mis. \"SMPN 2 kelas 8\") agar saran lebih tepat."}
               {candidates?.truncated && ` Hanya ${MAX_PROMOTION_ROWS} generus pertama yang ditampilkan; pilih wilayah yang lebih kecil.`}
             </CardDescription>
           </CardHeader>
