@@ -117,12 +117,27 @@ export interface RosterRow {
   canWrite: boolean;
 }
 
+export interface RosterFilter {
+  /** Hanya generus kelompok ini. */
+  kelompokId?: string;
+  /** Cari nama (tanpa beda huruf besar/kecil). */
+  q?: string;
+  /** Batas baris (untuk pencarian lintas kelompok). */
+  limit?: number;
+}
+
 /**
  * Peserta sasaran agenda yang terlihat oleh user, beserta presensinya.
  * Admin kelompok pada agenda desa/daerah otomatis hanya melihat anggotanya
  * (RLS generus), yang sekaligus menjadi daftar delegasinya.
+ *
+ * Hak tulis dihitung per baris, jadi untuk agenda besar panggil dengan filter
+ * (satu kelompok / pencarian), bukan seluruh peserta. Ringkasan: getAgendaSummary.
  */
-export async function getRoster(claims: JwtClaims, agendaId: string): Promise<RosterRow[]> {
+export async function getRoster(claims: JwtClaims, agendaId: string, filter: RosterFilter = {}): Promise<RosterRow[]> {
+  const kel = filter.kelompokId ? sql`AND g.kelompok_id = ${filter.kelompokId}` : sql``;
+  const q = filter.q?.trim() ? sql`AND g.name ILIKE ${`%${filter.q.trim()}%`}` : sql``;
+  const limit = filter.limit ? sql`LIMIT ${filter.limit}` : sql``;
   return withRls(claims, async (tx) => {
     const res = await tx.execute<{
       generus_id: string;
@@ -135,26 +150,29 @@ export async function getRoster(claims: JwtClaims, agendaId: string): Promise<Ro
       recorded_at: string | null;
       can_write: boolean;
     }>(sql`
-      SELECT g.id AS generus_id, g.name, g.gender, k.name AS kelompok, d.name AS desa,
-             at.status, at.method, at.recorded_at,
-             app.can_write_attendance(a.id, g.id) AS can_write
-      FROM agendas a
-      JOIN generus g ON app.agenda_is_target(a, g)
-      JOIN units k ON k.id = g.kelompok_id
-      JOIN units d ON d.id = k.parent_id
-      LEFT JOIN attendance at ON at.agenda_id = a.id AND at.generus_id = g.id
-      WHERE a.id = ${agendaId}
-      UNION ALL
-      -- Presensi yang tersimpan untuk generus yang kini bukan sasaran (mis. agenda diubah).
-      SELECT g.id, g.name, g.gender, k.name, d.name, at.status, at.method, at.recorded_at,
-             app.can_write_attendance(at.agenda_id, g.id)
-      FROM attendance at
-      JOIN agendas a ON a.id = at.agenda_id
-      JOIN generus g ON g.id = at.generus_id
-      JOIN units k ON k.id = g.kelompok_id
-      JOIN units d ON d.id = k.parent_id
-      WHERE at.agenda_id = ${agendaId} AND NOT app.agenda_is_target(a, g)
-      ORDER BY desa, kelompok, name`);
+      SELECT r.*, app.can_write_attendance(${agendaId}, r.generus_id) AS can_write
+      FROM (
+        SELECT g.id AS generus_id, g.name, g.gender, k.name AS kelompok, d.name AS desa,
+               at.status, at.method, at.recorded_at
+        FROM agendas a
+        JOIN generus g ON app.agenda_is_target(a, g)
+        JOIN units k ON k.id = g.kelompok_id
+        JOIN units d ON d.id = k.parent_id
+        LEFT JOIN attendance at ON at.agenda_id = a.id AND at.generus_id = g.id
+        WHERE a.id = ${agendaId} ${kel} ${q}
+        UNION ALL
+        -- Presensi yang tersimpan untuk generus yang kini bukan sasaran (mis. agenda diubah).
+        SELECT g.id, g.name, g.gender, k.name, d.name, at.status, at.method, at.recorded_at
+        FROM attendance at
+        JOIN agendas a ON a.id = at.agenda_id
+        JOIN generus g ON g.id = at.generus_id
+        JOIN units k ON k.id = g.kelompok_id
+        JOIN units d ON d.id = k.parent_id
+        WHERE at.agenda_id = ${agendaId} AND NOT app.agenda_is_target(a, g) ${kel} ${q}
+        ORDER BY desa, kelompok, name
+        ${limit}
+      ) r
+      ORDER BY r.desa, r.kelompok, r.name`);
     return res.map((r) => ({
       generusId: r.generus_id,
       name: r.name,
@@ -174,6 +192,72 @@ export interface AttendanceSummary {
   counts: Record<AttendanceStatus | "belum", number>;
   /** (hadir + terlambat) / total, 0–1. */
   rate: number;
+}
+
+export interface KelompokSummary extends AttendanceSummary {
+  kelompokId: string;
+  kelompok: string;
+  desaId: string;
+  desa: string;
+}
+
+/**
+ * Rekap presensi per kelompok, dihitung di database (tanpa memuat daftar nama).
+ * Hanya generus yang terlihat oleh user (RLS). Dipakai untuk tampilan awal agenda.
+ */
+export async function getAgendaSummary(claims: JwtClaims, agendaId: string): Promise<KelompokSummary[]> {
+  const rows = await withRls(claims, (tx) =>
+    tx.execute<{ kelompok_id: string; kelompok: string; desa_id: string; desa: string } & Record<AttendanceStatus | "belum" | "total", number>>(sql`
+      WITH p AS (
+        SELECT g.kelompok_id, at.status
+        FROM agendas a
+        JOIN generus g ON app.agenda_is_target(a, g)
+        LEFT JOIN attendance at ON at.agenda_id = a.id AND at.generus_id = g.id
+        WHERE a.id = ${agendaId}
+        UNION ALL
+        SELECT g.kelompok_id, at.status
+        FROM attendance at
+        JOIN agendas a ON a.id = at.agenda_id
+        JOIN generus g ON g.id = at.generus_id
+        WHERE at.agenda_id = ${agendaId} AND NOT app.agenda_is_target(a, g)
+      )
+      SELECT k.id AS kelompok_id, k.name AS kelompok, d.id AS desa_id, d.name AS desa,
+             count(*)::int AS total,
+             count(*) FILTER (WHERE p.status = 'hadir')::int AS hadir,
+             count(*) FILTER (WHERE p.status = 'terlambat')::int AS terlambat,
+             count(*) FILTER (WHERE p.status = 'izin')::int AS izin,
+             count(*) FILTER (WHERE p.status = 'sakit')::int AS sakit,
+             count(*) FILTER (WHERE p.status = 'alpa')::int AS alpa,
+             count(*) FILTER (WHERE p.status IS NULL)::int AS belum
+      FROM p
+      JOIN units k ON k.id = p.kelompok_id
+      JOIN units d ON d.id = k.parent_id
+      GROUP BY k.id, k.name, d.id, d.name
+      ORDER BY d.name, k.name`),
+  );
+  return rows.map((r) => {
+    const counts = { hadir: r.hadir, terlambat: r.terlambat, izin: r.izin, sakit: r.sakit, alpa: r.alpa, belum: r.belum };
+    return {
+      kelompokId: r.kelompok_id,
+      kelompok: r.kelompok,
+      desaId: r.desa_id,
+      desa: r.desa,
+      total: r.total,
+      counts,
+      rate: r.total ? (r.hadir + r.terlambat) / r.total : 0,
+    };
+  });
+}
+
+/** Jumlahkan beberapa rekap (mis. semua kelompok, atau satu desa). */
+export function sumSummaries(list: AttendanceSummary[]): AttendanceSummary {
+  const counts = { hadir: 0, terlambat: 0, izin: 0, sakit: 0, alpa: 0, belum: 0 };
+  let total = 0;
+  for (const s of list) {
+    total += s.total;
+    for (const k of Object.keys(counts) as (keyof typeof counts)[]) counts[k] += s.counts[k];
+  }
+  return { total, counts, rate: total ? (counts.hadir + counts.terlambat) / total : 0 };
 }
 
 export function summarize(rows: Pick<RosterRow, "status">[]): AttendanceSummary {

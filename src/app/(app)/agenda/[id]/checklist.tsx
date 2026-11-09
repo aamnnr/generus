@@ -35,6 +35,7 @@ export interface ChecklistRow {
  */
 export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: string; rows: ChecklistRow[]; showGroup: boolean }) {
   const [query, setQuery] = useState("");
+  const [onlyEmpty, setOnlyEmpty] = useState(false);
   const offline = useOffline();
   const queued = useLiveQuery(() => offlineDb().outbox.where("agendaId").equals(agendaId).toArray(), [agendaId]);
   const queuedMap = useMemo(() => new Map((queued ?? []).map((q) => [q.generusId, q])), [queued]);
@@ -46,8 +47,8 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return q ? rows.filter((r) => r.name.toLowerCase().includes(q)) : rows;
-  }, [rows, query]);
+    return rows.filter((r) => (!q || r.name.toLowerCase().includes(q)) && (!onlyEmpty || !(queuedMap.get(r.generusId)?.status ?? r.status)));
+  }, [rows, query, onlyEmpty, queuedMap]);
 
   const groups = useMemo(() => {
     const m = new Map<string, ChecklistRow[]>();
@@ -71,6 +72,10 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari nama" aria-label="Cari nama peserta" className="max-w-xs rounded-full" />
+        <label className="tap inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-sm">
+          <input type="checkbox" checked={onlyEmpty} onChange={(e) => setOnlyEmpty(e.target.checked)} />
+          Hanya yang belum diisi
+        </label>
         {writable.some((r) => !current(r)) && (
           <Button type="button" variant="outline" size="sm" onClick={markUnrecordedPresent}>
             Hadirkan semua yang belum diisi
