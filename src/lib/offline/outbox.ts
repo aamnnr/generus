@@ -33,6 +33,8 @@ export interface RosterItem {
   tokenHash: string | null;
   /** Status dari server saat diunduh. Status terbaru = antrian ?? status ini. */
   status: AttendanceStatus | null;
+  /** Kapan status itu tercatat (ISO). Dari server, atau diisi perangkat saat scan pertama. Kosong di data lama. */
+  recordedAt?: string | null;
 }
 
 export interface ScanAgenda {

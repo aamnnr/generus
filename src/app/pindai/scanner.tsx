@@ -12,21 +12,20 @@ import { Input } from "@/components/ui/input";
 import { offlineDb, saveRoster, type RosterItem } from "@/lib/offline/outbox";
 import { processScan, recordBySearch, type ScanResult } from "@/lib/offline/scan";
 import { beep, createQrDetector, type QrDetector } from "@/lib/qr-reader";
+import { createScanGate, pushLog, type LogEntry } from "@/lib/scan-gate";
 
 const STATUS_LABEL: Record<string, string> = { hadir: "Hadir", terlambat: "Terlambat", izin: "Izin", sakit: "Sakit", alpa: "Alpa" };
-const SAME_CODE_COOLDOWN_MS = 3000;
 
-interface Feedback {
-  result: ScanResult;
-  at: number;
+/** Kunci riwayat: orang yang sama, atau jenis pesan galat yang sama, digabung jadi satu baris. */
+function resultKey(r: ScanResult): string {
+  return r.kind === "ok" || r.kind === "duplicate" ? `p:${r.name}|${r.kelompok}` : r.kind === "closed" ? `c:${r.reason}` : r.kind;
 }
 
 export function Scanner() {
   const agendaId = useSearchParams().get("agenda") ?? "";
   const offline = useOffline();
   const [download, setDownload] = useState<{ state: "idle" | "loading" | "error"; message?: string }>({ state: "idle" });
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
-  const [recent, setRecent] = useState<Feedback[]>([]);
+  const [recent, setRecent] = useState<LogEntry<ScanResult>[]>([]);
   const [query, setQuery] = useState("");
 
   const agenda = useLiveQuery(() => (agendaId ? offlineDb().scanAgendas.get(agendaId) : undefined), [agendaId]);
@@ -68,24 +67,22 @@ export function Scanner() {
   }, [agendaId, refresh]);
 
   const show = useCallback((result: ScanResult) => {
-    const fb = { result, at: Date.now() };
-    setFeedback(fb);
-    setRecent((r) => [fb, ...r].slice(0, 12));
+    setRecent((log) => pushLog(log, resultKey(result), result, Date.now()));
     beep(result.kind === "ok" ? "ok" : result.kind === "duplicate" ? "warn" : "error");
     if (result.kind === "ok") requestSync();
   }, []);
 
-  const lastCode = useRef<{ code: string; at: number }>({ code: "", at: 0 });
-  const handleCode = useCallback(
+  // Satu kartu diproses sekali selama masih di depan kamera (lihat lib/scan-gate).
+  const gate = useRef(createScanGate());
+  const handleCamera = useCallback(
     async (raw: string) => {
-      const now = Date.now();
-      // Kamera membaca kode yang sama berkali-kali per detik: abaikan pengulangan singkat.
-      if (raw === lastCode.current.code && now - lastCode.current.at < SAME_CODE_COOLDOWN_MS) return;
-      lastCode.current = { code: raw, at: now };
+      if (!gate.current.accept(raw)) return;
       show(await processScan(agendaId, raw));
     },
     [agendaId, show],
   );
+  // Scanner USB / ketikan manual: setiap Enter adalah niat pengguna, selalu diproses.
+  const handleTyped = useCallback(async (raw: string) => show(await processScan(agendaId, raw)), [agendaId, show]);
 
   if (!agendaId) {
     return <p className="text-muted-foreground">Agenda tidak dipilih. Buka pemindai dari halaman agenda.</p>;
@@ -111,7 +108,7 @@ export function Scanner() {
         )}
       </div>
 
-      <FeedbackPanel feedback={feedback} />
+      <FeedbackPanel feedback={recent[0] ?? null} />
 
       {!agenda && download.state !== "loading" && (
         <p className="rounded-2xl bg-accent p-3 text-sm text-accent-foreground">
@@ -121,8 +118,8 @@ export function Scanner() {
 
       {agenda && (
         <>
-          <Camera onCode={handleCode} />
-          <ManualInput onCode={(c) => void handleCode(c)} />
+          <Camera onCode={(c) => void handleCamera(c)} />
+          <ManualInput onCode={(c) => void handleTyped(c)} />
 
           <div className="flex flex-col gap-2">
             <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Tanpa kartu? Cari nama (min. 2 huruf)" aria-label="Cari nama peserta" className="rounded-full" />
@@ -182,9 +179,12 @@ export function Scanner() {
           <h2 className="text-sm font-medium text-muted-foreground">Scan terakhir</h2>
           <ul className="flex flex-col gap-1 text-sm">
             {recent.map((r) => (
-              <li key={r.at} className="flex justify-between gap-2">
-                <span>{resultTitle(r.result)}</span>
-                <span className="tabular-nums text-muted-foreground">
+              <li key={r.key} className="flex justify-between gap-2">
+                <span>
+                  {resultTitle(r.value)}
+                  {r.count > 1 && <span className="ml-1.5 rounded-full bg-muted px-1.5 text-xs text-muted-foreground tabular-nums">{r.count}×</span>}
+                </span>
+                <span className="shrink-0 tabular-nums text-muted-foreground">
                   {new Date(r.at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
                 </span>
               </li>
@@ -207,12 +207,24 @@ export function Scanner() {
   );
 }
 
+/** "pukul 07.12", atau "24/10 pukul 07.12" bila bukan hari ini. */
+function recordedLabel(at: Date | null): string {
+  if (!at) return "";
+  const time = at.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+  const sameDay = at.toDateString() === new Date().toDateString();
+  return sameDay ? ` pukul ${time}` : ` ${at.toLocaleDateString("id-ID", { day: "numeric", month: "short" })} pukul ${time}`;
+}
+
+function duplicateText(r: Extract<ScanResult, { kind: "duplicate" }>): string {
+  return `sudah tercatat${recordedLabel(r.recordedAt)} (${STATUS_LABEL[r.status]})`;
+}
+
 function resultTitle(r: ScanResult): string {
   switch (r.kind) {
     case "ok":
       return `${r.name} — ${STATUS_LABEL[r.status]}`;
     case "duplicate":
-      return `${r.name} — sudah tercatat (${STATUS_LABEL[r.status]})`;
+      return `${r.name} — ${duplicateText(r)}`;
     case "unknown":
       return "Kartu tidak dikenal / bukan peserta agenda ini";
     case "invalid":
@@ -222,7 +234,8 @@ function resultTitle(r: ScanResult): string {
   }
 }
 
-function FeedbackPanel({ feedback }: { feedback: Feedback | null }) {
+/** Hasil scan terakhir (baris teratas riwayat). */
+function FeedbackPanel({ feedback }: { feedback: LogEntry<ScanResult> | null }) {
   if (!feedback) {
     return (
       <div className="rounded-2xl border-2 border-dashed border-border px-4 py-6 text-center text-muted-foreground">
@@ -230,7 +243,7 @@ function FeedbackPanel({ feedback }: { feedback: Feedback | null }) {
       </div>
     );
   }
-  const r = feedback.result;
+  const r = feedback.value;
   const tone =
     r.kind === "ok"
       ? "border-status-hadir bg-status-hadir-soft text-foreground"
@@ -238,12 +251,15 @@ function FeedbackPanel({ feedback }: { feedback: Feedback | null }) {
         ? "border-status-terlambat bg-status-terlambat-soft text-foreground"
         : "border-status-alpa bg-status-alpa-soft text-foreground";
   return (
-    <div key={feedback.at} role="alert" className={`rounded-xl border-2 px-4 py-5 text-center ${tone}`}>
+    <div key={feedback.at} role="alert" className={`relative rounded-xl border-2 px-4 py-5 text-center ${tone}`}>
+      {feedback.count > 1 && (
+        <span className="absolute top-2 right-2.5 rounded-full bg-background/70 px-2 text-xs tabular-nums text-muted-foreground">discan {feedback.count}×</span>
+      )}
       {r.kind === "ok" || r.kind === "duplicate" ? (
         <>
           <div className="font-heading text-2xl font-semibold">{r.name}</div>
           <div className="text-sm">
-            {r.kelompok} · {r.kind === "ok" ? STATUS_LABEL[r.status] : `sudah tercatat (${STATUS_LABEL[r.status]})`}
+            {r.kelompok} · {r.kind === "ok" ? STATUS_LABEL[r.status] : duplicateText(r)}
           </div>
         </>
       ) : (

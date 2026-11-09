@@ -6,7 +6,7 @@ import { enqueue, offlineDb, outboxKey, type AttendanceStatus, type RosterItem }
 
 export type ScanResult =
   | { kind: "ok"; name: string; kelompok: string; status: AttendanceStatus }
-  | { kind: "duplicate"; name: string; kelompok: string; status: AttendanceStatus }
+  | { kind: "duplicate"; name: string; kelompok: string; status: AttendanceStatus; recordedAt: Date | null }
   | { kind: "unknown" }
   | { kind: "invalid" }
   | { kind: "closed"; reason: string };
@@ -27,11 +27,15 @@ async function agendaOpen(agendaId: string): Promise<{ lateAfter: Date } | { rea
 
 async function record(item: RosterItem, mode: "scan" | "search", now: Date, lateAfter: Date): Promise<ScanResult> {
   const existing = await currentStatus(item);
-  if (existing) return { kind: "duplicate", name: item.name, kelompok: item.kelompok, status: existing };
+  if (existing) {
+    const queued = item.recordedAt ? undefined : await offlineDb().outbox.get(outboxKey(item.agendaId, item.generusId));
+    const at = item.recordedAt ? new Date(item.recordedAt) : queued ? new Date(queued.updatedAt) : null;
+    return { kind: "duplicate", name: item.name, kelompok: item.kelompok, status: existing, recordedAt: at };
+  }
   const status: AttendanceStatus = now > lateAfter ? "terlambat" : "hadir";
   await enqueue([{ agendaId: item.agendaId, generusId: item.generusId, status, mode }]);
   // Catat juga di roster lokal: setelah antrian terkirim & dihapus, scan ulang tetap terdeteksi duplikat.
-  await offlineDb().roster.update([item.agendaId, item.generusId], { status });
+  await offlineDb().roster.update([item.agendaId, item.generusId], { status, recordedAt: now.toISOString() });
   return { kind: "ok", name: item.name, kelompok: item.kelompok, status };
 }
 

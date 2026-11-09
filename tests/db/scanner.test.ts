@@ -109,6 +109,14 @@ describe("petugas scan", () => {
     expect(n).toBe(1);
   });
 
+  it("roster menyertakan jam presensi tercatat", async () => {
+    const rows = await asUser(db, u.adminDesaA, async () =>
+      (await db.query<{ generus_id: string; recorded_at: Date | null }>(`SELECT generus_id, recorded_at FROM app.agenda_roster($1)`, [agenda])).rows,
+    );
+    expect(rows.find((r) => r.generus_id === g.a1)?.recorded_at).toBeInstanceOf(Date);
+    expect(rows.find((r) => r.generus_id === g["a2-kartu-hilang"])?.recorded_at).toBeNull();
+  });
+
   it("akses kedaluwarsa ditolak", async () => {
     await grant(u.adminDesaA, u.petugas, "now() - interval '1 minute'");
     await expect(roster(u.petugas)).rejects.toThrow(/bukan pengelola atau petugas/);

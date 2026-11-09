@@ -219,7 +219,7 @@ export interface RosterDownload {
     lockedAt: string | null;
     cancelledAt: string | null;
   };
-  rows?: { generusId: string; name: string; gender: "L" | "P"; kelompok: string; desa: string; tokenHash: string | null; status: string | null }[];
+  rows?: { generusId: string; name: string; gender: "L" | "P"; kelompok: string; desa: string; tokenHash: string | null; status: string | null; recordedAt: string | null }[];
 }
 
 /** Daftar peserta untuk pemindai (disimpan di perangkat agar bisa dipakai offline). */
@@ -252,6 +252,7 @@ export async function downloadRoster(agendaId: string): Promise<RosterDownload> 
         desa: string;
         token_hash: string | null;
         status: string | null;
+        recorded_at: string | Date | null;
       }>(sql`SELECT * FROM app.agenda_roster(${agendaId})`);
       return {
         agenda: {
@@ -270,6 +271,7 @@ export async function downloadRoster(agendaId: string): Promise<RosterDownload> 
           desa: r.desa,
           tokenHash: r.token_hash,
           status: r.status,
+          recordedAt: r.recorded_at ? new Date(r.recorded_at).toISOString() : null,
         })),
       };
     });

@@ -26,7 +26,7 @@ async function setup(overrides: { lockedAt?: string | null; cancelledAt?: string
     },
     [
       { generusId: "g-a", name: "Ahmad", gender: "L", kelompok: "S1", desa: "Sukamaju", tokenHash: await sha256Hex(qrPayload(TOKEN_A)), status: null },
-      { generusId: "g-b", name: "Budi", gender: "L", kelompok: "S2", desa: "Sukamaju", tokenHash: await sha256Hex(qrPayload(TOKEN_B)), status: "izin" },
+      { generusId: "g-b", name: "Budi", gender: "L", kelompok: "S2", desa: "Sukamaju", tokenHash: await sha256Hex(qrPayload(TOKEN_B)), status: "izin", recordedAt: "2026-10-24T03:00:00.000Z" },
       { generusId: "g-c", name: "Citra", gender: "P", kelompok: "S2", desa: "Sukamaju", tokenHash: null, status: null },
     ],
   );
@@ -51,6 +51,19 @@ describe("pemindai offline", () => {
     expect(await processScan(AG, qrPayload(TOKEN_A))).toMatchObject({ kind: "duplicate", name: "Ahmad", status: "hadir" });
     expect(await processScan(AG, qrPayload(TOKEN_B))).toMatchObject({ kind: "duplicate", name: "Budi", status: "izin" });
     expect(await offlineDb().outbox.count()).toBe(1);
+  });
+
+  it("duplikat menyertakan jam pertama kali tercatat", async () => {
+    const first = new Date("2026-10-25T12:40:00Z");
+    await processScan(AG, qrPayload(TOKEN_A), first);
+    expect(await processScan(AG, qrPayload(TOKEN_A), new Date("2026-10-25T12:55:00Z"))).toMatchObject({ kind: "duplicate", recordedAt: first });
+    expect(await processScan(AG, qrPayload(TOKEN_B))).toMatchObject({ recordedAt: new Date("2026-10-24T03:00:00Z") });
+  });
+
+  it("jam tercatat dari antrian bila roster belum punya (mis. checklist)", async () => {
+    await enqueue([{ agendaId: AG, generusId: "g-a", status: "sakit" }]);
+    const r = await processScan(AG, qrPayload(TOKEN_A));
+    expect(r.kind === "duplicate" && r.recordedAt instanceof Date).toBe(true);
   });
 
   it("tetap duplikat setelah antrian terkirim dan dikosongkan", async () => {
