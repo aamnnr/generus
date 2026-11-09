@@ -3,7 +3,7 @@ import type { PGlite } from "@electric-sql/pglite";
 import { asUser, createTestDb, createUnit, createUser, grantRole } from "./harness";
 
 let db: PGlite;
-const u = {} as Record<"superadmin" | "adminDesaA" | "adminKelA1" | "kyaiKelA1" | "adminKelB1", string>;
+const u = {} as Record<"superadmin" | "adminDaerah" | "adminDesaA" | "adminKelA1" | "kyaiKelA1" | "adminKelB1", string>;
 const unit = {} as Record<"daerah" | "desaA" | "desaB" | "kelA1" | "kelA2" | "kelB1", string>;
 const j = {} as Record<"pra" | "remaja" | "pelajar" | "mandiri", string>;
 const g = {} as Record<string, string>;
@@ -58,10 +58,11 @@ beforeAll(async () => {
   unit.kelA2 = await createUnit(db, "kelompok", "A2", unit.desaA);
   unit.kelB1 = await createUnit(db, "kelompok", "B1", unit.desaB);
 
-  for (const k of Object.keys({ superadmin: 0, adminDesaA: 0, adminKelA1: 0, kyaiKelA1: 0, adminKelB1: 0 }) as (keyof typeof u)[]) {
+  for (const k of Object.keys({ superadmin: 0, adminDaerah: 0, adminDesaA: 0, adminKelA1: 0, kyaiKelA1: 0, adminKelB1: 0 }) as (keyof typeof u)[]) {
     u[k] = await createUser(db, `ag-${k}`);
   }
   await grantRole(db, u.superadmin, unit.daerah, "superadmin");
+  await grantRole(db, u.adminDaerah, unit.daerah, "admin");
   await grantRole(db, u.adminDesaA, unit.desaA, "admin");
   await grantRole(db, u.adminKelA1, unit.kelA1, "admin");
   await grantRole(db, u.kyaiKelA1, unit.kelA1, "kyai");
@@ -108,6 +109,78 @@ describe("membuat & melihat agenda", () => {
 
   it("menolak waktu yang tidak masuk akal", async () => {
     await expect(addAgenda(unit.desaA, { startH: 1, endH: 0 })).rejects.toThrow(/Waktu selesai/);
+  });
+});
+
+describe("pengelola agenda per tingkat", () => {
+  const insert = (who: string, unitId: string) =>
+    asUser(db, who, () =>
+      db.query(
+        `INSERT INTO agendas (unit_id, title, starts_at, ends_at, late_after, delegate_until)
+         VALUES ($1, 'X', now(), now() + interval '2 hour', now(), now() + interval '2 day') RETURNING id`,
+        [unitId],
+      ),
+    );
+  const rename = (who: string, agendaId: string) =>
+    asUser(db, who, async () => (await db.query(`UPDATE agendas SET title = 'Diubah' WHERE id = $1`, [agendaId])).affectedRows ?? 0);
+  const canManage = (who: string, agendaId: string) =>
+    asUser(db, who, async () => (await db.query<{ ok: boolean }>(`SELECT app.can_manage_agenda($1) ok`, [agendaId])).rows[0].ok);
+
+  it("admin hanya membuat agenda di unitnya sendiri, tidak di unit bawahan", async () => {
+    await expect(insert(u.adminDaerah, unit.daerah)).resolves.toBeTruthy();
+    await expect(insert(u.adminDaerah, unit.desaA)).rejects.toThrow(/row-level security/);
+    await expect(insert(u.adminDaerah, unit.kelA1)).rejects.toThrow(/row-level security/);
+    await expect(insert(u.adminDesaA, unit.desaA)).resolves.toBeTruthy();
+    await expect(insert(u.adminDesaA, unit.kelA1)).rejects.toThrow(/row-level security/);
+    await expect(insert(u.adminDesaA, unit.daerah)).rejects.toThrow(/row-level security/);
+    await expect(insert(u.adminKelA1, unit.kelA1)).resolves.toBeTruthy();
+  });
+
+  it("superadmin daerah membuat agenda di semua tingkat", async () => {
+    for (const id of [unit.daerah, unit.desaA, unit.kelA1, unit.kelB1]) await expect(insert(u.superadmin, id)).resolves.toBeTruthy();
+  });
+
+  it("admin di atas unit agenda tidak bisa mengubah/membatalkan, tetapi tetap bisa melihat", async () => {
+    const desa = await addAgenda(unit.desaA);
+    const kel = await addAgenda(unit.kelA1);
+    const daerah = await addAgenda(unit.daerah);
+    expect(await rename(u.adminDaerah, desa)).toBe(0);
+    expect(await rename(u.adminDesaA, kel)).toBe(0);
+    expect(await rename(u.adminDesaA, daerah)).toBe(0);
+    expect(await rename(u.adminDaerah, daerah)).toBe(1);
+    expect(await rename(u.adminDesaA, desa)).toBe(1);
+    expect(await rename(u.adminKelA1, kel)).toBe(1);
+    expect(await rename(u.superadmin, desa)).toBe(1);
+    expect(await rename(u.superadmin, kel)).toBe(1);
+    expect(await canManage(u.adminDaerah, desa)).toBe(false);
+    expect(await canManage(u.superadmin, kel)).toBe(true);
+    const sees = await asUser(db, u.adminDaerah, async () => (await db.query(`SELECT 1 FROM agendas WHERE id = $1`, [kel])).rows.length);
+    expect(sees).toBe(1);
+  });
+
+  it("admin tidak bisa memindahkan agendanya ke unit bawahan", async () => {
+    const desa = await addAgenda(unit.desaA);
+    await expect(
+      asUser(db, u.adminDesaA, () => db.query(`UPDATE agendas SET unit_id = $2 WHERE id = $1`, [desa, unit.kelA1])),
+    ).rejects.toThrow(/row-level security/);
+  });
+
+  it("presensi: admin di atas unit agenda hanya membaca; superadmin tetap pengelola", async () => {
+    const aktif = await addAgenda(unit.desaA);
+    await expect(mark(u.adminDaerah, aktif, g["a1-pra"])).rejects.toThrow(/row-level security/);
+    const kel = await addAgenda(unit.kelA1);
+    await expect(mark(u.adminDesaA, kel, g["a1-pra"])).rejects.toThrow(/row-level security/);
+    await expect(mark(u.adminKelA1, kel, g["a1-pra"])).resolves.toBeTruthy();
+    await expect(mark(u.superadmin, kel, g["a1-pra"], "izin")).resolves.toBeTruthy();
+    const lewat = await addAgenda(unit.desaA, { startH: -50, endH: -49, delegateH: -1 });
+    await expect(mark(u.adminDaerah, lewat, g["a1-pra"])).rejects.toThrow(/row-level security/);
+    await expect(mark(u.superadmin, lewat, g["a1-pra"])).resolves.toBeTruthy();
+  });
+
+  it("kunci manual: admin daerah tidak bisa mengunci agenda desa, superadmin bisa", async () => {
+    const a = await addAgenda(unit.desaA, { startH: -3, endH: -2 });
+    await expect(asUser(db, u.adminDaerah, () => db.query(`SELECT app.lock_agenda($1)`, [a]))).rejects.toThrow(/pengelola/);
+    await expect(asUser(db, u.superadmin, () => db.query(`SELECT app.lock_agenda($1)`, [a]))).resolves.toBeTruthy();
   });
 });
 

@@ -77,7 +77,7 @@ export interface AgendaDetail extends AgendaListItem {
   targetKategoriIds: string[];
   targetGender: "L" | "P" | null;
   recurrenceId: string | null;
-  /** User adalah pengelola (admin di unit agenda atau di atasnya). */
+  /** User adalah pengelola: admin di unit agenda itu sendiri, atau superadmin di atasnya. */
   canManage: boolean;
   /** User adalah petugas scan aktif untuk agenda ini. */
   isScanner: boolean;
@@ -95,7 +95,7 @@ export async function getAgenda(claims: JwtClaims, id: string): Promise<AgendaDe
         targetKategoriIds: agendas.targetKategoriIds,
         targetGender: agendas.targetGender,
         recurrenceId: agendas.recurrenceId,
-        canManage: sql<boolean>`(SELECT app.scope_paths(ARRAY['superadmin','admin']::app_role[])) @> ${agendas.unitPath}`,
+        canManage: sql<boolean>`app.can_manage_agenda_at(${agendas.unitPath})`,
         isScanner: sql<boolean>`app.is_agenda_scanner(${agendas.id})`,
       })
       .from(agendas)
@@ -221,12 +221,13 @@ export async function getGenerusAttendance(claims: JwtClaims, generusId: string,
   });
 }
 
-/** Unit tempat user boleh membuat agenda (admin/superadmin), sebagai pohon untuk UnitPicker. */
+/** Unit tempat user boleh membuat agenda: unit peran admin-nya sendiri, atau semua unit di bawah superadmin. */
 export async function listAgendaUnits(claims: JwtClaims): Promise<TreeUnit[]> {
   const res = await withRls(claims, (tx) =>
     tx.execute<{ id: string }>(sql`
       SELECT u.id FROM units u
-      WHERE u.path <@ (SELECT app.scope_paths(ARRAY['superadmin','admin']::app_role[]))`),
+      WHERE u.path <@ (SELECT app.scope_paths(ARRAY['superadmin']::app_role[]))
+         OR u.path = ANY (SELECT app.scope_paths(ARRAY['admin']::app_role[])))`),
   );
   return buildUnitTree(claims, res.map((r) => r.id));
 }

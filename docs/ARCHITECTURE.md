@@ -119,7 +119,7 @@ audit_log        (id, actor_id, table, row_id, action, before jsonb, after jsonb
 |------|-----------|-----------|--------------|-------------|
 | Pohon wilayah, akun | Tulis | – | Baca | Baca |
 | Generus | Tulis | – | Tulis (kelompok); mutasi (desa/daerah) | Baca |
-| Agenda & presensi | Tulis | – | Tulis agenda milik unitnya; delegasi untuk kelompok | Baca |
+| Agenda & presensi | Tulis (semua tingkat di daerahnya) | – | Tulis agenda milik unitnya sendiri (bukan unit bawahan); delegasi presensi untuk admin di bawah unit agenda | Baca |
 | Materi, kitab, target | Tulis | Tulis | Baca | Baca |
 | Capaian, penyampaian & progres kitab | Tulis | Baca agregat | Tulis (generus/kelompok miliknya) | Baca |
 

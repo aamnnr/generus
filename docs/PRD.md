@@ -80,7 +80,7 @@ Catatan:
 - F-05 Admin Kelompok menandai generus **Menikah** atau **Pindah Sambung** (dengan tanggal & keterangan, mis. daerah tujuan). Sejak tanggal itu generus keluar dari sasaran agenda dan target, kartu QR-nya nonaktif, tetapi riwayat presensi & capaian tetap tersimpan dan tampil di laporan periode sebelumnya.
 
 ### 5.2 Agenda
-- F-10 Admin tiap tingkat membuat agenda (sekali atau berulang mingguan), dengan lokasi, waktu, jenjang sasaran.
+- F-10 Admin tiap tingkat membuat agenda (sekali atau berulang mingguan), dengan lokasi, waktu, jenjang sasaran. Admin hanya mengelola agenda di unitnya sendiri (admin daerah → agenda daerah, admin desa → agenda desa, admin kelompok → agenda kelompok); superadmin daerah mengelola semua agenda di daerahnya. Admin di bawah unit agenda hanya melengkapi presensi anggotanya sampai batas pelengkapan; admin di atasnya hanya membaca.
 - F-11 Agenda desa/daerah otomatis tampil di dashboard unit-unit di bawahnya.
 - F-12 Agenda bisa dibatalkan/diubah; perubahan tercatat.
 

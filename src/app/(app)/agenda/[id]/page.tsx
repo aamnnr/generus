@@ -103,7 +103,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
       </div>
       <p className="-mt-3 text-sm text-muted-foreground">
         Kehadiran {Math.round(sum.rate * 100)}%{sum.counts.belum ? ` · ${sum.counts.belum} belum diisi` : ""}
-        {!a.lockedAt && !a.cancelledAt && ` · admin kelompok bisa melengkapi sampai ${formatDateTime(a.delegateUntil)}`}
+        {!a.lockedAt && !a.cancelledAt && ` · admin di bawahnya bisa melengkapi anggotanya sampai ${formatDateTime(a.delegateUntil)}`}
       </p>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
