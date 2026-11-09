@@ -16,6 +16,7 @@ import { UnitPicker } from "@/components/unit-picker";
 import { qrPayload } from "@/lib/qr";
 import { IdCard } from "./id-card";
 import { PrintButton } from "./print-button";
+import { DownloadPng } from "./download-png";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
 
@@ -120,6 +121,7 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
                 {rows.length === MAX_CARDS && ` (maksimal ${MAX_CARDS}; pilih wilayah lebih kecil)`}
               </span>
               <PrintButton />
+              {cards.length === 1 && <DownloadPng name={cards[0].name} token={cards[0].token} />}
               {ids.length > 0 && (
                 <Link href="/generus/kartu" className={buttonVariants({ variant: "ghost" })}>
                   Cetak per wilayah
