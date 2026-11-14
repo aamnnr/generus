@@ -31,7 +31,7 @@ export default function BaruPage() {
 
 async function FormLoader() {
   const me = await requireGenerusWriter();
-  const [units, jenjang] = await Promise.all([listAgendaUnits(me.claims), listJenjang(me.claims)]);
+  const [units, jenjang] = await Promise.all([listAgendaUnits(me.claims), listJenjang(me.claims, { kegiatan: true })]);
   return (
     <AgendaForm
       action={createAgenda}

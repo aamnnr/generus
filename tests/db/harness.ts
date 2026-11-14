@@ -33,11 +33,13 @@ export function migrationFiles(): string[] {
   return journal.entries.map((e) => path.join(DRIZZLE_DIR, `${e.tag}.sql`));
 }
 
-export async function createTestDb(): Promise<PGlite> {
+/** `before`: berhenti sebelum migrasi yang tag-nya memuat teks ini (untuk menguji migrasi data). */
+export async function createTestDb(opts: { before?: string } = {}): Promise<PGlite> {
   const db = await PGlite.create({ extensions: { ltree } });
   await db.exec(SUPABASE_STUB);
   await db.exec("SET search_path = public, extensions;");
   for (const file of migrationFiles()) {
+    if (opts.before && path.basename(file).includes(opts.before)) break;
     await db.exec(readFileSync(file, "utf8"));
   }
   await db.exec("GRANT USAGE ON SCHEMA extensions TO authenticated;");

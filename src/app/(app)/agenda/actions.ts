@@ -57,7 +57,7 @@ const agendaSchema = z
 async function buildAgenda(me: Awaited<ReturnType<typeof getCurrentUser>>, v: z.infer<typeof agendaSchema>) {
   const startsAt = zonedToUtc(v.date, v.startTime);
   const endsAt = zonedToUtc(v.date, v.endTime);
-  const target = segmentsToTarget(v.segments, await listJenjang(me.claims));
+  const target = segmentsToTarget(v.segments, await listJenjang(me.claims, { kegiatan: true }));
   return {
     unitId: v.unitId,
     title: v.title,

@@ -73,6 +73,8 @@ async function Kartu({ searchParams }: Pick<PageProps<"/generus/kartu">, "search
               and(
                 eq(generus.status, "aktif"),
                 eq(generus.qrActive, true),
+                // Balita (jenjang yang hanya didata) tidak dicetak kartunya.
+                eq(jenjang.ikutKegiatan, true),
                 ids.length
                   ? inArray(generus.id, ids)
                   : sql`${generus.unitPath} <@ (SELECT path FROM units WHERE id = ${unitId})`,

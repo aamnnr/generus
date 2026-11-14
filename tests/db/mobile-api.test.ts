@@ -323,7 +323,9 @@ describe("laporan & admin", () => {
     expect(await rpc("superadmin", "public.mobile_is_superadmin()")).toBe(true);
     expect(await rpc("adminDesaA", "public.mobile_is_superadmin()")).toBe(false);
     expect((await rows("superadmin", "SELECT * FROM public.mobile_wilayah()")).length).toBe(6);
-    expect((await rows("adminDesaA", "SELECT * FROM public.mobile_agenda_units()")).length).toBe(3);
+    // Admin hanya membuat agenda di unit perannya sendiri (0018); superadmin di seluruh lingkupnya.
+    expect((await rows<{ id: string }>("adminDesaA", "SELECT * FROM public.mobile_agenda_units()")).map((r) => r.id)).toEqual([unit.desaA]);
+    expect((await rows("superadmin", "SELECT * FROM public.mobile_agenda_units()")).length).toBe(6);
   });
 
   it("kunci agenda: ditolak sebelum selesai, kunci otomatis tidak error", async () => {
@@ -331,5 +333,37 @@ describe("laporan & admin", () => {
     await rpc("adminDesaA", "public.mobile_lock_due_agendas()");
     const att = await rpc<{ rows: unknown[]; stats: { total: number } }>("adminKelA1", "public.mobile_generus_attendance($1)", [g.Ahmad]);
     expect(att.rows.length).toBe(1);
+  });
+});
+
+describe("API v2 (0020): superadmin sistem & agenda per kelompok", () => {
+  it("mobile_me menandai superadmin sistem", async () => {
+    expect(await rpc<{ is_system_admin: boolean }>("superadmin", "public.mobile_me()")).toMatchObject({ is_system_admin: true });
+    expect(await rpc<{ is_system_admin: boolean }>("adminDesaA", "public.mobile_me()")).toMatchObject({ is_system_admin: false });
+  });
+
+  it("detail agenda: hak kelola per tingkat dan ringkasan per kelompok", async () => {
+    type Detail = { can_manage: boolean; summary: { kelompok: string; total: number; izin: number; belum: number }[] } | null;
+    const desa = await rpc<Detail>("adminDesaA", "public.mobile_agenda_detail($1)", [agenda]);
+    expect(desa!.can_manage).toBe(true);
+    expect(desa!.summary.map((k) => [k.kelompok, k.total])).toEqual([["A1", 2], ["A2", 1]]);
+    expect(desa!.summary[0]).toMatchObject({ izin: 1, belum: 1 });
+    const kel = await rpc<Detail>("adminKelA1", "public.mobile_agenda_detail($1)", [agenda]);
+    expect(kel!.can_manage).toBe(false);
+    expect(kel!.summary.map((k) => k.kelompok)).toEqual(["A1"]);
+    expect((await rpc<Detail>("superadmin", "public.mobile_agenda_detail($1)", [agenda]))!.can_manage).toBe(true);
+    expect(await rpc("adminKelB1", "public.mobile_agenda_detail($1)", [agenda])).toBeNull();
+    expect((await rpc<{ can_manage: boolean }>("adminKelA1", "public.mobile_agenda($1)", [agenda])).can_manage).toBe(false);
+  });
+
+  it("peserta per kelompok atau hasil pencarian, dengan hak tulis", async () => {
+    type Row = { name: string; can_write: boolean };
+    const a2 = await rpc<Row[]>("adminDesaA", "public.mobile_agenda_peserta($1, $2)", [agenda, unit.kelA2]);
+    expect(a2).toEqual([expect.objectContaining({ name: "Citra", can_write: true })]);
+    const cari = await rpc<Row[]>("adminDesaA", "public.mobile_agenda_peserta($1, NULL, 'bud', 50)", [agenda]);
+    expect(cari.map((r) => r.name)).toEqual(["Budi"]);
+    const limited = await rpc<Row[]>("adminDesaA", "public.mobile_agenda_peserta($1, NULL, NULL, 2)", [agenda]);
+    expect(limited.length).toBe(2);
+    expect(await rpc<Row[]>("adminKelA1", "public.mobile_agenda_peserta($1, $2)", [agenda, unit.kelA2])).toEqual([]);
   });
 });

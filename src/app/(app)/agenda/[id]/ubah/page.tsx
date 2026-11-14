@@ -26,7 +26,7 @@ export default function UbahPage({ params }: PageProps<"/agenda/[id]/ubah">) {
 async function Ubah({ params }: Pick<PageProps<"/agenda/[id]/ubah">, "params">) {
   const [me, { id }] = await Promise.all([requireGenerusWriter(), params]);
   if (!z.string().uuid().safeParse(id).success) notFound();
-  const [a, units, jenjang] = await Promise.all([getAgenda(me.claims, id), listAgendaUnits(me.claims), listJenjang(me.claims)]);
+  const [a, units, jenjang] = await Promise.all([getAgenda(me.claims, id), listAgendaUnits(me.claims), listJenjang(me.claims, { kegiatan: true })]);
   if (!a) notFound();
   if (!a.canManage || a.lockedAt || a.cancelledAt) redirect(`/agenda/${id}`);
 

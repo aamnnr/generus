@@ -60,7 +60,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
   const [me, { id }, sp] = await Promise.all([requireGenerusReader(), params, searchParams]);
   if (!z.string().uuid().safeParse(id).success) notFound();
   await lockDueAgendas(me.claims);
-  const [a, jenjang] = await Promise.all([getAgenda(me.claims, id), listJenjang(me.claims)]);
+  const [a, jenjang] = await Promise.all([getAgenda(me.claims, id), listJenjang(me.claims, { kegiatan: true })]);
   if (!a) notFound();
   // Tampilan awal agenda besar = ringkasan per kelompok (dihitung di database).
   // Daftar nama baru dimuat untuk satu kelompok yang dipilih atau hasil pencarian,

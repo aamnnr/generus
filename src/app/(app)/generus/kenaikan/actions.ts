@@ -8,7 +8,7 @@ import { withRls } from "@/db/rls";
 import { requireGenerusWriter } from "@/lib/auth";
 import { dbErrorMessage } from "@/lib/db-error";
 import { MAX_PROMOTION_ROWS } from "@/lib/generus";
-import { TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
+import { segmentLabel, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
 
 export interface PromoteState {
   error?: string;
@@ -61,7 +61,7 @@ export async function promoteGenerus(_prev: PromoteState, formData: FormData): P
     revalidatePath("/generus/kenaikan");
     const skipped = parsed.data.ids.length - updated.length;
     return {
-      ok: `${updated.length} generus dinaikkan ke ${t.to.jenjang} ${t.to.kategori}.${skipped ? ` ${skipped} dilewati (sudah berubah atau di luar akses Anda).` : ""}`,
+      ok: `${updated.length} generus dinaikkan ke ${segmentLabel(t.to)}.${skipped ? ` ${skipped} dilewati (sudah berubah atau di luar akses Anda).` : ""}`,
       nonce: crypto.randomUUID(),
     };
   } catch (err) {

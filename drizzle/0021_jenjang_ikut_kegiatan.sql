@@ -1,0 +1,1 @@
+ALTER TABLE "jenjang" ADD COLUMN "ikut_kegiatan" boolean DEFAULT true NOT NULL;

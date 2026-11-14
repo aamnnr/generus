@@ -157,7 +157,7 @@ function JenjangFields({
           required={kategori.length > 0}
           disabled={kategori.length === 0}
         >
-          <NativeSelectOption value="">{kategori.length ? "Pilih kategori" : "Tidak ada (Pra Remaja)"}</NativeSelectOption>
+          <NativeSelectOption value="">{kategori.length ? "Pilih kategori" : "Tidak ada kategori"}</NativeSelectOption>
           {kategori.map((k) => (
             <NativeSelectOption key={k.id} value={k.id}>
               {k.name}

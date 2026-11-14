@@ -24,6 +24,10 @@ export const STATUS_LABEL: Record<GenerusStatus, string> = {
 
 /** Filter jenjang gabungan jenjang + kategori, dipakai di URL. */
 export const JENJANG_FILTERS = {
+  balita: { label: "Balita", jenjang: "Balita", kategori: null },
+  caberawit: { label: "Caberawit (semua)", jenjang: "Caberawit", kategori: null },
+  "caberawit-paud": { label: "Caberawit PAUD/TK", jenjang: "Caberawit", kategori: "PAUD/TK" },
+  "caberawit-sd": { label: "Caberawit SD", jenjang: "Caberawit", kategori: "SD" },
   "pra-remaja": { label: "Pra Remaja", jenjang: "Pra Remaja", kategori: null },
   remaja: { label: "Remaja (semua)", jenjang: "Remaja", kategori: null },
   "remaja-pelajar": { label: "Remaja Pelajar", jenjang: "Remaja", kategori: "Pelajar" },
@@ -141,20 +145,27 @@ export async function listScopeUnits(claims: JwtClaims, scope: "read" | "write" 
 export interface JenjangOption {
   id: string;
   name: string;
+  /** false = hanya didata (Balita): tidak ikut agenda, target, capaian, kartu. */
+  ikutKegiatan: boolean;
   kategori: { id: string; name: string }[];
 }
 
-export async function listJenjang(claims: JwtClaims): Promise<JenjangOption[]> {
+/**
+ * Daftar jenjang & kategorinya, urut. `kegiatan: true` = hanya jenjang yang ikut
+ * kegiatan (untuk sasaran agenda); tanpa opsi = semua (untuk data generus).
+ */
+export async function listJenjang(claims: JwtClaims, opts: { kegiatan?: boolean } = {}): Promise<JenjangOption[]> {
   return withRls(claims, async (tx) => {
     const rows = await tx
-      .select({ id: jenjang.id, name: jenjang.name, kId: jenjangKategori.id, kName: jenjangKategori.name })
+      .select({ id: jenjang.id, name: jenjang.name, ikut: jenjang.ikutKegiatan, kId: jenjangKategori.id, kName: jenjangKategori.name })
       .from(jenjang)
       .leftJoin(jenjangKategori, eq(jenjangKategori.jenjangId, jenjang.id))
+      .where(opts.kegiatan ? eq(jenjang.ikutKegiatan, true) : undefined)
       .orderBy(asc(jenjang.sortOrder), asc(jenjangKategori.sortOrder));
     const out: JenjangOption[] = [];
     for (const r of rows) {
       let j = out.find((x) => x.id === r.id);
-      if (!j) out.push((j = { id: r.id, name: r.name, kategori: [] }));
+      if (!j) out.push((j = { id: r.id, name: r.name, ikutKegiatan: r.ikut, kategori: [] }));
       if (r.kId && r.kName) j.kategori.push({ id: r.kId, name: r.kName });
     }
     return out;

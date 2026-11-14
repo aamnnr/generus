@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import Link from "@/components/app-link";
 import { sql } from "drizzle-orm";
 import { ArrowRight, BookOpenText, CalendarDays, ClipboardCheck, IdCard, ScanLine, Users, type LucideIcon } from "lucide-react";
-import { generus } from "@/db/schema";
 import { withRls } from "@/db/rls";
 import { InstallPrompt } from "@/components/install-prompt";
 import { initials } from "@/components/shell/nav";
@@ -40,16 +39,14 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
     reader ? getBerandaSummary(user.claims) : Promise.resolve(null),
     reader
       ? withRls(user.claims, async (tx) => {
-          const [row] = await tx
-            .select({
-              total: sql<number>`count(*)::int`,
-              praRemaja: sql<number>`count(*) FILTER (WHERE j.name = 'Pra Remaja')::int`,
-              remaja: sql<number>`count(*) FILTER (WHERE j.name = 'Remaja')::int`,
-            })
-            .from(generus)
-            .innerJoin(sql`jenjang j`, sql`j.id = ${generus.jenjangId}`)
-            .where(sql`${generus.status} = 'aktif'`);
-          return row;
+          // Jumlah generus aktif per jenjang (termasuk jenjang yang kosong).
+          const rows = await tx.execute<{ name: string; n: number }>(sql`
+            SELECT j.name, count(g.id)::int AS n
+            FROM jenjang j
+            LEFT JOIN generus g ON g.jenjang_id = j.id AND g.status = 'aktif'
+            GROUP BY j.id, j.name, j.sort_order
+            ORDER BY j.sort_order`);
+          return { total: rows.reduce((t, r) => t + r.n, 0), perJenjang: rows.map((r) => ({ name: r.name, n: r.n })) };
         })
       : Promise.resolve(null),
   ]);
@@ -191,10 +188,11 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
       {period && <PeriodCard period={period} reader={reader} writer={writer} rekap={rekap ?? null} rekapHref={rekapRootUnit(user) ? "/capaian/rekap" : "/capaian"} />}
 
       {counts && (
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           <Stat title="Generus aktif" value={counts.total} />
-          <Stat title="Pra Remaja" value={counts.praRemaja} />
-          <Stat title="Remaja" value={counts.remaja} />
+          {counts.perJenjang.map((j) => (
+            <Stat key={j.name} title={j.name} value={j.n} />
+          ))}
         </div>
       )}
 

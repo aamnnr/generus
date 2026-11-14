@@ -103,6 +103,8 @@ export const jenjang = pgTable("jenjang", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull().unique(),
   sortOrder: integer("sort_order").notNull(),
+  // false = hanya didata (mis. Balita): tidak ikut sasaran agenda, presensi, target, capaian, dan kartu QR.
+  ikutKegiatan: boolean("ikut_kegiatan").notNull().default(true),
 });
 
 export const jenjangKategori = pgTable(

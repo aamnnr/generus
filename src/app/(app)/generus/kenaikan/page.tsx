@@ -9,7 +9,7 @@ import { UnitPicker } from "@/components/unit-picker";
 import { buildUnitTree } from "@/lib/unit-tree";
 import { requireGenerusWriter } from "@/lib/auth";
 import { listPromotionCandidates, listScopeUnits, MAX_PROMOTION_ROWS } from "@/lib/generus";
-import { academicYearStart, ageAt, isPromotionSeason, suggestPromotion, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
+import { academicYearStart, ageAt, isPromotionSeason, segmentLabel, suggestPromotion, TRANSITIONS, type TransitionKey } from "@/lib/kenaikan-rules";
 import { PromoteForm } from "./promote-form";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
@@ -52,7 +52,9 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
       age: ageAt(g.birthDate, refDate),
       ...suggestPromotion(p.t, g, today),
     })) ?? [];
-  const fromPra = t.from.jenjang === "Pra Remaja";
+  // Kenaikan antarjenjang sekolah: kelas akhir SD = 6, SLTP = 9.
+  const lastGrade = t.from.jenjang === "Pra Remaja" ? 9 : p.t === "sd-ke-pra" ? 6 : null;
+  const school = lastGrade === 9 ? "SMPN 2 kelas 8" : "SDN 1 kelas 5";
 
   return (
     <>
@@ -96,19 +98,19 @@ async function Kenaikan({ searchParams }: Pick<PageProps<"/generus/kenaikan">, "
             <CardTitle>{t.label}</CardTitle>
             <CardDescription>
               {t.hint} Centang hanya yang benar-benar naik; yang tidak dicentang tetap di jenjangnya. Usia dihitung per 1 Juli {refDate.getFullYear()}.
-              {fromPra &&
+              {lastGrade &&
                 (isPromotionSeason(today)
-                  ? " Generus yang tercatat kelas 9 dianggap baru lulus; kelas 7–8 tidak disarankan."
-                  : " Di luar Juli–Agustus, generus yang tercatat kelas 9 dianggap masih duduk di kelas 9 dan tidak disarankan.")}
-              {fromPra && " Tulis kelas di kolom Sekolah (mis. \"SMPN 2 kelas 8\") agar saran lebih tepat."}
+                  ? ` Generus yang tercatat kelas ${lastGrade} dianggap baru lulus; kelas di bawahnya tidak disarankan.`
+                  : ` Di luar Juli–Agustus, generus yang tercatat kelas ${lastGrade} dianggap masih duduk di kelas ${lastGrade} dan tidak disarankan.`)}
+              {lastGrade && ` Tulis kelas di kolom Sekolah (mis. "${school}") agar saran lebih tepat.`}
               {candidates?.truncated && ` Hanya ${MAX_PROMOTION_ROWS} generus pertama yang ditampilkan; pilih wilayah yang lebih kecil.`}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {rows.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Tidak ada generus {t.from.jenjang}{t.from.kategori ? ` ${t.from.kategori}` : ""} aktif di wilayah ini.</p>
+              <p className="text-sm text-muted-foreground">Tidak ada generus {segmentLabel(t.from)} aktif di wilayah ini.</p>
             ) : (
-              <PromoteForm transition={p.t} targetLabel={`${t.to.jenjang} ${t.to.kategori}`} rows={rows} />
+              <PromoteForm transition={p.t} targetLabel={segmentLabel(t.to)} rows={rows} />
             )}
           </CardContent>
         </Card>

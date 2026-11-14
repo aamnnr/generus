@@ -196,7 +196,7 @@ export function validateRows(sheetRows: unknown[][], ctx: ImportContext): Import
     }
     const j = ctx.jenjang.find((x) => norm(x.name).replace(/[^a-z]/g, "") === norm(get("jenjang")).replace(/[^a-z]/g, ""));
     if (!j) {
-      rows.push(fail("Jenjang harus Pra Remaja atau Remaja"));
+      rows.push(fail(`Jenjang harus salah satu dari: ${ctx.jenjang.map((x) => x.name).join(", ")}`));
       continue;
     }
     const katRaw = norm(get("kategori"));

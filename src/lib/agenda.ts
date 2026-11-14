@@ -311,7 +311,7 @@ export async function listAgendaUnits(claims: JwtClaims): Promise<TreeUnit[]> {
     tx.execute<{ id: string }>(sql`
       SELECT u.id FROM units u
       WHERE u.path <@ (SELECT app.scope_paths(ARRAY['superadmin']::app_role[]))
-         OR u.path = ANY (SELECT app.scope_paths(ARRAY['admin']::app_role[])))`),
+         OR u.path = ANY (app.scope_paths(ARRAY['admin']::app_role[]))`),
   );
   return buildUnitTree(claims, res.map((r) => r.id));
 }

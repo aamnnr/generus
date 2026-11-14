@@ -45,6 +45,8 @@ Catatan:
 - **Unit wilayah**: pohon Daerah → Desa → Kelompok.
 - **Generus**: anggota yang terdaftar di tepat satu kelompok, punya **kode QR unik**, jenjang, dan status keanggotaan.
 - **Jenjang** (saat ini; tetap dapat dikonfigurasi Superadmin):
+  - **Balita** — belum sekolah. Tanpa kategori. **Hanya didata** (sensus jamaah): tidak menjadi sasaran agenda/presensi, tidak punya target & capaian, tidak dicetak kartu QR (`jenjang.ikut_kegiatan = false`).
+  - **Caberawit** — PAUD/TK sampai kelas 6 SD, dengan kategori **PAUD/TK** dan **SD**.
   - **Pra Remaja** — generus yang masih sekolah SLTP. Tanpa kategori.
   - **Remaja**, dengan kategori:
     - **Pelajar** — masih sekolah/kuliah.
@@ -74,6 +76,7 @@ Catatan:
 - F-02 Admin Kelompok mengelola data generus (CRUD, import CSV/Excel). Mutasi antar kelompok dalam daerah dilakukan Admin Desa/Daerah, dengan riwayat.
 - F-03 Sistem membuat kode QR unik per generus; kartu QR bisa dicetak massal (PDF, 8–10 kartu per A4).
 - F-04 Jenjang & kategori dikonfigurasi Superadmin. Perpindahan jenjang/kategori dilakukan admin, dibantu pengingat di awal tahun ajaran (Juli):
+  - Balita yang masuk PAUD/TK → Caberawit PAUD/TK; lulus TK → Caberawit SD; lulus kelas 6 → Pra Remaja.
   - Pra Remaja yang lulus SLTP → Remaja Pelajar (atau Remaja Mandiri bila tidak melanjutkan sekolah).
   - Remaja Pelajar yang selesai sekolah/kuliah → Remaja Mandiri.
   Admin dapat memproses kenaikan secara massal (centang beberapa generus → ubah jenjang/kategori).
@@ -140,7 +143,7 @@ Alasan tidak memilih alternatif lain:
 | # | Topik | Keputusan |
 |---|-------|-----------|
 | 1 | Input target kurikulum | Peran tersendiri **Tim Kurikulum PPG** di tingkat daerah |
-| 2 | Jenjang | Pra Remaja (SLTP, tanpa kategori); Remaja (Pelajar & Mandiri) — dapat dikonfigurasi |
+| 2 | Jenjang | Balita (hanya didata); Caberawit (PAUD/TK & SD); Pra Remaja (SLTP, tanpa kategori); Remaja (Pelajar & Mandiri) — dapat dikonfigurasi |
 | 3 | Progres kitab | Dicatat per generus |
 | 4 | Kyai | Hanya melihat (read-only) |
 | 5 | Cakupan | Satu daerah (single-tenant). Pohon wilayah tetap berakar di "Daerah" agar bisa diperluas kelak |

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { academicYearStart, ageAt, gradeFromSchool, isPromotionSeason, suggestPromotion, type TransitionKey } from "@/lib/kenaikan-rules";
+import { academicYearStart, ageAt, gradeFromSchool, isPromotionSeason, segmentLabel, suggestPromotion, type TransitionKey } from "@/lib/kenaikan-rules";
 
 const isSuggested = (k: TransitionKey, g: { birthDate: string; school: string | null }, d: Date) => suggestPromotion(k, g, d).suggested;
 
@@ -77,5 +77,45 @@ describe("Pra Remaja: hanya yang lulus kelas 9 yang naik", () => {
 describe("Pelajar → Mandiri", () => {
   it("masih SMA tidak disarankan walau usia sudah lewat", () => {
     expect(suggestPromotion("pelajar-ke-mandiri", { birthDate: "2002-01-01", school: "SMK kelas 12" }, juli)).toEqual({ suggested: false, reason: "masih kelas 12" });
+  });
+});
+
+describe("kenaikan Caberawit & Balita", () => {
+  const nov = new Date(2026, 10, 14);
+  const jul = new Date(2026, 6, 10);
+  const s = (key: Parameters<typeof suggestPromotion>[0], birthDate: string, school: string | null, today = nov) => suggestPromotion(key, { birthDate, school }, today);
+
+  it("kelas di SD dikenali, nomor sekolah tidak", () => {
+    expect(gradeFromSchool("SDN 2 Cawas kelas 3")).toBe(3);
+    expect(gradeFromSchool("Kelas VI")).toBe(6);
+    expect(gradeFromSchool("6A")).toBe(6);
+    expect(gradeFromSchool("SDN 2 Cawas")).toBeNull();
+  });
+
+  it("SD → Pra Remaja: kelas 1–5 tidak, kelas 6 hanya Juli–Agustus, SMP ya, tanpa kelas usia ≥ 12", () => {
+    expect(s("sd-ke-pra", "2013-01-01", "SDN 1 kelas 5").suggested).toBe(false);
+    expect(s("sd-ke-pra", "2014-01-01", "SDN 1 kelas 6").suggested).toBe(false);
+    expect(s("sd-ke-pra", "2014-01-01", "SDN 1 kelas 6", jul).suggested).toBe(true);
+    expect(s("sd-ke-pra", "2015-01-01", "SMPN 3 Klaten").suggested).toBe(true);
+    expect(s("sd-ke-pra", "2014-03-01", null)).toEqual({ suggested: true, reason: "usia 12 per 1 Juli" });
+    expect(s("sd-ke-pra", "2015-03-01", null).suggested).toBe(false);
+  });
+
+  it("PAUD/TK → SD: tercatat SD/MI ya, masih TK di luar Juli tidak, tanpa keterangan usia ≥ 6", () => {
+    expect(s("paud-ke-sd", "2020-01-01", "MI Muhammadiyah").suggested).toBe(true);
+    expect(s("paud-ke-sd", "2020-01-01", "TK Aisyiyah").suggested).toBe(false);
+    expect(s("paud-ke-sd", "2020-01-01", null).suggested).toBe(true);
+    expect(s("paud-ke-sd", "2021-01-01", null).suggested).toBe(false);
+  });
+
+  it("Balita → PAUD/TK: tercatat PAUD ya, tanpa keterangan usia ≥ 4", () => {
+    expect(s("balita-ke-paud", "2024-01-01", "PAUD Melati").suggested).toBe(true);
+    expect(s("balita-ke-paud", "2022-03-01", null).suggested).toBe(true);
+    expect(s("balita-ke-paud", "2023-03-01", null).suggested).toBe(false);
+  });
+
+  it("label segmen tanpa kategori", () => {
+    expect(segmentLabel({ jenjang: "Pra Remaja", kategori: null })).toBe("Pra Remaja");
+    expect(segmentLabel({ jenjang: "Caberawit", kategori: "SD" })).toBe("Caberawit SD");
   });
 });

@@ -70,7 +70,7 @@ async function GenerusList({ searchParams }: Pick<PageProps<"/generus">, "search
   const chips: { key: string | undefined; label: string }[] = [
     { key: undefined, label: "Semua" },
     ...Object.entries(JENJANG_FILTERS)
-      .filter(([k]) => k !== "remaja")
+      .filter(([k]) => k !== "remaja" && k !== "caberawit")
       .map(([k, v]) => ({ key: k, label: v.label })),
   ];
   const statusLabel = p.status === "semua" ? "generus" : STATUS_LABEL[p.status ?? "aktif"].toLowerCase();

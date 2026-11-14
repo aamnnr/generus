@@ -141,6 +141,27 @@
       "when": 1794206024632,
       "tag": "0019_roster_jam_tercatat",
       "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1794292104272,
+      "tag": "0020_mobile_api_v2",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1794649418853,
+      "tag": "0021_jenjang_ikut_kegiatan",
+      "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1794649425059,
+      "tag": "0022_caberawit_balita",
+      "breakpoints": true
     }
   ]
 }

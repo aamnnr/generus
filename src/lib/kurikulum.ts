@@ -200,6 +200,8 @@ export async function listJenjangWithKategori(claims: JwtClaims) {
       .select({ id: jenjang.id, name: jenjang.name, kId: jenjangKategori.id, kName: jenjangKategori.name })
       .from(jenjang)
       .leftJoin(jenjangKategori, eq(jenjangKategori.jenjangId, jenjang.id))
+      // Jenjang yang hanya didata (Balita) tidak punya target/capaian.
+      .where(eq(jenjang.ikutKegiatan, true))
       .orderBy(asc(jenjang.sortOrder), asc(jenjangKategori.sortOrder)),
   );
   const out: { id: string; name: string; kategori: { id: string; name: string }[] }[] = [];
