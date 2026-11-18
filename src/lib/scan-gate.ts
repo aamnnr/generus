@@ -29,19 +29,38 @@ export function createScanGate(releaseMs = SAME_CODE_RELEASE_MS): ScanGate {
 
 export interface LogEntry<T> {
   key: string;
+  /** Yang ditampilkan di riwayat (bisa hasil pertama, lihat `keep`). */
   value: T;
+  /** Hasil paling baru untuk kunci ini (untuk panel umpan balik). */
+  last: T;
+  /** Waktu pertama & terakhir muncul (ms). */
+  firstAt: number;
   at: number;
-  /** Berapa kali hasil yang sama muncul berturut-turut / diulang. */
+  /** Berapa kali kunci ini muncul. */
   count: number;
 }
 
 /**
  * Tambahkan hasil ke riwayat. Hasil dengan kunci yang sama (orang yang sama, atau
  * pesan galat yang sama) tidak menambah baris: baris lamanya naik ke atas dengan
- * hitungan bertambah. Riwayat dibatasi `limit` baris.
+ * hitungan bertambah. `keep(prev, next)` = true mempertahankan nilai tampilan lama
+ * (mis. "Hadir" tetap tampil walau scan berikutnya "sudah tercatat").
  */
-export function pushLog<T>(log: LogEntry<T>[], key: string, value: T, at: number, limit = 12): LogEntry<T>[] {
+export function pushLog<T>(
+  log: LogEntry<T>[],
+  key: string,
+  value: T,
+  at: number,
+  opts: { limit?: number; keep?: (prev: T, next: T) => boolean } = {},
+): LogEntry<T>[] {
   const old = log.find((e) => e.key === key);
-  const entry = { key, value, at, count: (old?.count ?? 0) + 1 };
-  return [entry, ...log.filter((e) => e !== old)].slice(0, limit);
+  const entry: LogEntry<T> = {
+    key,
+    value: old && opts.keep?.(old.value, value) ? old.value : value,
+    last: value,
+    firstAt: old?.firstAt ?? at,
+    at,
+    count: (old?.count ?? 0) + 1,
+  };
+  return [entry, ...log.filter((e) => e !== old)].slice(0, opts.limit ?? 50);
 }

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "@/components/app-link";
 import { useSearchParams } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
+import { CheckIcon, LockIcon, RotateCcwIcon, XIcon } from "lucide-react";
 import { useOffline } from "next/offline";
 import { downloadRoster } from "@/app/(app)/agenda/actions";
 import { requestSync } from "@/components/outbox-sync";
@@ -67,7 +68,8 @@ export function Scanner() {
   }, [agendaId, refresh]);
 
   const show = useCallback((result: ScanResult) => {
-    setRecent((log) => pushLog(log, resultKey(result), result, Date.now()));
+    // Scan ulang orang yang baru dicatat tetap menampilkan status awalnya (mis. "Hadir").
+    setRecent((log) => pushLog(log, resultKey(result), result, Date.now(), { keep: (prev) => prev.kind === "ok" }));
     beep(result.kind === "ok" ? "ok" : result.kind === "duplicate" ? "warn" : "error");
     if (result.kind === "ok") requestSync();
   }, []);
@@ -174,24 +176,7 @@ export function Scanner() {
         </div>
       </div>
 
-      {recent.length > 0 && (
-        <div className="flex flex-col gap-1">
-          <h2 className="text-sm font-medium text-muted-foreground">Scan terakhir</h2>
-          <ul className="flex flex-col gap-1 text-sm">
-            {recent.map((r) => (
-              <li key={r.key} className="flex justify-between gap-2">
-                <span>
-                  {resultTitle(r.value)}
-                  {r.count > 1 && <span className="ml-1.5 rounded-full bg-muted px-1.5 text-xs text-muted-foreground tabular-nums">{r.count}×</span>}
-                </span>
-                <span className="shrink-0 tabular-nums text-muted-foreground">
-                  {new Date(r.at).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      {recent.length > 0 && <ScanLog entries={recent} />}
 
       <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
         <span>
@@ -234,6 +219,113 @@ function resultTitle(r: ScanResult): string {
   }
 }
 
+type Tone = "ok" | "repeat" | "error";
+
+function toneOf(e: LogEntry<ScanResult>): Tone {
+  const v = e.value;
+  if (v.kind === "ok") return "ok";
+  if (v.kind === "duplicate") return "repeat";
+  return "error";
+}
+
+const TONE: Record<Tone, { icon: string; badge: string }> = {
+  ok: { icon: "bg-status-hadir-soft text-status-hadir", badge: "" },
+  repeat: { icon: "bg-status-terlambat-soft text-status-terlambat", badge: "bg-status-terlambat-soft text-status-terlambat" },
+  error: { icon: "bg-status-alpa-soft text-status-alpa", badge: "bg-status-alpa-soft text-status-alpa" },
+};
+
+const hhmm = (ms: number | Date) => new Date(ms).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+const hhmmss = (ms: number) => new Date(ms).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+const LOG_PREVIEW = 8;
+
+/**
+ * Riwayat scan sesi ini: satu baris per orang (atau per jenis galat), terbaru di atas.
+ * Ikon & warna = hasilnya (hijau tercatat, kuning sudah tercatat/scan ulang, merah ditolak).
+ */
+function ScanLog({ entries }: { entries: LogEntry<ScanResult>[] }) {
+  const [all, setAll] = useState(false);
+  const fresh = entries.filter((e) => e.value.kind === "ok").length;
+  const repeats = entries.reduce((n, e) => n + (e.value.kind === "ok" ? e.count - 1 : e.value.kind === "duplicate" ? e.count : 0), 0);
+  const rejected = entries.reduce((n, e) => n + (e.value.kind === "ok" || e.value.kind === "duplicate" ? 0 : e.count), 0);
+  const shown = all ? entries : entries.slice(0, LOG_PREVIEW);
+
+  return (
+    <section className="flex flex-col gap-2" aria-label="Riwayat scan">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1.5 px-1">
+        <h2 className="text-sm font-semibold">Riwayat scan</h2>
+        <div className="flex flex-wrap gap-1.5 text-xs font-medium">
+          <span className="rounded-full bg-status-hadir-soft px-2 py-0.5 text-status-hadir tabular-nums">{fresh} tercatat</span>
+          {repeats > 0 && <span className="rounded-full bg-status-terlambat-soft px-2 py-0.5 text-status-terlambat tabular-nums">{repeats} ulang</span>}
+          {rejected > 0 && <span className="rounded-full bg-status-alpa-soft px-2 py-0.5 text-status-alpa tabular-nums">{rejected} ditolak</span>}
+        </div>
+      </div>
+      <ul className="flex flex-col divide-y divide-muted overflow-hidden rounded-2xl bg-card shadow-card">
+        {shown.map((e, i) => (
+          <ScanLogRow key={e.key} e={e} latest={i === 0} />
+        ))}
+      </ul>
+      {entries.length > LOG_PREVIEW && (
+        <Button type="button" variant="ghost" size="sm" className="self-center" onClick={() => setAll((v) => !v)}>
+          {all ? "Tampilkan lebih sedikit" : `Tampilkan semua (${entries.length})`}
+        </Button>
+      )}
+    </section>
+  );
+}
+
+function ScanLogRow({ e, latest }: { e: LogEntry<ScanResult>; latest: boolean }) {
+  const v = e.value;
+  const tone = toneOf(e);
+  const Icon = v.kind === "closed" ? LockIcon : tone === "ok" ? CheckIcon : tone === "repeat" ? RotateCcwIcon : XIcon;
+  let title: string;
+  let detail: string;
+  switch (v.kind) {
+    case "ok":
+      title = v.name;
+      // Jam tercatat hanya perlu disebut bila berbeda dari jam scan terakhir (di kanan).
+      detail = `${v.kelompok} · ${STATUS_LABEL[v.status]}${e.count > 1 ? ` ${hhmm(e.firstAt)}` : ""}`;
+      break;
+    case "duplicate":
+      title = v.name;
+      detail = `${v.kelompok} · sudah tercatat${v.recordedAt ? ` ${hhmm(v.recordedAt)}` : ""} (${STATUS_LABEL[v.status]})`;
+      break;
+    case "unknown":
+      title = "Kartu tidak dikenal";
+      detail = "Bukan peserta agenda ini, atau kartunya sudah diganti.";
+      break;
+    case "invalid":
+      title = "Bukan kartu Generus";
+      detail = "QR yang terbaca bukan kartu dari aplikasi ini.";
+      break;
+    case "closed":
+      title = "Tidak bisa mencatat";
+      detail = v.reason;
+      break;
+  }
+  const repeatsLabel = v.kind === "ok" ? `scan ulang ${e.count - 1}×` : `${e.count}×`;
+
+  return (
+    <li className={`flex items-center gap-3 px-3 py-2.5 ${latest ? "animate-enter bg-muted/40" : ""}`}>
+      <span className={`flex size-8 shrink-0 items-center justify-center rounded-full ${TONE[tone].icon}`} aria-hidden>
+        <Icon className="size-4" strokeWidth={2.5} />
+      </span>
+      <span className="flex min-w-0 flex-1 flex-col">
+        <span className="truncate text-sm font-medium">{title}</span>
+        <span className="truncate text-xs text-muted-foreground">{detail}</span>
+      </span>
+      <span className="flex shrink-0 flex-col items-end gap-0.5">
+        <span className="text-xs tabular-nums text-muted-foreground" title={hhmmss(e.at)}>
+          {hhmm(e.at)}
+        </span>
+        {e.count > 1 && (
+          <span className={`rounded-full px-1.5 text-[11px] font-medium tabular-nums ${tone === "error" ? TONE.error.badge : TONE.repeat.badge}`}>{repeatsLabel}</span>
+        )}
+      </span>
+    </li>
+  );
+}
+
 /** Hasil scan terakhir (baris teratas riwayat). */
 function FeedbackPanel({ feedback }: { feedback: LogEntry<ScanResult> | null }) {
   if (!feedback) {
@@ -243,7 +335,7 @@ function FeedbackPanel({ feedback }: { feedback: LogEntry<ScanResult> | null }) 
       </div>
     );
   }
-  const r = feedback.value;
+  const r = feedback.last;
   const tone =
     r.kind === "ok"
       ? "border-status-hadir bg-status-hadir-soft text-foreground"

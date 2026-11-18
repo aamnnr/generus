@@ -36,9 +36,16 @@ describe("pushLog", () => {
     ]);
   });
 
+  it("keep mempertahankan nilai pertama, last menyimpan yang terbaru", () => {
+    const keep = (prev: string) => prev === "Hadir";
+    let log = pushLog<string>([], "a", "Hadir", 1, { keep });
+    log = pushLog(log, "a", "Sudah tercatat", 5, { keep });
+    expect(log[0]).toMatchObject({ value: "Hadir", last: "Sudah tercatat", firstAt: 1, at: 5, count: 2 });
+  });
+
   it("dibatasi jumlah baris", () => {
     let log = pushLog<number>([], "0", 0, 0);
-    for (let i = 1; i < 20; i++) log = pushLog(log, String(i), i, i, 5);
+    for (let i = 1; i < 20; i++) log = pushLog(log, String(i), i, i, { limit: 5 });
     expect(log.map((e) => e.value)).toEqual([19, 18, 17, 16, 15]);
   });
 });

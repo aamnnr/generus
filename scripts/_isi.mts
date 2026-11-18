@@ -1,0 +1,10 @@
+import postgres from "postgres";
+const sql = postgres(process.env.DATABASE_URL!, { max: 1 });
+const t = await sql`SELECT c.relname t, c.reltuples::bigint est FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace WHERE n.nspname = 'public' AND c.relkind = 'r' ORDER BY 1`;
+const out: Record<string, number> = {};
+for (const r of t) out[r.t] = (await sql.unsafe(`SELECT count(*)::int n FROM public."${r.t}"`))[0].n;
+console.log(out);
+console.log(await sql`SELECT u.level, u.name, (SELECT count(*)::int FROM units c WHERE c.path <@ u.path) - 1 AS turunan FROM units u WHERE u.level = 'daerah'`);
+console.log(await sql`SELECT p.email, ur.role, u.level, u.name FROM user_roles ur JOIN profiles p ON p.id = ur.user_id JOIN units u ON u.id = ur.unit_id ORDER BY p.email`);
+console.log("system_admins:", await sql`SELECT p.email FROM system_admins s JOIN profiles p ON p.id = s.user_id`);
+await sql.end();
