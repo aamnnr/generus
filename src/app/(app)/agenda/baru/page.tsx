@@ -11,7 +11,7 @@ import { createAgenda } from "../actions";
 import { AgendaForm } from "../agenda-form";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Buat Agenda · Generus" };
+export const metadata: Metadata = { title: "Buat Agenda" };
 
 export default function BaruPage() {
   return (

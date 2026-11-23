@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { BookOpenText, CalendarDays, ChartNoAxesColumn, FileBarChart, House, IdCard, LayoutGrid, LogOut, MapPin, UserCog, Users, type LucideIcon } from "lucide-react";
 import { logout } from "@/app/actions/auth";
 import type { NavIcon, NavItem, ShellNav } from "./nav";
+import { brand, isKliik } from "@/lib/brand";
 import { BrandMark } from "./ornament";
 
 const ICONS: Record<NavIcon, LucideIcon> = {
@@ -51,9 +52,16 @@ export function Sidebar({ nav }: { nav: ShellNav }) {
 
   return (
     <aside style={{ viewTransitionName: "app-sidebar" }} className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col gap-1 border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex print:hidden">
-      <Link href="/beranda" className="mb-5 flex items-center gap-2.5 px-2">
-        <BrandMark />
-        <span className="font-heading text-[22px] font-semibold">Generus</span>
+      <Link href="/beranda" className="mb-5 flex items-center gap-2.5 px-2" aria-label={`${brand.name} — Beranda`}>
+        {isKliik ? (
+          // eslint-disable-next-line @next/next/no-img-element -- SVG statis
+          <img src="/brand/kliik-jm-wordmark.svg" alt="" className="h-9 w-auto" />
+        ) : (
+          <>
+            <BrandMark />
+            <span className="font-heading text-[22px] font-semibold">{brand.name}</span>
+          </>
+        )}
       </Link>
       <nav aria-label="Navigasi utama" className="flex flex-col gap-0.5">
         {nav.main.map(link)}

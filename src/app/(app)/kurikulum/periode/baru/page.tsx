@@ -7,7 +7,7 @@ import { listPeriods } from "@/lib/kurikulum";
 import { PeriodForm } from "../../forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Buat periode · Generus" };
+export const metadata: Metadata = { title: "Buat periode" };
 
 export default function PeriodeBaruPage() {
   return (

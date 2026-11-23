@@ -1,5 +1,6 @@
 "use client";
 
+import { brand } from "@/lib/brand";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -67,7 +68,7 @@ export function InstallPrompt() {
     <Card>
       <CardContent className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="flex-1 text-sm">
-          <p className="font-medium">Pasang Generus di HP</p>
+          <p className="font-medium">Pasang {brand.name} di HP</p>
           {mode === "ios" ? (
             <p className="text-muted-foreground">
               Ketuk tombol <span className="font-medium text-foreground">Bagikan</span> di Safari, lalu pilih{" "}

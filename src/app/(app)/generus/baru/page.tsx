@@ -9,7 +9,7 @@ import { createGenerus } from "../actions";
 import { GenerusForm } from "../generus-form";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Tambah Generus · Generus" };
+export const metadata: Metadata = { title: "Tambah Generus" };
 
 export default function BaruPage() {
   return (

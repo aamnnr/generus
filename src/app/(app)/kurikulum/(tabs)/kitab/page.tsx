@@ -8,7 +8,7 @@ import { formatPosition, KITAB_UNIT_LABEL } from "@/lib/kurikulum-format";
 import { setKitabArchived } from "@/app/(app)/kurikulum/actions";
 import { KitabEditToggle, KitabForm } from "@/app/(app)/kurikulum/forms";
 
-export const metadata: Metadata = { title: "Kitab · Generus" };
+export const metadata: Metadata = { title: "Kitab" };
 
 export default function KitabPage() {
   return (

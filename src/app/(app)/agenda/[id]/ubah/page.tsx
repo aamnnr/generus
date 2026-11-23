@@ -13,7 +13,7 @@ import { updateAgenda } from "../../actions";
 import { AgendaForm } from "../../agenda-form";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Ubah Agenda · Generus" };
+export const metadata: Metadata = { title: "Ubah Agenda" };
 
 export default function UbahPage({ params }: PageProps<"/agenda/[id]/ubah">) {
   return (

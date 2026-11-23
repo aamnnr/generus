@@ -14,7 +14,7 @@ import { PromoteForm } from "./promote-form";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
 
-export const metadata: Metadata = { title: "Kenaikan Jenjang · Generus" };
+export const metadata: Metadata = { title: "Kenaikan Jenjang" };
 
 const paramsSchema = z.object({
   t: z.enum(Object.keys(TRANSITIONS) as [TransitionKey]).catch("pra-ke-pelajar"),

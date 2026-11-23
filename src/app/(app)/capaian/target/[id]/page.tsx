@@ -12,7 +12,7 @@ import { resolveCapaianContext } from "../../context";
 import { AchievementChecklist } from "../../forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Isi capaian · Generus" };
+export const metadata: Metadata = { title: "Isi capaian" };
 
 export default function TargetCapaianPage(props: PageProps<"/capaian/target/[id]">) {
   return (

@@ -12,7 +12,7 @@ import { dateRange } from "../../../kurikulum/shared";
 import { GenerusAchievementForm, KitabSingleForm, QuerySelect } from "../../forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Capaian generus · Generus" };
+export const metadata: Metadata = { title: "Capaian generus" };
 
 export default function GenerusCapaianPage(props: PageProps<"/capaian/generus/[id]">) {
   return (

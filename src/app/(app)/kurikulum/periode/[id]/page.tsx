@@ -23,7 +23,7 @@ import { AddTargetPanel, Collapsible, DeletePeriodButton, PeriodForm, TargetRowE
 import { dateRange, PeriodPills, TargetContent, todayIso } from "../../shared";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Target periode · Generus" };
+export const metadata: Metadata = { title: "Target periode" };
 
 export default function PeriodePage({ params, searchParams }: PageProps<"/kurikulum/periode/[id]">) {
   return (

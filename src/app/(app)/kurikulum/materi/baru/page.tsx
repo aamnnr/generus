@@ -7,7 +7,7 @@ import { listMapelNames } from "@/lib/kurikulum";
 import { MateriForm } from "../../forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Tambah materi · Generus" };
+export const metadata: Metadata = { title: "Tambah materi" };
 
 export default function MateriBaruPage() {
   return (

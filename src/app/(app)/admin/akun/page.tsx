@@ -11,7 +11,7 @@ import { requireSuperadmin, roleLabel } from "@/lib/auth";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
 
-export const metadata: Metadata = { title: "Akun · Generus" };
+export const metadata: Metadata = { title: "Akun" };
 
 export default function AkunPage({ searchParams }: PageProps<"/admin/akun">) {
   return (

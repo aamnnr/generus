@@ -16,7 +16,7 @@ import { ProgressBar } from "../shared";
 import { PageLoading } from "@/components/page-loading";
 import { TAB_TRANSITION } from "@/lib/transitions";
 
-export const metadata: Metadata = { title: "Rekap capaian · Generus" };
+export const metadata: Metadata = { title: "Rekap capaian" };
 
 export default function RekapPage({ searchParams }: PageProps<"/capaian/rekap">) {
   return (

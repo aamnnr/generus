@@ -12,7 +12,7 @@ import { removeRole, setActive } from "../actions";
 import { AddRoleForm, ProfileForm, ResetPasswordForm } from "./forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Detail Akun · Generus" };
+export const metadata: Metadata = { title: "Detail Akun" };
 
 export default function DetailPage({ params }: PageProps<"/admin/akun/[id]">) {
   return (

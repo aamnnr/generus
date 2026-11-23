@@ -20,7 +20,7 @@ import { DownloadPng } from "./download-png";
 import { PageLoading } from "@/components/page-loading";
 import { QueryForm } from "@/components/query-form";
 
-export const metadata: Metadata = { title: "Kartu QR · Generus" };
+export const metadata: Metadata = { title: "Kartu QR" };
 
 const PER_SHEET = 9;
 const desaUnit = alias(units, "desa");

@@ -35,7 +35,7 @@ import { QueryForm } from "@/components/query-form";
 import { Input } from "@/components/ui/input";
 import { LiveRefresh } from "./live-refresh";
 
-export const metadata: Metadata = { title: "Agenda · Generus" };
+export const metadata: Metadata = { title: "Agenda" };
 
 const LEVEL = { daerah: "Daerah", desa: "Desa", kelompok: "Kelompok" } as const;
 const SEARCH_LIMIT = 50;

@@ -11,7 +11,7 @@ import { KitabBulkForm } from "../../forms";
 import { ProgressBar } from "../../shared";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Progres kitab · Generus" };
+export const metadata: Metadata = { title: "Progres kitab" };
 
 export default function KitabCapaianPage(props: PageProps<"/capaian/kitab/[id]">) {
   return (

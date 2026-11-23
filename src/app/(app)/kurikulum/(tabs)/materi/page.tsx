@@ -10,7 +10,7 @@ import { QueryForm } from "@/components/query-form";
 import { TAB_TRANSITION } from "@/lib/transitions";
 import { ChipNav } from "@/components/segment-nav";
 
-export const metadata: Metadata = { title: "Pustaka materi · Generus" };
+export const metadata: Metadata = { title: "Pustaka materi" };
 
 export default function MateriPage({ searchParams }: PageProps<"/kurikulum/materi">) {
   return (

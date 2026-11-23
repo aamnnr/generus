@@ -8,7 +8,7 @@ import { getWilayahTree } from "@/lib/wilayah";
 import { AddUnitForm, UnitRow } from "./forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Wilayah · Generus" };
+export const metadata: Metadata = { title: "Wilayah" };
 
 export default function WilayahPage() {
   return (

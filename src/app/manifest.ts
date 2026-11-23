@@ -1,9 +1,10 @@
 import type { MetadataRoute } from "next";
 import { APP_NAME, BRAND_COLOR } from "@/lib/app-icon";
+import { brand } from "@/lib/brand";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Pantau Generus",
+    name: brand.fullName,
     short_name: APP_NAME,
     description: "Presensi pengajian, target materi bulanan, dan progres kitab generus.",
     lang: "id",

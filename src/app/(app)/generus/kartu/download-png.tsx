@@ -25,6 +25,15 @@ function svgImage(svg: SVGElement, color?: string): Promise<HTMLImageElement> {
   });
 }
 
+/** <img> yang sudah selesai dimuat (sumbernya satu origin, jadi kanvas tidak "tercemar"). */
+function imageReady(img: HTMLImageElement): Promise<HTMLImageElement> {
+  if (img.complete && img.naturalWidth) return Promise.resolve(img);
+  return new Promise((resolve, reject) => {
+    img.addEventListener("load", () => resolve(img), { once: true });
+    img.addEventListener("error", () => reject(new Error("Gagal memuat logo")), { once: true });
+  });
+}
+
 function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
   ctx.beginPath();
   ctx.roundRect(x, y, w, h, Math.min(r, w / 2, h / 2));
@@ -87,7 +96,8 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
   ctx.clip();
   const star = $<SVGElement>(".idc-star");
   const s = rel(star);
-  ctx.drawImage(await svgImage(star, getComputedStyle(star).color), s.x, s.y, s.w, s.h);
+  // Ornamen bintang disembunyikan pada merek KLIIK JM (lebar 0).
+  if (s.w > 0) ctx.drawImage(await svgImage(star, getComputedStyle(star).color), s.x, s.y, s.w, s.h);
   ctx.restore();
 
   // Lubang tali
@@ -100,10 +110,10 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
   ctx.lineWidth = bw;
   ctx.stroke();
 
-  // Logo
-  const mark = $<SVGElement>(".idc-mark");
+  // Logo: <svg> (desain lama) atau <img> (KLIIK JM).
+  const mark = $<SVGElement | HTMLImageElement>(".idc-mark");
   const m = rel(mark);
-  ctx.drawImage(await svgImage(mark), m.x, m.y, m.w, m.h);
+  ctx.drawImage(mark instanceof HTMLImageElement ? await imageReady(mark) : await svgImage(mark), m.x, m.y, m.w, m.h);
 
   /** Tulis teks elemen di posisinya (rata tengah vertikal per baris, perataan mengikuti CSS). */
   const text = (el: HTMLElement, opts: { multiline?: boolean } = {}) => {

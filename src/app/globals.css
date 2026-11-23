@@ -152,6 +152,80 @@
   --sidebar-ring: oklch(0.754 0.083 160.7);
 }
 
+/* ---------------------------------------------------------------------------
+   Merek KLIIK JM (src/lib/brand.ts, NEXT_PUBLIC_BRAND=kliik — bawaan).
+   Menimpa token di atas; token lama tetap utuh untuk NEXT_PUBLIC_BRAND=generus.
+   Navy #1A2189 = oklch(0.33 0.168 270), cyan #008CD7 = oklch(0.616 0.15 243.4).
+   --------------------------------------------------------------------------- */
+:root[data-brand="kliik"] {
+  --font-display: var(--font-sans);
+  --background: oklch(0.975 0.006 255);
+  --foreground: oklch(0.24 0.04 270);
+  --card-foreground: oklch(0.24 0.04 270);
+  --popover-foreground: oklch(0.24 0.04 270);
+  --primary: oklch(0.33 0.168 270);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.94 0.025 255);
+  --secondary-foreground: oklch(0.33 0.168 270);
+  --muted: oklch(0.94 0.012 255);
+  --muted-foreground: oklch(0.50 0.03 265);
+  --accent: oklch(0.94 0.035 243);
+  --accent-foreground: oklch(0.45 0.13 245);
+  --border: oklch(0.90 0.015 255);
+  --input: oklch(0.90 0.015 255);
+  --ring: oklch(0.616 0.15 243.4);
+  --hero: oklch(0.33 0.168 270);
+  --hero-foreground: oklch(1 0 0);
+  --tile: oklch(0.94 0.012 255);
+  --brass: oklch(0.616 0.15 243.4);
+  /* Izin: teal, agar tidak tertukar dengan biru merek. */
+  --status-izin: oklch(0.52 0.09 192);
+  --status-izin-soft: oklch(0.945 0.025 192);
+  --chart-1: oklch(0.33 0.168 270);
+  --chart-2: oklch(0.616 0.15 243.4);
+  --chart-3: oklch(0.52 0.09 192);
+  --chart-5: oklch(0.70 0.10 250);
+  --sidebar: oklch(0.99 0.004 255);
+  --sidebar-foreground: oklch(0.24 0.04 270);
+  --sidebar-primary: oklch(0.33 0.168 270);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.94 0.025 255);
+  --sidebar-accent-foreground: oklch(0.33 0.168 270);
+  --sidebar-border: oklch(0.90 0.015 255);
+  --sidebar-ring: oklch(0.616 0.15 243.4);
+}
+
+:root[data-brand="kliik"].dark {
+  --background: oklch(0.18 0.035 270);
+  --foreground: oklch(0.95 0.01 255);
+  --card: oklch(0.23 0.045 270);
+  --card-foreground: oklch(0.95 0.01 255);
+  --popover: oklch(0.23 0.045 270);
+  --popover-foreground: oklch(0.95 0.01 255);
+  --primary: oklch(0.72 0.13 243);
+  --primary-foreground: oklch(0.18 0.035 270);
+  --secondary: oklch(0.28 0.05 270);
+  --secondary-foreground: oklch(0.95 0.01 255);
+  --muted: oklch(0.28 0.05 270);
+  --muted-foreground: oklch(0.74 0.03 260);
+  --accent: oklch(0.32 0.06 260);
+  --accent-foreground: oklch(0.85 0.08 243);
+  --border: oklch(0.33 0.05 270);
+  --input: oklch(0.33 0.05 270);
+  --ring: oklch(0.72 0.13 243);
+  --tile: oklch(0.28 0.05 270);
+  --status-izin: oklch(0.72 0.09 192);
+  --status-izin-soft: oklch(0.32 0.04 192);
+  --sidebar: oklch(0.23 0.045 270);
+  --sidebar-foreground: oklch(0.95 0.01 255);
+  --sidebar-primary: oklch(0.72 0.13 243);
+  --sidebar-primary-foreground: oklch(0.18 0.035 270);
+  --sidebar-accent: oklch(0.28 0.05 270);
+  --sidebar-accent-foreground: oklch(0.95 0.01 255);
+  --sidebar-border: oklch(0.33 0.05 270);
+  --sidebar-ring: oklch(0.72 0.13 243);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -362,6 +436,14 @@
   height: 5.2mm; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
   background: #F1E9D6; color: #5c4a1f; font-size: 1.9mm; font-weight: 600;
 }
+/* Kartu QR merek KLIIK JM: kepala navy tanpa ornamen, aksen biru. */
+[data-brand="kliik"] .idc-top { background: #1A2189; }
+[data-brand="kliik"] .idc-star { display: none; }
+[data-brand="kliik"] .idc-mark { border-radius: 2.4mm; }
+[data-brand="kliik"] .idc-name { font-weight: 800; }
+[data-brand="kliik"] .idc-pill { background: #E3EEFB; color: #1A2189; }
+[data-brand="kliik"] .idc-qr { border-color: #008CD7; }
+[data-brand="kliik"] .idc-foot { background: #E3EEFB; color: #1A2189; }
 
 @media print {
   @page { size: A4; margin: 10mm 8mm; }

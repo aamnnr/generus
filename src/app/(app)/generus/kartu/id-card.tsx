@@ -1,4 +1,5 @@
 import { LOGO_COLORS, LogoGlyph } from "@/components/brand/logo";
+import { brand, isKliik } from "@/lib/brand";
 import { FitName } from "./fit-name";
 
 // Kartu identitas generus: ukuran KTP berdiri (54 × 85,6 mm), untuk lanyard.
@@ -29,9 +30,14 @@ export function IdCard({ c }: { c: IdCardData }) {
           <path d="M12 2l2.6 3.7L19 5l-.7 4.4L22 12l-3.7 2.6L19 19l-4.4-.7L12 22l-2.6-3.7L5 19l.7-4.4L2 12l3.7-2.6L5 5l4.4.7z" />
         </svg>
         <div className="idc-brand">
-          <LogoGlyph variant="icon" mosque={LOGO_COLORS.cream} id={`idc-${c.id}`} className="idc-mark" />
+          {isKliik ? (
+            // eslint-disable-next-line @next/next/no-img-element -- SVG statis; juga digambar ulang oleh unduh PNG
+            <img src="/brand/kliik-jm-icon.svg" alt="" className="idc-mark" />
+          ) : (
+            <LogoGlyph variant="icon" mosque={LOGO_COLORS.cream} id={`idc-${c.id}`} className="idc-mark" />
+          )}
           <span className="idc-brand-text">
-            <span className="idc-app">KARTU GENERUS</span>
+            <span className="idc-app">{isKliik ? brand.name.toUpperCase() : "KARTU GENERUS"}</span>
             <span className="idc-daerah">{/^daerah\b/i.test(c.daerah) ? c.daerah : `Daerah ${c.daerah}`}</span>
           </span>
         </div>

@@ -28,7 +28,7 @@ import { QueryForm } from "@/components/query-form";
 import { TAB_TRANSITION } from "@/lib/transitions";
 import { ChipNav } from "@/components/segment-nav";
 
-export const metadata: Metadata = { title: "Generus · Generus" };
+export const metadata: Metadata = { title: "Generus" };
 
 const filterSchema = z.object({
   q: z.string().max(80).optional().catch(undefined),

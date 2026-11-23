@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getCurrentUser } from "@/lib/auth";
 import { PasswordForm } from "./password-form";
 
-export const metadata: Metadata = { title: "Ganti Password · Generus" };
+export const metadata: Metadata = { title: "Ganti Password" };
 
 export default function PasswordPage() {
   return (

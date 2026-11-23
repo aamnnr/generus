@@ -11,7 +11,7 @@ import { canReadGenerus, canWriteGenerus, getCurrentUser } from "@/lib/auth";
 import { formatDateLong, formatTime, utcToZoned, zoneLabel } from "@/lib/time";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Agenda · Generus" };
+export const metadata: Metadata = { title: "Agenda" };
 
 const LEVEL = { daerah: "Daerah", desa: "Desa", kelompok: "Kelompok" } as const;
 

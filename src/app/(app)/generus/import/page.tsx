@@ -6,7 +6,7 @@ import { requireGenerusWriter } from "@/lib/auth";
 import { listScopeUnits } from "@/lib/generus";
 import { ImportFlow } from "./import-flow";
 
-export const metadata: Metadata = { title: "Import Generus · Generus" };
+export const metadata: Metadata = { title: "Import Generus" };
 
 export default function ImportPage() {
   return (

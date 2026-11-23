@@ -32,7 +32,7 @@ import { PageLoading } from "@/components/page-loading";
 import { TAB_TRANSITION } from "@/lib/transitions";
 import { kurikulumEnabled } from "@/lib/features";
 
-export const metadata: Metadata = { title: "Laporan · Generus" };
+export const metadata: Metadata = { title: "Laporan" };
 
 export default function LaporanPage({ searchParams }: PageProps<"/laporan">) {
   return (

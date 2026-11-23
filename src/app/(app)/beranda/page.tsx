@@ -17,7 +17,7 @@ import { dateRange } from "../kurikulum/shared";
 import { formatDateLong, formatDateTime, formatTime, zoneLabel } from "@/lib/time";
 import { kurikulumEnabled } from "@/lib/features";
 
-export const metadata: Metadata = { title: "Beranda · Generus" };
+export const metadata: Metadata = { title: "Beranda" };
 
 export default function BerandaPage({ searchParams }: PageProps<"/beranda">) {
   return (

@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KLIIK JM · Aset logo</title>
+<style>
+  :root { --navy:#1A2189; --cyan:#008CD7; --ink:#1d2033; --muted:#5d6278; --line:#e3e6ef; --bg:#f5f7fb; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color:var(--ink); background:var(--bg); }
+  main { max-width: 1040px; margin: 0 auto; padding: 32px 20px 64px; }
+  h1 { margin: 0 0 4px; font-size: 26px; }
+  h2 { margin: 40px 0 6px; font-size: 18px; }
+  p.lead, p.note { color: var(--muted); margin: 0 0 16px; font-size: 14px; line-height: 1.5; }
+  .grid { display:grid; gap:16px; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+  .card { background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px; }
+  .card.dark { background: var(--navy); border-color: var(--navy); }
+  .card.cyan { background: var(--cyan); border-color: var(--cyan); }
+  .card img { display:block; width:100%; height:auto; }
+  .cap { font-size:12px; color:var(--muted); margin-top:10px; }
+  .card.dark .cap, .card.cyan .cap { color: #dfe4ff; }
+  .sizes { display:flex; align-items:flex-end; gap:20px; flex-wrap:wrap; }
+  .sizes figure { margin:0; text-align:center; font-size:11px; color:var(--muted); }
+  .sizes img { display:block; margin:0 auto 6px; }
+  .swatches { display:flex; gap:12px; flex-wrap:wrap; }
+  .sw { width:180px; border-radius:14px; overflow:hidden; border:1px solid var(--line); background:#fff; font-size:13px; }
+  .sw div:first-child { height:72px; }
+  .sw div:last-child { padding:10px 12px; line-height:1.45; }
+  .tab { display:inline-flex; align-items:center; gap:8px; background:#dee1e6; padding:8px 14px; border-radius:10px 10px 0 0; font-size:13px; }
+  .tab.dark { background:#35363a; color:#e8eaed; }
+  .phone { width: 260px; border-radius: 34px; padding: 26px 18px; background: linear-gradient(160deg,#1f5fd1,#0c2f84); display:grid; grid-template-columns: repeat(4, 1fr); gap: 18px 10px; }
+  .app { text-align:center; color:#fff; font-size:10px; }
+  .app i { display:block; width:48px; height:48px; margin:0 auto 5px; border-radius:12px; background:rgba(255,255,255,.25); }
+  .app img { width:48px; height:48px; border-radius:12px; display:block; margin:0 auto 5px; }
+  .mask { position:relative; width:192px; }
+  .mask img { width:192px; border-radius:50%; }
+  .mask::after { content:""; position:absolute; inset:0; border-radius:50%; border:2px dashed #e0457b; transform: scale(.8); }
+  .row { display:flex; gap:24px; flex-wrap:wrap; align-items:center; }
+  code { background:#eef0f6; padding:1px 6px; border-radius:6px; font-size:12px; }
+  @media (max-width: 480px) { .grid { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>KLIIK JM · Aset logo</h1>
+  <p class="lead">Digambar ulang sebagai vektor (SVG) dari logo yang diberikan klien, tanpa mengubah bentuk huruf maupun warna. Ikon K + centang disusun dari huruf K logo yang sama. Untuk persetujuan sebelum dipasang di aplikasi.</p>
+
+  <h2>Logo lengkap</h2>
+  <div class="grid">
+    <div class="card"><img src="kliik-jm-logo.svg" alt="Logo KLIIK JM"><div class="cap">Utama, untuk latar terang · kliik-jm-logo.svg</div></div>
+    <div class="card dark"><img src="kliik-jm-logo-putih.svg" alt="Logo KLIIK JM putih"><div class="cap">Latar gelap · kliik-jm-logo-putih.svg</div></div>
+  </div>
+
+  <h2>Tanpa tagline</h2>
+  <p class="note">Untuk header, sidebar, dan tempat sempit: tagline tidak terbaca bila logo kecil.</p>
+  <div class="grid">
+    <div class="card"><img src="kliik-jm-wordmark.svg" alt=""><div class="cap">kliik-jm-wordmark.svg</div></div>
+    <div class="card dark"><img src="kliik-jm-wordmark-putih.svg" alt=""><div class="cap">kliik-jm-wordmark-putih.svg</div></div>
+    <div class="card"><img src="kliik-jm-wordmark-mono.svg" alt=""><div class="cap">Satu warna (cetak/stempel) · kliik-jm-wordmark-mono.svg</div></div>
+    <div class="card cyan"><img src="kliik-jm-wordmark-mono-putih.svg" alt=""><div class="cap">Putih penuh, di atas foto/warna · kliik-jm-wordmark-mono-putih.svg</div></div>
+  </div>
+
+  <h2>Ikon aplikasi</h2>
+  <div class="row">
+    <div class="sizes">
+      <figure><img src="kliik-jm-icon.svg" width="160" style="filter:drop-shadow(0 6px 16px rgba(26,33,137,.18))" alt="">512 · utama</figure>
+      <figure><img src="kliik-jm-icon-gelap.svg" width="160" alt="">Varian gelap</figure>
+      <figure><img src="kliik-jm-icon.svg" width="64" alt="">64</figure>
+      <figure><img src="kliik-jm-icon.svg" width="48" alt="">48</figure>
+    </div>
+    <div class="phone" aria-label="Contoh di layar HP">
+      <div class="app"><i></i>Telepon</div><div class="app"><i></i>Pesan</div><div class="app"><i></i>Kamera</div><div class="app"><i></i>Galeri</div>
+      <div class="app"><i></i>Kalender</div><div class="app"><i></i>Jam</div><div class="app"><img src="kliik-jm-icon.svg" alt="">KLIIK JM</div><div class="app"><i></i>Catatan</div>
+    </div>
+  </div>
+
+  <h2>Favicon (tab browser)</h2>
+  <p class="note">Ukuran 16–32 px: latar navy & garis lebih tebal supaya K dan centang tetap terpisah, di tab terang maupun gelap.</p>
+  <div class="row">
+    <div class="sizes">
+      <figure><img src="kliik-jm-favicon.svg" width="64" alt="">64</figure>
+      <figure><img src="kliik-jm-favicon.svg" width="32" alt="">32</figure>
+      <figure><img src="kliik-jm-favicon.svg" width="16" alt="">16</figure>
+    </div>
+    <div><div class="tab"><img src="kliik-jm-favicon.svg" width="16" alt=""> KLIIK JM · Beranda</div></div>
+    <div><div class="tab dark"><img src="kliik-jm-favicon.svg" width="16" alt=""> KLIIK JM · Beranda</div></div>
+  </div>
+
+  <h2>Ikon Android (maskable) & iPhone</h2>
+  <p class="note">Android memotong ikon menjadi lingkaran/squircle; isi harus di dalam zona aman 80% (garis putus-putus). iPhone membulatkan sudut sendiri.</p>
+  <div class="row">
+    <div class="mask"><img src="kliik-jm-maskable.svg" alt=""></div>
+    <figure style="margin:0"><img src="kliik-jm-apple-touch.svg" width="150" style="border-radius:34px" alt=""><div class="cap">apple-touch-icon</div></figure>
+  </div>
+
+  <h2>Warna</h2>
+  <div class="swatches">
+    <div class="sw"><div style="background:#1A2189"></div><div><b>Navy</b> #1A2189<br>Warna utama: teks, tombol, ikon.</div></div>
+    <div class="sw"><div style="background:#008CD7"></div><div><b>Cyan</b> #008CD7<br>Aksen. Kontras ke putih 3,7:1 — jangan untuk teks kecil.</div></div>
+  </div>
+  <p class="note" style="margin-top:12px">Warna status presensi (hijau Hadir, kuning Terlambat, merah Alpa, dst.) tetap seperti sekarang karena bermakna, bukan bagian merek.</p>
+</main>
+</body>
+</html>

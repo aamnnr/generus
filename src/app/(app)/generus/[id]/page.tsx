@@ -31,7 +31,7 @@ import { DeleteForm, MutateForm, ReactivateForm, ReissueCardForm, StatusForm } f
 import { PageLoading } from "@/components/page-loading";
 import { kurikulumEnabled } from "@/lib/features";
 
-export const metadata: Metadata = { title: "Detail Generus · Generus" };
+export const metadata: Metadata = { title: "Detail Generus" };
 
 export default function DetailPage({ params, searchParams }: PageProps<"/generus/[id]">) {
   return (

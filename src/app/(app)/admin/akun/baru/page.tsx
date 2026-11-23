@@ -7,7 +7,7 @@ import { requireSuperadmin } from "@/lib/auth";
 import { CreateAccountForm } from "./create-form";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Tambah Akun · Generus" };
+export const metadata: Metadata = { title: "Tambah Akun" };
 
 export default function BaruPage() {
   return (

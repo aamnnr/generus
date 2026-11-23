@@ -4,6 +4,7 @@ import { ConfirmHost } from "@/components/confirm";
 import { FormValidation } from "@/components/form-validation";
 import { Pwa } from "@/components/pwa";
 import { APP_NAME, BRAND_COLOR } from "@/lib/app-icon";
+import { BRAND } from "@/lib/brand";
 import "./globals.css";
 
 // Tipografi: docs/DESIGN.md §3.
@@ -17,7 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: APP_NAME,
+  // Judul halaman cukup "Agenda"; nama aplikasi ditambahkan otomatis.
+  title: { default: APP_NAME, template: `%s · ${APP_NAME}` },
   description: "Pemantauan ketertiban generus: presensi, target materi, dan progres kitab",
   applicationName: APP_NAME,
   appleWebApp: { capable: true, title: APP_NAME, statusBarStyle: "default" },
@@ -32,6 +34,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="id"
+      data-brand={BRAND}
       className={`${sans.variable} ${display.variable} ${arabic.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">

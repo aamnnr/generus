@@ -7,7 +7,7 @@ import { canEditCurriculum, getCurrentUser } from "@/lib/auth";
 import { listPeriods } from "@/lib/kurikulum";
 import { dateRange, PeriodPills, todayIso } from "@/app/(app)/kurikulum/shared";
 
-export const metadata: Metadata = { title: "Kurikulum · Generus" };
+export const metadata: Metadata = { title: "Kurikulum" };
 
 // Judul, tab, dan Suspense ada di (tabs)/layout.tsx.
 export default async function KurikulumPage() {

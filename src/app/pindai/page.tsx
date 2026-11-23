@@ -5,7 +5,7 @@ import { Scanner } from "./scanner";
 
 // Kerangka statis tanpa data pribadi: aman disimpan service worker sehingga
 // pemindai bisa dibuka tanpa sinyal. Data peserta dibaca dari IndexedDB.
-export const metadata: Metadata = { title: "Pemindai QR · Generus" };
+export const metadata: Metadata = { title: "Pemindai QR" };
 
 export default function PindaiPage() {
   return (

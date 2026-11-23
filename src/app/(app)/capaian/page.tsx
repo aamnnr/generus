@@ -18,7 +18,7 @@ import { DeliveryToggle, QuerySelect, QueryUnitPicker } from "./forms";
 import { ProgressBar } from "./shared";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Capaian · Generus" };
+export const metadata: Metadata = { title: "Capaian" };
 
 export default function CapaianPage({ searchParams }: PageProps<"/capaian">) {
   return (

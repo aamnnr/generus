@@ -12,7 +12,7 @@ import { setMateriArchived } from "../../actions";
 import { MateriForm } from "../../forms";
 import { PageLoading } from "@/components/page-loading";
 
-export const metadata: Metadata = { title: "Ubah materi · Generus" };
+export const metadata: Metadata = { title: "Ubah materi" };
 
 export default function MateriDetailPage({ params }: PageProps<"/kurikulum/materi/[id]">) {
   return (

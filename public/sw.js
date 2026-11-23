@@ -7,7 +7,7 @@
  * - Halaman lain yang berisi data pribadi TIDAK disimpan di cache perangkat.
  * Naikkan VERSION bila isi file ini berubah agar cache lama dibersihkan.
  */
-const VERSION = "v6";
+const VERSION = "v7"; // v7: halaman offline & ikon mengikuti merek aktif (src/lib/brand.ts)
 const STATIC_CACHE = `generus-static-${VERSION}`;
 const PRECACHE = ["/offline.html", "/icons/icon-192.png", "/icons/icon-512.png"];
 

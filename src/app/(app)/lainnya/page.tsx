@@ -9,7 +9,7 @@ import { canEditCurriculum, canReadGenerus, canWriteGenerus, getCurrentUser, rek
 import { PageLoading } from "@/components/page-loading";
 import { kurikulumEnabled } from "@/lib/features";
 
-export const metadata: Metadata = { title: "Lainnya · Generus" };
+export const metadata: Metadata = { title: "Lainnya" };
 
 export default function LainnyaPage() {
   return (
