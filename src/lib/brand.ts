@@ -2,7 +2,7 @@
 //   "kliik"   (bawaan) — KLIIK JM: navy #1A2189 + cyan #008CD7, logo dari klien (docs/brand/kliik-jm).
 //   "generus"           — desain lama (hijau tua + kuningan, logo masjid & bintang).
 // Kembali ke desain lama = set NEXT_PUBLIC_BRAND=generus lalu build/deploy ulang; tidak ada data yang berubah.
-// Token warna per merek ada di globals.css (`:root[data-brand="…"]`).
+// Token warna per merek ada di globals.css (`:root.brand-kliik`).
 
 export type Brand = "kliik" | "generus";
 

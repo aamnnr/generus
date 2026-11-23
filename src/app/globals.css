@@ -157,7 +157,7 @@
    Menimpa token di atas; token lama tetap utuh untuk NEXT_PUBLIC_BRAND=generus.
    Navy #1A2189 = oklch(0.33 0.168 270), cyan #008CD7 = oklch(0.616 0.15 243.4).
    --------------------------------------------------------------------------- */
-:root[data-brand="kliik"] {
+:root.brand-kliik {
   --font-display: var(--font-sans);
   --background: oklch(0.975 0.006 255);
   --foreground: oklch(0.24 0.04 270);
@@ -195,7 +195,7 @@
   --sidebar-ring: oklch(0.616 0.15 243.4);
 }
 
-:root[data-brand="kliik"].dark {
+:root.brand-kliik.dark {
   --background: oklch(0.18 0.035 270);
   --foreground: oklch(0.95 0.01 255);
   --card: oklch(0.23 0.045 270);
@@ -437,13 +437,13 @@
   background: #F1E9D6; color: #5c4a1f; font-size: 1.9mm; font-weight: 600;
 }
 /* Kartu QR merek KLIIK JM: kepala navy tanpa ornamen, aksen biru. */
-[data-brand="kliik"] .idc-top { background: #1A2189; }
-[data-brand="kliik"] .idc-star { display: none; }
-[data-brand="kliik"] .idc-mark { border-radius: 2.4mm; }
-[data-brand="kliik"] .idc-name { font-weight: 800; }
-[data-brand="kliik"] .idc-pill { background: #E3EEFB; color: #1A2189; }
-[data-brand="kliik"] .idc-qr { border-color: #008CD7; }
-[data-brand="kliik"] .idc-foot { background: #E3EEFB; color: #1A2189; }
+.brand-kliik .idc-top { background: #1A2189; }
+.brand-kliik .idc-star { display: none; }
+.brand-kliik .idc-mark { border-radius: 2.4mm; }
+.brand-kliik .idc-name { font-weight: 800; }
+.brand-kliik .idc-pill { background: #E3EEFB; color: #1A2189; }
+.brand-kliik .idc-qr { border-color: #008CD7; }
+.brand-kliik .idc-foot { background: #E3EEFB; color: #1A2189; }
 
 @media print {
   @page { size: A4; margin: 10mm 8mm; }

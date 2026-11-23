@@ -14,7 +14,7 @@ Aplikasi punya dua merek tampilan, dipilih saat build lewat `NEXT_PUBLIC_BRAND` 
 | `kliik` (bawaan) | **KLIIK JM** — navy `#1A2189` + cyan `#008CD7`, logo dari klien (`docs/brand/kliik-jm`, `public/brand`), huruf Plus Jakarta Sans untuk judul juga, ornamen islami diganti motif centang, warna status Izin teal. |
 | `generus` | Desain lama di dokumen ini (hijau tua + kuningan, logo masjid & bintang, Lora). |
 
-Token KLIIK JM menimpa token lama di `globals.css` (`:root[data-brand="kliik"]`); token lama tidak dihapus.
+Token KLIIK JM menimpa token lama di `globals.css` (`:root.brand-kliik`, kelas `brand-<merek>` di `<html>`); token lama tidak dihapus.
 **Rollback:** set `NEXT_PUBLIC_BRAND=generus` di environment (Vercel / VPS), lalu build & deploy ulang.
 Data tidak berubah. HP yang sudah memasang aplikasi (PWA) bisa butuh waktu atau pasang ulang agar ikonnya ikut berganti.
 Bagian di bawah ini menjelaskan desain lama; untuk KLIIK JM lihat `docs/brand/kliik-jm/` dan kanvas desainnya.

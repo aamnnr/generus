@@ -35,7 +35,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="id"
       data-brand={BRAND}
-      className={`${sans.variable} ${display.variable} ${arabic.variable} ${geistMono.variable} h-full antialiased`}
+      // Kelas merek (bukan selector atribut): build CSS produksi membuang aturan [data-brand="…"].
+      className={`${sans.variable} ${display.variable} ${arabic.variable} ${geistMono.variable} brand-${BRAND} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Pwa />
