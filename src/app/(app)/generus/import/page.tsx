@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { StickyColumns } from "@/components/sticky-columns";
 import type { Metadata } from "next";
 import { BackLink, PageHeader } from "@/components/page-header";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +14,7 @@ export default function ImportPage() {
     <>
       <BackLink href="/generus">Kembali ke daftar generus</BackLink>
       <PageHeader title="Import dari Excel" description="Tambahkan banyak generus sekaligus dari template. File diperiksa dulu sebelum disimpan." />
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <StickyColumns className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader>
             <CardTitle>Unggah file</CardTitle>
@@ -42,7 +43,7 @@ export default function ImportPage() {
             </Suspense>
           </CardContent>
         </Card>
-      </div>
+      </StickyColumns>
     </>
   );
 }

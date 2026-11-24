@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { StickyColumns } from "@/components/sticky-columns";
 import type { Metadata } from "next";
 import Link from "@/components/app-link";
 import { BackLink, PageHeader, Pill } from "@/components/page-header";
@@ -82,7 +83,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
         />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+      <StickyColumns className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader>
             <CardTitle>Data diri</CardTitle>
@@ -232,7 +233,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/generus/[id]">,
             </Card>
           )}
         </div>
-      </div>
+      </StickyColumns>
     </>
   );
 }

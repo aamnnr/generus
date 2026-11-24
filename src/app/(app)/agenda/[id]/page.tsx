@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { StickyColumns } from "@/components/sticky-columns";
 import type { Metadata } from "next";
 import Link from "@/components/app-link";
 import { BackLink } from "@/components/page-header";
@@ -133,7 +134,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
         {live && <LiveRefresh />}
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+      <StickyColumns className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
         {/* HP: tanpa kartu luar agar baris checklist selebar layar (DESIGN.md §6.4). */}
         <Card className="max-md:overflow-visible max-md:bg-transparent max-md:shadow-none max-md:[--card-spacing:0px]">
           <CardHeader>
@@ -243,7 +244,7 @@ async function Detail({ params, searchParams }: Pick<PageProps<"/agenda/[id]">, 
             </Card>
           )}
         </div>
-      </div>
+      </StickyColumns>
     </>
   );
 }
