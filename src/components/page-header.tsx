@@ -30,6 +30,8 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-end gap-x-4 gap-y-3 print:hidden">
       <div className="flex min-w-0 flex-[1_1_320px] flex-col gap-1">
+        {/* Aksen garis navy–cyan di atas judul (hanya merek KLIIK JM, lihat globals.css). */}
+        <span className="kliik-accent" aria-hidden />
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="text-2xl leading-8 font-bold md:text-[26px] md:leading-[34px]">{title}</h1>
           {badges}
@@ -43,7 +45,7 @@ export function PageHeader({
 
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center gap-2 rounded-2xl bg-card px-6 py-10 text-center shadow-card">
+    <div className="kliik-motif flex flex-col items-center gap-2 rounded-2xl bg-card px-6 py-10 text-center shadow-card">
       <MosqueSilhouette className="w-24 text-brass opacity-40" />
       <p className="text-lg font-bold">{title}</p>
       {description && <p className="max-w-sm text-sm text-muted-foreground">{description}</p>}

@@ -69,6 +69,9 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
     return { x: r.left - R.left, y: r.top - R.top, w: r.width, h: r.height };
   };
   const $ = <T extends Element = HTMLElement>(sel: string) => card.querySelector<T>(sel)!;
+  // Merek KLIIK JM: motif & siku QR yang di layar dibuat lewat CSS ikut digambar di sini.
+  const kliik = document.documentElement.classList.contains("brand-kliik");
+  const mm = R.width / 54; // kartu selebar 54 mm
 
   // Bentuk kartu
   const cs = getComputedStyle(card);
@@ -77,7 +80,7 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
   ctx.fillStyle = cs.backgroundColor;
   ctx.fillRect(0, 0, R.width, R.height);
 
-  // Kepala kartu: latar hijau dengan tepi bawah melengkung (border-radius 50% / 4mm)
+  // Kepala kartu: latar warna merek dengan tepi bawah melengkung (border-radius 50% / 4mm)
   const top = $(".idc-top");
   const t = rel(top);
   const ts = getComputedStyle(top);
@@ -94,6 +97,20 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
   ctx.fillStyle = ts.backgroundColor;
   ctx.fill();
   ctx.clip();
+  if (kliik) {
+    // Cahaya cyan di pojok kanan atas + garis miring tipis (motif kaki huruf K).
+    const glow = ctx.createRadialGradient(t.x + t.w, t.y, 0, t.x + t.w, t.y, t.w * 0.75);
+    glow.addColorStop(0, "rgba(0, 140, 215, 0.55)");
+    glow.addColorStop(1, "rgba(0, 140, 215, 0)");
+    ctx.fillStyle = glow;
+    ctx.fillRect(t.x, t.y, t.w, t.h);
+    ctx.save();
+    ctx.translate(t.x + t.w / 2, t.y + t.h / 2);
+    ctx.rotate((32 * Math.PI) / 180);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+    for (let x = -t.w; x < t.w; x += 2.6 * mm) ctx.fillRect(x, -t.w, 0.35 * mm, t.w * 2);
+    ctx.restore();
+  }
   const star = $<SVGElement>(".idc-star");
   const s = rel(star);
   // Ornamen bintang disembunyikan pada merek KLIIK JM (lebar 0).
@@ -139,7 +156,8 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
     ctx.restore();
   };
 
-  text($(".idc-app"));
+  const app = card.querySelector<HTMLElement>(".idc-app");
+  if (app) text(app);
   text($(".idc-daerah"));
   text($(".idc-name"), { multiline: true });
   text($(".idc-meta"), { multiline: true });
@@ -164,6 +182,16 @@ async function renderCard(card: HTMLElement): Promise<HTMLCanvasElement> {
   ctx.strokeStyle = qs.borderTopColor;
   ctx.lineWidth = qb;
   ctx.stroke();
+  if (kliik) {
+    // Siku cyan di empat sudut kotak QR (di layar: .idc-qr::before).
+    const o = 0.7 * mm, len = 4 * mm, th = 0.6 * mm;
+    const [x0, y0, x1, y1] = [q.x - o, q.y - o, q.x + q.w + o, q.y + q.h + o];
+    ctx.fillStyle = "#008CD7";
+    for (const [cx, cy, sx, sy] of [[x0, y0, 1, 1], [x1, y0, -1, 1], [x0, y1, 1, -1], [x1, y1, -1, -1]] as const) {
+      ctx.fillRect(sx > 0 ? cx : cx - len, sy > 0 ? cy : cy - th, len, th);
+      ctx.fillRect(sx > 0 ? cx : cx - th, sy > 0 ? cy : cy - len, th, len);
+    }
+  }
   const qrSvg = qrBox.querySelector("svg")!;
   const qi = rel(qrSvg);
   ctx.imageSmoothingEnabled = false;

@@ -102,7 +102,7 @@ export function BottomNav({ nav }: { nav: ShellNav }) {
     <nav
       aria-label="Navigasi utama"
       style={{ viewTransitionName: "app-tabs" }}
-      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[0_-4px_24px_oklch(0.26_0.04_167/0.06)] backdrop-blur lg:hidden print:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 pb-[env(safe-area-inset-bottom)] shadow-[var(--app-shadow-nav)] backdrop-blur lg:hidden print:hidden"
     >
       <div className="mx-auto grid h-16 max-w-xl" style={{ gridTemplateColumns: `repeat(${nav.tabs.length}, minmax(0, 1fr))` }}>
         {nav.tabs.map((item) => {

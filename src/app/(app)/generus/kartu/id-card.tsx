@@ -32,12 +32,13 @@ export function IdCard({ c }: { c: IdCardData }) {
         <div className="idc-brand">
           {isKliik ? (
             // eslint-disable-next-line @next/next/no-img-element -- SVG statis; juga digambar ulang oleh unduh PNG
-            <img src="/brand/kliik-jm-icon.svg" alt="" className="idc-mark" />
+            <img src="/brand/kliik-jm-wordmark-putih.svg" alt={brand.name} className="idc-mark" />
           ) : (
             <LogoGlyph variant="icon" mosque={LOGO_COLORS.cream} id={`idc-${c.id}`} className="idc-mark" />
           )}
           <span className="idc-brand-text">
-            <span className="idc-app">{isKliik ? brand.name.toUpperCase() : "KARTU GENERUS"}</span>
+            {/* KLIIK JM: nama sudah ada di wordmark, cukup daerah di bawahnya. */}
+            {!isKliik && <span className="idc-app">KARTU GENERUS</span>}
             <span className="idc-daerah">{/^daerah\b/i.test(c.daerah) ? c.daerah : `Daerah ${c.daerah}`}</span>
           </span>
         </div>

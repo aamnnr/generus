@@ -75,6 +75,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
 
       <header className="flex items-start gap-3">
         <div className="flex min-w-0 flex-1 flex-col">
+          <span className="kliik-accent" aria-hidden />
           <span className="text-[13px] font-medium text-muted-foreground">Assalamu&apos;alaikum,</span>
           <h1 className="font-heading text-[28px] leading-[34px] font-semibold lg:text-[32px] lg:leading-10">{user.name}</h1>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -138,7 +139,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
           </div>
         )}
           {summary && (
-            <section className="order-3 flex flex-col gap-4 rounded-2xl bg-card p-5 shadow-card lg:order-2 lg:col-span-4">
+            <section className="kliik-motif order-3 flex flex-col gap-4 rounded-2xl bg-card p-5 shadow-card lg:order-2 lg:col-span-4">
               <div className="flex items-center">
                 <h2 className="flex-1 text-lg font-bold">
                   {new Date().toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
@@ -199,7 +200,7 @@ async function Beranda({ searchParams }: Pick<PageProps<"/beranda">, "searchPara
       <InstallPrompt />
 
       {writer && (
-        <div className="flex items-center gap-3 rounded-2xl bg-secondary px-4 py-3.5 text-secondary-foreground">
+        <div className="kliik-motif flex items-center gap-3 rounded-2xl bg-secondary px-4 py-3.5 text-secondary-foreground">
           <EightStar className="size-7 shrink-0" />
           <p className="text-[13px] leading-5">
             Kartu QR dipakai pada pengajian desa & daerah. Kartu hilang? Terbitkan ulang dari halaman generus lalu cetak.
@@ -231,7 +232,7 @@ function HeroCard({ hero, writer }: { hero: HeroAgenda | null; writer: boolean }
     <section className="relative flex h-full flex-col gap-3 overflow-hidden rounded-[20px] bg-hero p-5 text-hero-foreground shadow-float md:p-7">
       <MosqueSilhouette className="absolute -right-4 top-2 w-48 opacity-[0.12] md:w-64" />
       <div className="flex items-center gap-2">
-        {hero.ongoing && <span className="size-2 rounded-full bg-[oklch(0.82_0.09_158)]" aria-hidden />}
+        {hero.ongoing && <span className="size-2 rounded-full bg-live" aria-hidden />}
         <span className="text-[11px] font-semibold tracking-[0.06em] text-white/80">
           {hero.ongoing ? "SEDANG BERLANGSUNG" : "AGENDA BERIKUTNYA"} · {LEVEL[hero.level].toUpperCase()}
         </span>
@@ -281,8 +282,8 @@ function Progress({ label, value, hint }: { label: string; value: number | null;
         <span>{label}</span>
         <span className="tabular-nums">{pct === null ? "—" : `${pct}%`}</span>
       </span>
-      <span className="h-2 overflow-hidden rounded-full bg-[oklch(0.879_0.027_159.5)]">
-        <span className="block h-full rounded-full bg-[oklch(0.488_0.079_164.3)]" style={{ width: `${pct ?? 0}%` }} />
+      <span className="h-2 overflow-hidden rounded-full bg-secondary">
+        <span className="block h-full rounded-full bg-primary" style={{ width: `${pct ?? 0}%` }} />
       </span>
       <span className="text-[13px] text-muted-foreground">{hint}</span>
     </div>
@@ -291,7 +292,7 @@ function Progress({ label, value, hint }: { label: string; value: number | null;
 
 function Stat({ title, value }: { title: string; value: number }) {
   return (
-    <div className="rounded-2xl bg-card p-3 shadow-card md:p-5">
+    <div className="kliik-motif rounded-2xl bg-card p-3 shadow-card md:p-5">
       <div className="text-xs text-muted-foreground md:text-[13px]">{title}</div>
       <div className="font-heading text-2xl font-semibold tabular-nums md:text-[30px] md:leading-[38px]">{value.toLocaleString("id-ID")}</div>
     </div>
@@ -328,7 +329,7 @@ function PeriodCard({
 }) {
   const pct = (a: number, b: number) => (b > 0 ? Math.round((a / b) * 100) : 0);
   return (
-    <section className="flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 shadow-card md:p-5">
+    <section className="kliik-motif flex flex-wrap items-center gap-4 rounded-2xl bg-card p-4 shadow-card md:p-5">
       <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-tile text-primary">
         <BookOpenText className="size-6" strokeWidth={1.75} aria-hidden />
       </span>
