@@ -1,10 +1,10 @@
 "use client";
 
+import { PasswordInput } from "@/components/ui/password-input";
 import { useActionState } from "react";
 import { changePassword, type FormState } from "@/app/actions/auth";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 export function PasswordForm() {
@@ -18,11 +18,11 @@ export function PasswordForm() {
       )}
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">Password baru</Label>
-        <Input id="password" name="password" type="password" autoComplete="new-password" minLength={8} required />
+        <PasswordInput id="password" name="password" autoComplete="new-password" minLength={8} required />
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="confirm">Ulangi password baru</Label>
-        <Input id="confirm" name="confirm" type="password" autoComplete="new-password" minLength={8} required />
+        <PasswordInput id="confirm" name="confirm" autoComplete="new-password" minLength={8} required />
       </div>
       <Button type="submit" disabled={pending}>
         {pending ? "Menyimpan…" : "Simpan password"}

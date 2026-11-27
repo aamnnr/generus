@@ -1,8 +1,9 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { useOffline } from "next/offline";
+import { confirmDialog } from "@/components/confirm";
 import { requestSync } from "@/components/outbox-sync";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -42,13 +43,22 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
   const waiting = (queued ?? []).filter((q) => !q.error).length;
   const rejected = (queued ?? []).filter((q): q is OutboxItem & { error: string } => !!q.error);
 
-  const current = (r: ChecklistRow) => queuedMap.get(r.generusId)?.status ?? r.status;
+  // Pilihan terakhir di perangkat ini, dipakai sampai data server menyusul. Tanpa ini tombol
+  // "berkedip": saat antrian baru ditulis (sebelum aktif) dan saat antrian sudah terkirim
+  // tetapi daftar dari server belum diperbarui (kembali sebentar ke status lama).
+  const [local, setLocal] = useState<Record<string, Status>>({});
+  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  useEffect(() => {
+    const t = timers.current;
+    return () => t.forEach(clearTimeout);
+  }, []);
+  const current = (r: ChecklistRow) => queuedMap.get(r.generusId)?.status ?? local[r.generusId] ?? r.status;
   const writable = rows.filter((r) => r.canWrite);
 
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return rows.filter((r) => (!q || r.name.toLowerCase().includes(q)) && (!onlyEmpty || !(queuedMap.get(r.generusId)?.status ?? r.status)));
-  }, [rows, query, onlyEmpty, queuedMap]);
+    return rows.filter((r) => (!q || r.name.toLowerCase().includes(q)) && (!onlyEmpty || !(queuedMap.get(r.generusId)?.status ?? local[r.generusId] ?? r.status)));
+  }, [rows, query, onlyEmpty, queuedMap, local]);
 
   const groups = useMemo(() => {
     const m = new Map<string, ChecklistRow[]>();
@@ -61,12 +71,36 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
 
   const record = async (entries: { generusId: string; status: Status }[]) => {
     if (entries.length === 0) return;
+    // Tampilkan pilihan seketika; dilepas 30 detik kemudian (data server sudah menyusul).
+    setLocal((prev) => ({ ...prev, ...Object.fromEntries(entries.map((e) => [e.generusId, e.status])) }));
+    for (const e of entries) {
+      clearTimeout(timers.current.get(e.generusId));
+      timers.current.set(
+        e.generusId,
+        setTimeout(() => {
+          timers.current.delete(e.generusId);
+          setLocal((prev) => {
+            const next = { ...prev };
+            delete next[e.generusId];
+            return next;
+          });
+        }, 30_000),
+      );
+    }
     await enqueue(entries.map((e) => ({ ...e, agendaId })));
     requestSync();
   };
 
-  const markUnrecordedPresent = () =>
-    record(writable.filter((r) => !current(r)).map((r) => ({ generusId: r.generusId, status: "hadir" as const })));
+  const markUnrecordedPresent = async () => {
+    const targets = writable.filter((r) => !current(r));
+    if (targets.length === 0) return;
+    const ok = await confirmDialog({
+      title: `Hadirkan ${targets.length} peserta yang belum diisi?`,
+      description: "Semua peserta di daftar ini yang belum punya status akan dicatat Hadir. Bila ada yang keliru, ubah satu per satu.",
+      confirmLabel: "Ya, hadirkan semua",
+    });
+    if (ok) await record(targets.map((r) => ({ generusId: r.generusId, status: "hadir" as const })));
+  };
 
   return (
     <div className="flex flex-col gap-3">
@@ -93,7 +127,7 @@ export function AttendanceChecklist({ agendaId, rows, showGroup }: { agendaId: s
               <Button type="button" size="sm" variant="outline" onClick={async () => (await retryRejected(), requestSync())}>
                 Coba lagi
               </Button>
-              <Button type="button" size="sm" variant="ghost" onClick={() => discardRejected(agendaId)}>
+              <Button type="button" size="sm" variant="ghost" onClick={async () => (await discardRejected(agendaId), setLocal({}))}>
                 Buang perubahan ini
               </Button>
             </span>

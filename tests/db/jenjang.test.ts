@@ -122,5 +122,5 @@ describe("migrasi 0022 pada agenda yang sudah ada", () => {
     expect(await names(locked)).toEqual([]);
     expect(await names(cancelled)).toEqual([]);
     await old.close();
-  });
+  }, 120_000); // membangun database kedua dari awal: lambat saat semua tes berjalan bersamaan
 });

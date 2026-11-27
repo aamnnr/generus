@@ -1,5 +1,6 @@
 "use client";
 
+import { PasswordInput } from "@/components/ui/password-input";
 import { useActionState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight } from "lucide-react";
@@ -31,7 +32,7 @@ export function LoginForm() {
       </div>
       <div className="flex flex-col gap-2">
         <Label htmlFor="password">Password</Label>
-        <Input id="password" name="password" type="password" autoComplete="current-password" required />
+        <PasswordInput id="password" name="password" autoComplete="current-password" required />
       </div>
       <Button type="submit" size="lg" disabled={pending} className="w-full">
         {pending ? "Masuk…" : "Masuk"}
